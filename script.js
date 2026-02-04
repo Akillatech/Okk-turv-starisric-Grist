@@ -88,11 +88,15 @@ function initGrist() {
         console.log('RECORDS RECEIVED FROM GRIST API'); // Bold marker
         console.log('Count:', records ? records.length : 'null');
         console.log('Mappings:', mappings);
+        console.log('Active CONFIG.COLUMNS.date:', CONFIG.COLUMNS.date); // Debug CONFIG
 
         if (records && records.length > 0) {
             console.log('Sample Record:', JSON.stringify(records[0]));
-            // Dump all keys to see actual column IDs
             console.log('Actual Keys in Record:', Object.keys(records[0]));
+
+            // Test getRecVal immediately on the sample
+            const testDateVal = getRecVal(records[0], 'date');
+            console.log('Test getRecVal(date) on sample:', testDateVal);
         } else {
             console.warn('Records array is empty or null!');
         }
@@ -103,6 +107,9 @@ function initGrist() {
         if (allRecords.length > 0) {
             tableColumns = Object.keys(allRecords[0]);
         }
+
+        // Initialize Date Selectors (Years/Months)
+        initDateSelectors();
 
         // Hide loading and show content
         document.getElementById('loading').style.display = 'none';
@@ -138,6 +145,92 @@ function initGrist() {
         }
         refreshDashboard(); // Settings might change stats (holidays etc)
     });
+}
+
+// Global flag to prevent resetting user selection on data updates
+let dateSelectorsInitialized = false;
+
+function initDateSelectors() {
+    const years = new Set();
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+
+    years.add(currentYear); // Ensure current year is always available
+
+    if (allRecords) {
+        allRecords.forEach(r => {
+            const d = parseGristDate(getRecVal(r, 'date'));
+            if (d) years.add(d.getFullYear());
+        });
+    }
+
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+
+    // --- Main Dashboard Selectors ---
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+
+    if (yearSelect && monthSelect) {
+        const oldYear = yearSelect.value;
+        const oldMonth = monthSelect.value;
+
+        yearSelect.innerHTML = '<option value="all">Весь период</option>';
+        sortedYears.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.innerText = y;
+            yearSelect.appendChild(opt);
+        });
+
+        if (!dateSelectorsInitialized) {
+            // First Load: Set Defaults
+            yearSelect.value = currentYear;
+            monthSelect.value = currentMonth;
+            // Update global state immediately
+            currentPeriod = `month:${currentYear}-${currentMonth}`;
+        } else {
+            // Restore Selection
+            if (oldYear !== 'all' && sortedYears.includes(Number(oldYear))) {
+                yearSelect.value = oldYear;
+            } else if (oldYear === 'all') {
+                yearSelect.value = 'all';
+            } else {
+                yearSelect.value = currentYear; // Fallback
+            }
+            // Month is static, keep value
+            monthSelect.value = oldMonth;
+        }
+    }
+
+    // --- Other Selectors (Project, Calendar) ---
+    ['projectYearSelect', 'calendarYearSelect'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const oldVal = el.value;
+            el.innerHTML = '';
+            sortedYears.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.innerText = y;
+                el.appendChild(opt);
+            });
+
+            if (!dateSelectorsInitialized) {
+                el.value = currentYear;
+            } else {
+                if (oldVal && sortedYears.includes(Number(oldVal))) el.value = oldVal;
+                else el.value = currentYear;
+            }
+        }
+    });
+
+    // --- Calendar Month Default ---
+    if (!dateSelectorsInitialized) {
+        const calMonth = document.getElementById('calendarMonthSelect');
+        if (calMonth) calMonth.value = new Date().getMonth(); // 0-indexed
+    }
+
+    dateSelectorsInitialized = true;
 }
 
 // --- Logic ---
