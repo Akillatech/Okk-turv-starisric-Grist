@@ -104,6 +104,16 @@ function initGrist() {
             tableColumns = Object.keys(allRecords[0]);
         }
 
+        // Hide loading and show content
+        document.getElementById('loading').style.display = 'none';
+
+        // Only switch to home if we are not already in a specific view (like calendar)
+        // But for initial load, default to home
+        if (document.getElementById('content').style.display === 'none' &&
+            document.getElementById('calendarView').style.display === 'none') {
+            window.logic.showHome();
+        }
+
         // Initial Render
         refreshDashboard();
     });
