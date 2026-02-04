@@ -184,12 +184,14 @@ function initDateSelectors() {
 
         if (!dateSelectorsInitialized) {
             // First Load: Set Defaults
+            console.log('initDateSelectors: First Load. Setting Default to', currentYear, currentMonth);
             yearSelect.value = currentYear;
             monthSelect.value = currentMonth;
             // Update global state immediately
             currentPeriod = `month:${currentYear}-${currentMonth}`;
         } else {
             // Restore Selection
+            console.log('initDateSelectors: Restore. Old:', oldYear, oldMonth);
             if (oldYear !== 'all' && sortedYears.includes(Number(oldYear))) {
                 yearSelect.value = oldYear;
             } else if (oldYear === 'all') {
