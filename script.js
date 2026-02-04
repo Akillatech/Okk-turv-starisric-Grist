@@ -10,29 +10,29 @@ const CONFIG = {
         date: ['Дата', 'Date'],
         project: ['Наименование', 'Project', 'Проекты'],
         projectCheck: ['Проект', 'Project_Check'],
-        
+
         // Pure Hours (Column K)
         pureHours: ['Чистых_часов_валидации', 'Pure_Hours', 'Hours'],
         // Tasks Checked (Column J)
         checkedTasks: ['Факт_проверок_шт', 'Checked_Tasks', 'Tasks_Checked'],
-        
+
         // Markup Hours (Column Q)
         markupHours: ['Часов_разметки', 'Markup_Hours'],
         // Tasks Marked (Column P)
         markedTasks: ['Факт_разметка_шт', 'Marked_Tasks'],
         // Markup Checkbox
         markupCheck: ['Разметка', 'Markup_Check'],
-        
+
         // Additional/Other Hours (Column L)
         additionalHours: ['Иных_часов_работы', 'Other_Hours', 'Additional_Hours'],
         // Other Checkbox
         otherCheck: ['Другое', 'Other_Check'],
-        
+
         // Overtime Hours (Column M)
         overtimeHours: ['Часы_переработки', 'Overtime_Hours'],
         // Overtime Checkbox
         overtimeCheck: ['Переработка', 'Overtime_Check'],
-        
+
         // Idle Hours (Column N)
         idleHours: ['Часы_простоя', 'Idle_Hours']
     }
@@ -52,7 +52,7 @@ let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 function getRecVal(record, keyName) {
     const potentialNames = CONFIG.COLUMNS[keyName];
     if (!potentialNames) return null;
-    
+
     for (const name of potentialNames) {
         if (record.hasOwnProperty(name)) return record[name];
         // Also try sanitized variants just in case (replace spaces with _)
@@ -85,13 +85,19 @@ function initGrist() {
     grist.ready({ requiredAccess: 'full' }); // Full access needed for settings (options)
 
     grist.onRecords(function (records, mappings) {
+        console.log('Grist: Records received', records.length);
+        console.log('Grist: Column Mappings', mappings);
+        if (records.length > 0) {
+            console.log('Grist: First Record Sample', records[0]);
+            console.log('Grist: Record Keys', Object.keys(records[0]));
+        }
         allRecords = records;
-        
+
         // Infer columns from first record if available, or just use what we have
         if (records.length > 0) {
             tableColumns = Object.keys(records[0]);
         }
-        
+
         // Initial Render
         refreshDashboard();
     });
@@ -122,11 +128,11 @@ function initGrist() {
 
 window.logic = {
     // --- UI Events Exported to HTML ---
-    
-    applyCustomPeriod: function() {
+
+    applyCustomPeriod: function () {
         const year = document.getElementById('yearSelect').value;
         const month = document.getElementById('monthSelect').value;
-        
+
         if (year === 'all') {
             currentPeriod = 'all';
         } else if (month === 'all') {
@@ -134,24 +140,24 @@ window.logic = {
         } else {
             currentPeriod = `month:${year}-${month}`;
         }
-        
+
         refreshDashboard();
     },
 
-    showHome: function() {
+    showHome: function () {
         showView('content');
     },
 
-    showCalendar: function() {
+    showCalendar: function () {
         showView('calendarView');
         this.updateCalendarView(); // Trigger render
     },
 
-    updateCalendarView: function() {
+    updateCalendarView: function () {
         renderCalendar();
     },
 
-    prevMonth: function() {
+    prevMonth: function () {
         const monthSelect = document.getElementById('calendarMonthSelect');
         const yearSelect = document.getElementById('calendarYearSelect');
         let m = parseInt(monthSelect.value);
@@ -164,13 +170,13 @@ window.logic = {
             // Check if year exists
             const opts = yearSelect.options;
             let yearFound = false;
-            for(let i=0; i<opts.length; i++) if(opts[i].value == y) yearFound = true;
-            if(!yearFound) {
+            for (let i = 0; i < opts.length; i++) if (opts[i].value == y) yearFound = true;
+            if (!yearFound) {
                 // Determine if we should allow generic navigation even if year not in settings?
                 // Better to just update value and let logic handle empty year
             }
         }
-        
+
         monthSelect.value = m;
         // Verify year update
         if (yearSelect.querySelector(`option[value="${y}"]`)) {
@@ -182,7 +188,7 @@ window.logic = {
         renderCalendar();
     },
 
-    nextMonth: function() {
+    nextMonth: function () {
         const monthSelect = document.getElementById('calendarMonthSelect');
         const yearSelect = document.getElementById('calendarYearSelect');
         let m = parseInt(monthSelect.value);
@@ -201,20 +207,20 @@ window.logic = {
     },
 
     // Settings
-    openSettings: function() {
+    openSettings: function () {
         document.getElementById('settingsModal').classList.add('active');
         renderSettingsUI();
     },
 
-    closeSettings: function() {
+    closeSettings: function () {
         document.getElementById('settingsModal').classList.remove('active');
     },
 
-    switchSettingsTab: function(tabName) {
+    switchSettingsTab: function (tabName) {
         // Only one tab implemented for now
     },
 
-    addHoliday: function() {
+    addHoliday: function () {
         const input = document.getElementById('newHoliday');
         const val = input.value.trim();
         if (val) {
@@ -227,7 +233,7 @@ window.logic = {
         }
     },
 
-    addShortDay: function() {
+    addShortDay: function () {
         const input = document.getElementById('newShortDay');
         const val = input.value.trim();
         if (val) {
@@ -239,70 +245,70 @@ window.logic = {
             }
         }
     },
-    
-    deleteYear: function() {
-         const select = document.getElementById('calendarYear');
-         const year = select.value;
-         if (year && confirm('Удалить год ' + year + '?')) {
-             currentSettings.years = currentSettings.years.filter(y => y.toString() !== year.toString());
-             renderSettingsUI();
-         }
+
+    deleteYear: function () {
+        const select = document.getElementById('calendarYear');
+        const year = select.value;
+        if (year && confirm('Удалить год ' + year + '?')) {
+            currentSettings.years = currentSettings.years.filter(y => y.toString() !== year.toString());
+            renderSettingsUI();
+        }
     },
 
-    addNewYear: function() {
+    addNewYear: function () {
         const newYear = prompt('Введите год:');
         if (newYear && !isNaN(newYear)) {
             if (!currentSettings.years) currentSettings.years = [];
             if (!currentSettings.years.includes(parseInt(newYear))) {
                 currentSettings.years.push(parseInt(newYear));
-                currentSettings.years.sort((a,b) => b-a);
+                currentSettings.years.sort((a, b) => b - a);
                 renderSettingsUI();
             }
         }
     },
 
-    saveSettings: async function() {
+    saveSettings: async function () {
         // Save to Grist Options
         await grist.setOption('settings', currentSettings);
         this.closeSettings();
         refreshDashboard(); // Refresh to apply changes (formatted holidays etc)
     },
-    
+
     // sorting
-    sortWorkType: function(type, field) {
+    sortWorkType: function (type, field) {
         // Implement simple table sorting
         // This requires state of current sort. 
         // For MVP, we might skip complex sort or implement basic DOM sort
         console.log('Sorting not implemented yet in this iteration');
     },
-    
+
     // Project Modal
-    loadProjectStats: function() {
+    loadProjectStats: function () {
         // Triggered by selects in modal
         // Re-calculate and render
         const pYear = document.getElementById('projectYearSelect').value;
         const pMonth = document.getElementById('projectMonthSelect').value;
         const modal = document.getElementById('projectModal');
         const title = document.getElementById('projectModalTitle').innerText;
-        
+
         renderProjectDetails(title, parseInt(pYear), parseInt(pMonth));
     },
-    
-    closeProjectModal: function() {
-         document.getElementById('projectModal').classList.remove('active');
+
+    closeProjectModal: function () {
+        document.getElementById('projectModal').classList.remove('active');
     },
-    
-    closeDayModal: function() {
+
+    closeDayModal: function () {
         document.getElementById('dayModal').classList.remove('active');
     },
-    
+
     // Today
-    returnToToday: function() {
+    returnToToday: function () {
         // Reset date pickers to today
         initTodayDatePickers(); // Will trigger change
     },
-    
-    loadTodayRange: function() {
+
+    loadTodayRange: function () {
         renderTodayStats();
     }
 };
@@ -316,7 +322,7 @@ initGrist();
 function showView(viewId) {
     document.getElementById('content').style.display = viewId === 'content' ? 'block' : 'none';
     document.getElementById('calendarView').style.display = viewId === 'calendarView' ? 'block' : 'none';
-    
+
     document.getElementById('homeBtn').classList.toggle('active', viewId === 'content');
     document.getElementById('calendarBtn').classList.toggle('active', viewId === 'calendarView');
 }
@@ -326,10 +332,10 @@ function showView(viewId) {
 
 function calculateStatistics(period) {
     const todayStats = calculateTodayStatsGeneric(allRecords); // Always current day/range
-    
+
     // Filter data for main dashboard stats (Weekly/Project)
     // ...
-    
+
     // For now, return what we can
     return {
         today: todayStats,
@@ -341,12 +347,12 @@ function calculateTodayStatsGeneric(records) {
     // Get date range from inputs
     const fromStr = document.getElementById('todayDateFrom').value;
     const toStr = document.getElementById('todayDateTo').value;
-    
+
     let fromDate = fromStr ? new Date(fromStr) : new Date();
     let toDate = toStr ? new Date(toStr) : new Date();
-    fromDate.setHours(0,0,0,0);
-    toDate.setHours(23,59,59,999);
-    
+    fromDate.setHours(0, 0, 0, 0);
+    toDate.setHours(23, 59, 59, 999);
+
     let stats = {
         totalHours: 0,
         overtimeHours: 0,
@@ -357,25 +363,31 @@ function calculateTodayStatsGeneric(records) {
         checkedTasksCount: 0,
         markedTasksCount: 0
     };
-    
-    records.forEach(row => {
-        const d = parseGristDate(getRecVal(row, 'date'));
-        if (!d) return;
-        d.setHours(0,0,0,0);
-        
+
+    records.forEach((row, idx) => {
+        const dVal = getRecVal(row, 'date');
+        const d = parseGristDate(dVal);
+        if (!d) {
+            if (idx < 3) console.warn('Skipping row due to missing/invalid date:', row, 'Val:', dVal);
+            return;
+        }
+        d.setHours(0, 0, 0, 0);
+
         if (d >= fromDate && d <= toDate) {
             const pure = Number(getRecVal(row, 'pureHours')) || 0;
+            if (idx < 3) console.log('Row processed:', { date: d, pure: pure });
+
             const additional = Number(getRecVal(row, 'additionalHours')) || 0;
             const markup = Number(getRecVal(row, 'markupHours')) || 0;
             const idle = Number(getRecVal(row, 'idleHours')) || 0;
             const overtime = Number(getRecVal(row, 'overtimeHours')) || 0;
-            
+
             stats.totalHours += pure + additional + markup + idle;
             stats.overtimeHours += overtime;
             stats.idleHours += idle;
             stats.checkedTasksCount += (Number(getRecVal(row, 'checkedTasks')) || 0);
             stats.markedTasksCount += (Number(getRecVal(row, 'markedTasks')) || 0);
-            
+
             // Checkboxes might be boolean or check strings or 1/0
             if (getRecVal(row, 'projectCheck')) stats.checkHours += pure;
             if (getRecVal(row, 'markupCheck')) stats.markupHours += markup; // Note: logic in GAS adds markupHours if markup check is true. Wait, GAS logic: if markupCheck -> result.markupHours += markupHours. (This assumes markupHours is only counted if checked? Or is markupHours column independent?)
@@ -384,11 +396,11 @@ function calculateTodayStatsGeneric(records) {
             // So markupHours is ALWAYS added to total, but tracked separately in stats.markupHours ONLY if checked. 
             // BUT wait, is markupHours ONLY non-zero if checked? User input dependent.
             // Let's stick to GAS logic: sum everything for total, but conditional for categories.
-            
-             if (getRecVal(row, 'otherCheck')) stats.otherHours += additional;
+
+            if (getRecVal(row, 'otherCheck')) stats.otherHours += additional;
         }
     });
-    
+
     return stats;
 }
 
@@ -396,10 +408,10 @@ function calculateTodayStatsGeneric(records) {
 function refreshDashboard() {
     // 1. Populate Year Selects if empty
     updateYearSelects();
-    
+
     // 2. Render Today Stats
     renderTodayStats();
-    
+
     // 3. Render Dashboard Center (Weekly/Projects)
     // Only if on content view
     if (document.getElementById('content').style.display !== 'none') {
@@ -413,48 +425,48 @@ function updateYearSelects() {
     // Also scan data for years
     allRecords.forEach(r => {
         const d = parseGristDate(getRecVal(r, 'date'));
-        if(d) years.add(d.getFullYear());
+        if (d) years.add(d.getFullYear());
     });
-    
+
     if (years.size === 0) years.add(new Date().getFullYear());
-    
-    const sortedYears = Array.from(years).sort((a,b) => b-a);
-    
+
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+
     const selects = ['yearSelect', 'calendarYearSelect', 'calendarYear', 'projectYearSelect'];
     selects.forEach(id => {
         const el = document.getElementById(id);
-        if(!el) return;
+        if (!el) return;
         const currentVal = el.value;
         // Keep "All" option for main filter
         const hasAll = el.querySelector('option[value="all"]');
-        
+
         el.innerHTML = '';
         if (hasAll) {
-             const opt = document.createElement('option');
-             opt.value = 'all';
-             opt.innerText = 'Весь период';
-             el.appendChild(opt);
+            const opt = document.createElement('option');
+            opt.value = 'all';
+            opt.innerText = 'Весь период';
+            el.appendChild(opt);
         }
-        
+
         sortedYears.forEach(y => {
             const opt = document.createElement('option');
             opt.value = y;
             opt.innerText = y;
             el.appendChild(opt);
         });
-        
+
         // Restore value if exists, else default
         if (currentVal && Array.from(el.options).some(o => o.value == currentVal)) {
             el.value = currentVal;
         } else if (sortedYears.length > 0) {
-             if (!hasAll) el.value = sortedYears[0]; // Default to latest year
+            if (!hasAll) el.value = sortedYears[0]; // Default to latest year
         }
     });
 }
 
 function renderTodayStats() {
     const stats = calculateTodayStatsGeneric(allRecords);
-    
+
     setText('todayTotalHours', formatNum(stats.totalHours));
     setText('todayOvertimeHours', formatNum(stats.overtimeHours));
     setText('todayIdleHours', formatNum(stats.idleHours));
@@ -463,7 +475,7 @@ function renderTodayStats() {
     setText('todayOtherHours', formatNum(stats.otherHours));
     setText('todayCheckedTasksCount', stats.checkedTasksCount);
     setText('todayMarkedTasksCount', stats.markedTasksCount);
-    
+
     // Also update Workload Circle (based on Today? Or Period? GAS Dashboard has "Workload Summary" separate from "Today")
     // GAS calculateOverallWorkload uses `currentPeriod`.
     renderWorkload();
@@ -472,13 +484,13 @@ function renderTodayStats() {
 function renderWorkload() {
     // Calculate based on currentPeriod
     let data = filterByPeriod(allRecords, currentPeriod);
-    
+
     // Norm calculation needs calendar settings (holidays/short days)
     // GAS: getWorkHours(d)
-    
+
     let totalHours = 0;
     let normHours = 0;
-    
+
     // Calculate norm for the period
     // Iterate days in period
     const range = getPeriodDateRange(currentPeriod);
@@ -487,57 +499,57 @@ function renderWorkload() {
         // GAS "All": iterates data?
         // Let's iterate data days
     }
-    
+
     // Simplified Workload: Sum Data Hours vs (Days * 8) - Holidays
     // This is complex to port 100% without the exact `getWorkHours` logic from GAS which relied on hardcoded lists or sheet lists.
     // We will use `currentSettings.holidays` (strings "DD.MM")
-    
+
     const dateMap = new Map(); // Use to track unique days present in data for "All"? 
     // No, Workload should be based on CALENDAR time passed in period.
-    
+
     // If period is 'all', maybe just skip norm or estimate?
     // Let's implement basics.
-    
+
     data.forEach(row => {
-         const pure = Number(getRecVal(row, 'pureHours')) || 0;
-         const additional = Number(getRecVal(row, 'additionalHours')) || 0;
-         const markup = Number(getRecVal(row, 'markupHours')) || 0;
-         totalHours += pure + additional + markup; // Note: Idle/Overtime usually not in Workload % logic in GAS?
-         // GAS: result.totalHours += pureHours + additionalHours + markupHours; (Yes)
+        const pure = Number(getRecVal(row, 'pureHours')) || 0;
+        const additional = Number(getRecVal(row, 'additionalHours')) || 0;
+        const markup = Number(getRecVal(row, 'markupHours')) || 0;
+        totalHours += pure + additional + markup; // Note: Idle/Overtime usually not in Workload % logic in GAS?
+        // GAS: result.totalHours += pureHours + additionalHours + markupHours; (Yes)
     });
-    
+
     // Calculate Norm
     if (range) {
         let d = new Date(range.start);
         while (d <= range.end) {
-             normHours += getDayNorm(d);
-             d.setDate(d.getDate() + 1);
+            normHours += getDayNorm(d);
+            d.setDate(d.getDate() + 1);
         }
     } else {
         // For 'all', rely on data dates range
         if (data.length > 0) {
-             const dates = data.map(r => parseGristDate(getRecVal(r, 'date'))).filter(d=>d).sort((a,b)=>a-b);
-             if (dates.length > 0) {
-                 let d = new Date(dates[0]);
-                 let end = new Date(dates[dates.length-1]);
-                 while (d <= end) {
-                     normHours += getDayNorm(d);
-                     d.setDate(d.getDate() + 1);
-                 }
-             }
+            const dates = data.map(r => parseGristDate(getRecVal(r, 'date'))).filter(d => d).sort((a, b) => a - b);
+            if (dates.length > 0) {
+                let d = new Date(dates[0]);
+                let end = new Date(dates[dates.length - 1]);
+                while (d <= end) {
+                    normHours += getDayNorm(d);
+                    d.setDate(d.getDate() + 1);
+                }
+            }
         }
     }
-    
+
     const percentage = normHours > 0 ? Math.round((totalHours / normHours) * 100) : 0;
-    
+
     setText('workloadPercentage', percentage + '%');
     setText('workloadText', `${formatNum(totalHours)} ч из ${formatNum(normHours)} ч`);
-    
+
     // Liquid animation height
     const liquid = document.getElementById('liquidGroup');
     // Translate Y: 190 (empty) to -10 (full, covering circle)
     // 0% -> 190, 100% -> 0
-    const yVal = 190 - (percentage * 1.9); 
+    const yVal = 190 - (percentage * 1.9);
     if (liquid) liquid.setAttribute('transform', `translate(0,${yVal})`);
 }
 
@@ -561,7 +573,7 @@ function isShortDay(dayStr) {
 // Helper Utils
 function setText(id, val) {
     const el = document.getElementById(id);
-    if(el) el.innerText = val;
+    if (el) el.innerText = val;
 }
 function formatNum(n) {
     if (!n) return '0';
@@ -570,7 +582,7 @@ function formatNum(n) {
 function formatDateShort(date) {
     let d = date.getDate();
     let m = date.getMonth() + 1;
-    return (d < 10 ? '0'+d : d) + '.' + (m < 10 ? '0'+m : m);
+    return (d < 10 ? '0' + d : d) + '.' + (m < 10 ? '0' + m : m);
 }
 function initTodayDatePickers() {
     // Set to today
@@ -584,10 +596,10 @@ function initTodayDatePickers() {
 
 function filterByPeriod(records, period) {
     if (period === 'all') return records;
-    
+
     const range = getPeriodDateRange(period);
     if (!range) return records;
-    
+
     return records.filter(r => {
         const d = parseGristDate(getRecVal(r, 'date'));
         return d && d >= range.start && d <= range.end;
