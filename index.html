@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Grist Statistics Widget</title>
+    <!-- Grist Plugin API -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- New Main Header -->
+        <div class="main-header">
+            <div class="header-filters">
+                <div class="filter-group">
+                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        Год:</label>
+                    <select id="yearSelect" onchange="window.logic.applyCustomPeriod()">
+                        <option value="all">Весь период</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        Месяц:</label>
+                    <select id="monthSelect" onchange="window.logic.applyCustomPeriod()">
+                        <option value="all">Все месяцы</option>
+                        <option value="1">Январь</option>
+                        <option value="2">Февраль</option>
+                        <option value="3">Март</option>
+                        <option value="4">Апрель</option>
+                        <option value="5">Май</option>
+                        <option value="6">Июнь</option>
+                        <option value="7">Июль</option>
+                        <option value="8">Август</option>
+                        <option value="9">Сентябрь</option>
+                        <option value="10">Октябрь</option>
+                        <option value="11">Ноябрь</option>
+                        <option value="12">Декабрь</option>
+                    </select>
+                </div>
+                <div class="period-selector" style="margin-top: 0; padding-top: 0; border-top: none;">
+                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        Диапазон:</label>
+                    <span id="dateRange"
+                        style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">-</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="sheet-name" id="sheetName">Статистика</span>
+                <button class="nav-btn icon icon-home" id="homeBtn" onclick="window.logic.showHome()" title="Главная"></button>
+                <button class="nav-btn icon icon-calendar" id="calendarBtn" onclick="window.logic.showCalendar()"
+                    title="Календарь"></button>
+                <button class="settings-btn icon icon-settings" onclick="window.logic.openSettings()" title="Настройки"></button>
+            </div>
+        </div>
+
+        <!-- Hidden info for compatibility -->
+        <div style="display:none;">
+            <span id="totalRows">-</span>
+            <span id="filteredRows">-</span>
+            <span id="totalColumns">-</span>
+            <span id="periodLabel">За все время</span>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Загрузка статистики...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <!-- Two Column Layout -->
+            <div class="main-content">
+                <!-- Left Column - Tables -->
+                <div class="left-column">
+                    <!-- Weekly Statistics -->
+                    <div id="weeklyStatsSection" class="data-block" style="display: none;">
+                        <h3><span class="icon icon-calendar"></span> Статистика по неделям</h3>
+                        <table class="weekly-table">
+                            <thead>
+                                <tr>
+                                    <th>Неделя</th>
+                                    <th>Часы работы</th>
+                                    <th>Норма</th>
+                                    <th>Переработка</th>
+                                    <th>Простой</th>
+                                    <th>Проверено</th>
+                                    <th>Размечено</th>
+                                    <th>Загруженность</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weeklyTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Проект -->
+                    <div id="projectSection" class="projects-section" style="display: none;">
+                        <h2>
+                            <span class="icon icon-doc"></span>
+                            <span>Проект</span>
+                        </h2>
+                        <table class="projects-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'name')" style="cursor: pointer;">
+                                        Название <span id="sort-Проект-name">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'pureHours')" style="cursor: pointer;">
+                                        Часы проверки <span id="sort-Проект-pureHours">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'tasks')" style="cursor: pointer;">
+                                        Проверено <span id="sort-Проект-tasks">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMainTasks')" style="cursor: pointer;">
+                                        Метрики проверки <span id="sort-Проект-avgMainTasks">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupHours')" style="cursor: pointer;">
+                                        Часы разметки <span id="sort-Проект-markupHours">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupTasks')" style="cursor: pointer;">
+                                        Размечено <span id="sort-Проект-markupTasks">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMarkupTasks')" style="cursor: pointer;">
+                                        Метрики разметки <span id="sort-Проект-avgMarkupTasks">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'additionalHours')" style="cursor: pointer;">
+                                        Иные часы работы <span id="sort-Проект-additionalHours">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Проект', 'totalHours')" style="cursor: pointer;">
+                                        Всего часов <span id="sort-Проект-totalHours">↕️</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Переработка -->
+                    <div id="overtimeSection" class="projects-section" style="display: none;">
+                        <h2>
+                            <span class="icon icon-fire"></span>
+                            <span>Переработка</span>
+                        </h2>
+                        <table class="projects-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'name')" style="cursor: pointer;">
+                                        Название <span id="sort-Переработка-name">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'tasks')" style="cursor: pointer;">
+                                        Всего задач <span id="sort-Переработка-tasks">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'hours')" style="cursor: pointer;">
+                                        Часы работы <span id="sort-Переработка-hours">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'entries')" style="cursor: pointer;">
+                                        Записей <span id="sort-Переработка-entries">↕️</span>
+                                    </th>
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'avgHours')" style="cursor: pointer;">
+                                        Ср. часов/задача <span id="sort-Переработка-avgHours">↕️</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="overtimeTableBody"></tbody>
+                        </table>
+                    </div>
+                </div><!-- End Left Column -->
+
+                <!-- Right Column - Sidebar -->
+                <div class="right-column">
+                    <!-- Workload Summary -->
+                    <div class="workload-sidebar">
+                        <h3><span class="icon icon-stats"></span> Нагрузка общая</h3>
+                        <div class="circular-progress-container">
+                            <div class="liquid-circle">
+                                <svg class="liquid-svg" viewBox="0 0 200 200">
+                                    <defs>
+                                        <clipPath id="circleClip">
+                                            <circle cx="100" cy="100" r="90" />
+                                        </clipPath>
+                                        <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#E3FB1E" />
+                                            <stop offset="100%" style="stop-color:#9ab012" />
+                                        </linearGradient>
+                                    </defs>
+                                    <g clip-path="url(#circleClip)">
+                                        <g id="liquidGroup" transform="translate(0,190)">
+                                            <!-- Волна 1 (основная) - увеличенная амплитуда -->
+                                            <path id="wave1" class="wave-path"
+                                                d="M-40,15 Q-10,-8 20,15 Q50,38 80,15 Q110,-8 140,15 Q170,38 200,15 Q230,-8 260,15 L260,200 L-40,200 Z"
+                                                fill="#c4d916" />
+                                            <!-- Волна 2 (светлая сверху) -->
+                                            <path id="wave2" class="wave-path wave-path-2"
+                                                d="M-40,10 Q0,-12 40,10 Q80,32 120,10 Q160,-12 200,10 Q240,32 280,10 L280,200 L-40,200 Z"
+                                                fill="rgba(227,251,30,0.6)" />
+                                        </g>
+                                        <!-- Брызги (отдельная группа) -->
+                                        <g id="splashGroup">
+                                            <circle class="splash splash-1" cx="30" cy="5" r="4"
+                                                fill="rgba(227,251,30,0.7)" />
+                                            <circle class="splash splash-2" cx="90" cy="8" r="3"
+                                                fill="rgba(196,217,22,0.8)" />
+                                            <circle class="splash splash-3" cx="150" cy="3" r="3.5"
+                                                fill="rgba(227,251,30,0.6)" />
+                                            <circle class="splash splash-4" cx="60" cy="6" r="2"
+                                                fill="rgba(180,200,20,0.7)" />
+                                            <circle class="splash splash-5" cx="120" cy="4" r="2.5"
+                                                fill="rgba(227,251,30,0.8)" />
+                                        </g>
+                                    </g>
+                                </svg>
+                                <div class="percentage-overlay">
+                                    <span class="big-percentage" id="workloadPercentage">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hours-text" id="workloadText">0 ч из 0 ч</div>
+                    </div>
+
+                    <!-- Today Stats -->
+                    <div class="today-sidebar">
+                        <div class="today-header">
+                            <h3><span class="icon icon-calendar"></span> Сегодня</h3>
+                            <button class="return-today-btn" id="returnTodayBtn" onclick="window.logic.returnToToday()"
+                                style="display: none;">
+                                <span class="icon icon-arrow">←</span> Вернуться
+                            </button>
+                        </div>
+                        <div class="today-date-picker">
+                            <input type="date" id="todayDateFrom" class="date-input" onchange="window.logic.loadTodayRange()">
+                            <span class="date-separator">—</span>
+                            <input type="date" id="todayDateTo" class="date-input" onchange="window.logic.loadTodayRange()">
+                        </div>
+                        <div class="today-grid">
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-time"></span>
+                                <span class="tile-value" id="todayTotalHours">-</span>
+                                <span class="tile-label">Часы работы</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-fire"></span>
+                                <span class="tile-value" id="todayOvertimeHours">-</span>
+                                <span class="tile-label">Переработка</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-pause"></span>
+                                <span class="tile-value" id="todayIdleHours">-</span>
+                                <span class="tile-label">Простой</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-check"></span>
+                                <span class="tile-value" id="todayCheckHours">-</span>
+                                <span class="tile-label">Проверено</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-tag"></span>
+                                <span class="tile-value" id="todayMarkupHours">-</span>
+                                <span class="tile-label">Размечено</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-doc"></span>
+                                <span class="tile-value" id="todayOtherHours">-</span>
+                                <span class="tile-label">Иные задачи</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-list"></span>
+                                <span class="tile-value" id="todayCheckedTasksCount">-</span>
+                                <span class="tile-label">Задач проверено</span>
+                            </div>
+                            <div class="today-tile">
+                                <span class="tile-icon icon icon-bookmark"></span>
+                                <span class="tile-value" id="todayMarkedTasksCount">-</span>
+                                <span class="tile-label">Задач размечено</span>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Right Column -->
+            </div><!-- End main-content -->
+        </div><!-- End content -->
+
+        <!-- Calendar View -->
+        <div id="calendarView" class="calendar-view" style="display: none;">
+            <div class="calendar-controls">
+                <button class="calendar-nav-btn" onclick="window.logic.prevMonth()">◀</button>
+                <div class="calendar-title-selects">
+                    <select id="calendarMonthSelect" class="calendar-select" onchange="window.logic.updateCalendarView()">
+                        <option value="0">Январь</option>
+                        <option value="1">Февраль</option>
+                        <option value="2">Март</option>
+                        <option value="3">Апрель</option>
+                        <option value="4">Май</option>
+                        <option value="5">Июнь</option>
+                        <option value="6">Июль</option>
+                        <option value="7">Август</option>
+                        <option value="8">Сентябрь</option>
+                        <option value="9">Октябрь</option>
+                        <option value="10">Ноябрь</option>
+                        <option value="11">Декабрь</option>
+                    </select>
+                    <select id="calendarYearSelect" class="calendar-select" onchange="window.logic.updateCalendarView()">
+                        <!-- Years will be populated dynamically -->
+                    </select>
+                </div>
+                <button class="calendar-nav-btn" onclick="window.logic.nextMonth()">▶</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Headers -->
+                <div class="calendar-header-cell week-number-header">Нед</div>
+                <div class="calendar-header-cell">Пн</div>
+                <div class="calendar-header-cell">Вт</div>
+                <div class="calendar-header-cell">Ср</div>
+                <div class="calendar-header-cell">Чт</div>
+                <div class="calendar-header-cell">Пт</div>
+                <div class="calendar-header-cell" style="color: #e57373;">Сб</div>
+                <div class="calendar-header-cell" style="color: #e57373;">Вс</div>
+                <!-- Days will be populated via JS -->
+            </div>
+
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-dot today"></div>
+                    <span>Сегодня</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot holiday"></div>
+                    <span>Праздник</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot short"></div>
+                    <span>Сокращенный</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal-overlay">
+            <div class="modal" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h2><span class="icon icon-settings"></span> Настройки</h2>
+                    <button class="modal-close" onclick="window.logic.closeSettings()">×</button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="settings-tabs">
+                    <button class="settings-tab active" onclick="window.logic.switchSettingsTab('calendar')"><span
+                            class="icon icon-calendar" style="width:18px;height:18px;margin-right:4px;"></span>
+                        Календарь</button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Calendar Tab -->
+                    <div id="calendarTab" class="settings-tab-content active">
+                        <div class="settings-group">
+                            <label for="calendarYear"><span class="icon icon-calendar"
+                                    style="width:18px;height:18px;margin-right:4px;"></span> Год:</label>
+                            <div class="year-selector-row">
+                                <select id="calendarYear" onchange="window.logic.loadCalendarForYear()">
+                                    <!-- Динамически заполняется -->
+                                </select>
+                                <button class="btn-add-year" onclick="window.logic.addNewYear()">+ Год</button>
+                                <button class="btn-add-year" onclick="window.logic.deleteYear()"
+                                    style="background-color: #ff5252; margin-left: 5px;">- Удалить</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label><span class="icon icon-party"
+                                    style="width:18px;height:18px;margin-right:4px;"></span> Праздничные дни
+                                (выходные):</label>
+                            <div class="dates-container" id="holidaysList"></div>
+                            <div class="add-date-row">
+                                <input type="text" id="newHoliday" placeholder="ДД.ММ" maxlength="5">
+                                <button class="btn-add" onclick="window.logic.addHoliday()">+ Добавить</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label><span class="icon icon-clock"
+                                    style="width:18px;height:18px;margin-right:4px;"></span> Сокращенные дни (7
+                                часов):</label>
+                            <div class="dates-container" id="shortDaysList"></div>
+                            <div class="add-date-row">
+                                <input type="text" id="newShortDay" placeholder="ДД.ММ" maxlength="5">
+                                <button class="btn-add" onclick="window.logic.addShortDay()">+ Добавить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="window.logic.closeSettings()">Отмена</button>
+                    <button class="btn-save" onclick="window.logic.saveSettings()">Сохранить (Global)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Detail Modal -->
+        <div id="projectModal" class="modal-overlay">
+            <div class="modal" style="max-width: 1200px;">
+                <div class="modal-header">
+                    <h2><span class="icon icon-stats"></span> <span id="projectModalTitle">Проект</span></h2>
+                    <button class="modal-close" onclick="window.logic.closeProjectModal()">×</button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="projectLoading"
+                        style="display: none; align-items: center; justify-content: center; flex-direction: column; min-height: 400px; width: 100%;">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 10px; color: #666;">Загрузка данных...</p>
+                    </div>
+                    <div id="projectContent">
+                        <div class="project-controls"
+                            style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 20px;">
+                            <div class="project-filters" style="margin-bottom: 0;">
+                                <div class="filter-group">
+                                    <label>Год:</label>
+                                    <select id="projectYearSelect" onchange="window.logic.loadProjectStats()">
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Месяц:</label>
+                                    <select id="projectMonthSelect" onchange="window.logic.loadProjectStats()">
+                                        <option value="0">Все месяцы</option>
+                                        <option value="1">Январь</option>
+                                        <option value="2">Февраль</option>
+                                        <option value="3">Март</option>
+                                        <option value="4">Апрель</option>
+                                        <option value="5">Май</option>
+                                        <option value="6">Июнь</option>
+                                        <option value="7">Июль</option>
+                                        <option value="8">Август</option>
+                                        <option value="9">Сентябрь</option>
+                                        <option value="10">Октябрь</option>
+                                        <option value="11">Ноябрь</option>
+                                        <option value="12">Декабрь</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="project-summary" style="margin-bottom: 0; flex: 1;">
+                                <div class="summary-card">
+                                    <div class="summary-value" id="projectTotalHours">0</div>
+                                    <div class="summary-label">Всего часов</div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-value" id="projectTotalTasks">0</div>
+                                    <div class="summary-label">Задач</div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-value" id="projectAvgHours">0</div>
+                                    <div class="summary-label">Сред. часов/нед</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-weekly-table">
+                            <table class="projects-table">
+                                <thead>
+                                    <tr>
+                                        <th>Неделя</th>
+                                        <th>Даты</th>
+                                        <th>Часы проверки</th>
+                                        <th>Проверено</th>
+                                        <th>Метрики проверки</th>
+                                        <th>Часы разметки</th>
+                                        <th>Размечено</th>
+                                        <th>Метрики разметки</th>
+                                        <th>Иные часы</th>
+                                        <th>Всего часов</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projectWeeklyBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="window.logic.closeProjectModal()">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day Statistics Modal -->
+        <div id="dayModal" class="modal-overlay">
+            <div class="modal" style="max-width: 1400px;">
+                <div class="modal-header">
+                    <h2><span class="icon icon-calendar"></span> <span id="dayModalTitle">Статистика за день</span></h2>
+                    <button class="modal-close" onclick="window.logic.closeDayModal()">×</button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Day Summary -->
+                    <div class="summary-card">
+                        <div class="summary-value" id="dayWorkHours">0</div>
+                        <div class="summary-label">Часы работы</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value" id="dayProjects">0</div>
+                        <div class="summary-label">Проектов</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value" id="dayCheckedTasks">0</div>
+                        <div class="summary-label">Проверено</div>
+                    </div>
+                </div>
+
+                <!-- Projects Table -->
+                <div class="project-weekly-table">
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th>Проект</th>
+                                <th>Часы проверки</th>
+                                <th>Проверено</th>
+                                <th>Метрики проверки</th>
+                                <th>Часы разметки</th>
+                                <th>Размечено</th>
+                                <th>Метрики разметки</th>
+                                <th>Иные часы</th>
+                                <th>Всего часов</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dayProjectsBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="window.logic.closeDayModal()">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    <script src="script.js"></script>
+</body>
+</html>
