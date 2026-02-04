@@ -85,17 +85,23 @@ function initGrist() {
     grist.ready({ requiredAccess: 'full' }); // Full access needed for settings (options)
 
     grist.onRecords(function (records, mappings) {
-        console.log('Grist: Records received', records.length);
-        console.log('Grist: Column Mappings', mappings);
-        if (records.length > 0) {
-            console.log('Grist: First Record Sample', records[0]);
-            console.log('Grist: Record Keys', Object.keys(records[0]));
+        console.log('RECORDS RECEIVED FROM GRIST API'); // Bold marker
+        console.log('Count:', records ? records.length : 'null');
+        console.log('Mappings:', mappings);
+
+        if (records && records.length > 0) {
+            console.log('Sample Record:', JSON.stringify(records[0]));
+            // Dump all keys to see actual column IDs
+            console.log('Actual Keys in Record:', Object.keys(records[0]));
+        } else {
+            console.warn('Records array is empty or null!');
         }
-        allRecords = records;
+
+        allRecords = records || []; // Safety fallout
 
         // Infer columns from first record if available, or just use what we have
-        if (records.length > 0) {
-            tableColumns = Object.keys(records[0]);
+        if (allRecords.length > 0) {
+            tableColumns = Object.keys(allRecords[0]);
         }
 
         // Initial Render
