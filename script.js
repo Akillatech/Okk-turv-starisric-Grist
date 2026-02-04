@@ -4,37 +4,37 @@
  */
 
 const CONFIG = {
-    // Column mapping: Map internal logic names to Grist Column IDs (sanitized)
-    // Users might need to adjust these IDs in Grist Creator Panel if they differ.
+    // Column mapping: Map internal logic names to Grist Column IDs
+    // Added 'B', 'H', 'K' etc based on logs from user's Grist table
     COLUMNS: {
-        date: ['Дата', 'Date'],
-        project: ['Наименование', 'Project', 'Проекты'],
-        projectCheck: ['Проект', 'Project_Check'],
+        date: ['Дата', 'Date', 'B'],
+        project: ['Наименование', 'Project', 'Проекты', 'H'],
+        projectCheck: ['Проект', 'Project_Check', 'C'],
 
-        // Pure Hours (Column K)
-        pureHours: ['Чистых_часов_валидации', 'Pure_Hours', 'Hours'],
-        // Tasks Checked (Column J)
-        checkedTasks: ['Факт_проверок_шт', 'Checked_Tasks', 'Tasks_Checked'],
+        // Pure Hours
+        pureHours: ['Чистых_часов_валидации', 'Pure_Hours', 'Hours', 'K'],
+        // Tasks Checked
+        checkedTasks: ['Факт_проверок_шт', 'Checked_Tasks', 'Tasks_Checked', 'J'], // Assuming J is checked count based on 11
 
-        // Markup Hours (Column Q)
-        markupHours: ['Часов_разметки', 'Markup_Hours'],
-        // Tasks Marked (Column P)
-        markedTasks: ['Факт_разметка_шт', 'Marked_Tasks'],
+        // Markup Hours
+        markupHours: ['Часов_разметки', 'Markup_Hours', 'Q'],
+        // Tasks Marked
+        markedTasks: ['Факт_разметка_шт', 'Marked_Tasks', 'P'], // Assuming P
         // Markup Checkbox
-        markupCheck: ['Разметка', 'Markup_Check'],
+        markupCheck: ['Разметка', 'Markup_Check', 'D'],
 
-        // Additional/Other Hours (Column L)
-        additionalHours: ['Иных_часов_работы', 'Other_Hours', 'Additional_Hours'],
+        // Additional/Other Hours
+        additionalHours: ['Иных_часов_работы', 'Other_Hours', 'Additional_Hours', 'L'],
         // Other Checkbox
-        otherCheck: ['Другое', 'Other_Check'],
+        otherCheck: ['Другое', 'Other_Check', 'E'],
 
-        // Overtime Hours (Column M)
-        overtimeHours: ['Часы_переработки', 'Overtime_Hours'],
+        // Overtime Hours
+        overtimeHours: ['Часы_переработки', 'Overtime_Hours', 'M'],
         // Overtime Checkbox
-        overtimeCheck: ['Переработка', 'Overtime_Check'],
+        overtimeCheck: ['Переработка', 'Overtime_Check', 'F'],
 
-        // Idle Hours (Column N)
-        idleHours: ['Часы_простоя', 'Idle_Hours']
+        // Idle Hours
+        idleHours: ['Часы_простоя', 'Idle_Hours', 'N']
     }
 };
 
