@@ -96,7 +96,6 @@ function autoSaveSettings() {
     grist.setOption('settings', currentSettings)
         .then(() => {
             console.log('✅ Settings staged in Grist (remember to save document!)');
-            // Show subtle reminder
             showSaveReminder();
         })
         .catch(err => {
