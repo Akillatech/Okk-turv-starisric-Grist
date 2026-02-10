@@ -49,10 +49,12 @@
             </div>
             <div class="header-right">
                 <span class="sheet-name" id="sheetName">Статистика</span>
-                <button class="nav-btn icon icon-home" id="homeBtn" onclick="window.logic.showHome()" title="Главная"></button>
+                <button class="nav-btn icon icon-home" id="homeBtn" onclick="window.logic.showHome()"
+                    title="Главная"></button>
                 <button class="nav-btn icon icon-calendar" id="calendarBtn" onclick="window.logic.showCalendar()"
                     title="Календарь"></button>
-                <button class="settings-btn icon icon-settings" onclick="window.logic.openSettings()" title="Настройки"></button>
+                <button class="settings-btn icon icon-settings" onclick="window.logic.openSettings()"
+                    title="Настройки"></button>
             </div>
         </div>
 
@@ -106,28 +108,35 @@
                                     <th onclick="window.logic.sortWorkType('Проект', 'name')" style="cursor: pointer;">
                                         Название <span id="sort-Проект-name">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'pureHours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'pureHours')"
+                                        style="cursor: pointer;">
                                         Часы проверки <span id="sort-Проект-pureHours">↕️</span>
                                     </th>
                                     <th onclick="window.logic.sortWorkType('Проект', 'tasks')" style="cursor: pointer;">
                                         Проверено <span id="sort-Проект-tasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMainTasks')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMainTasks')"
+                                        style="cursor: pointer;">
                                         Метрики проверки <span id="sort-Проект-avgMainTasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'markupHours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupHours')"
+                                        style="cursor: pointer;">
                                         Часы разметки <span id="sort-Проект-markupHours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'markupTasks')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupTasks')"
+                                        style="cursor: pointer;">
                                         Размечено <span id="sort-Проект-markupTasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMarkupTasks')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMarkupTasks')"
+                                        style="cursor: pointer;">
                                         Метрики разметки <span id="sort-Проект-avgMarkupTasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'additionalHours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'additionalHours')"
+                                        style="cursor: pointer;">
                                         Иные часы работы <span id="sort-Проект-additionalHours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'totalHours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'totalHours')"
+                                        style="cursor: pointer;">
                                         Всего часов <span id="sort-Проект-totalHours">↕️</span>
                                     </th>
                                 </tr>
@@ -145,19 +154,24 @@
                         <table class="projects-table">
                             <thead>
                                 <tr>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'name')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'name')"
+                                        style="cursor: pointer;">
                                         Название <span id="sort-Переработка-name">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'tasks')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'tasks')"
+                                        style="cursor: pointer;">
                                         Всего задач <span id="sort-Переработка-tasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'hours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'hours')"
+                                        style="cursor: pointer;">
                                         Часы работы <span id="sort-Переработка-hours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'entries')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'entries')"
+                                        style="cursor: pointer;">
                                         Записей <span id="sort-Переработка-entries">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'avgHours')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'avgHours')"
+                                        style="cursor: pointer;">
                                         Ср. часов/задача <span id="sort-Переработка-avgHours">↕️</span>
                                     </th>
                                 </tr>
@@ -228,9 +242,11 @@
                             </button>
                         </div>
                         <div class="today-date-picker">
-                            <input type="date" id="todayDateFrom" class="date-input" onchange="window.logic.loadTodayRange()">
+                            <input type="date" id="todayDateFrom" class="date-input"
+                                onchange="window.logic.loadTodayRange()">
                             <span class="date-separator">—</span>
-                            <input type="date" id="todayDateTo" class="date-input" onchange="window.logic.loadTodayRange()">
+                            <input type="date" id="todayDateTo" class="date-input"
+                                onchange="window.logic.loadTodayRange()">
                         </div>
                         <div class="today-grid">
                             <div class="today-tile">
@@ -284,7 +300,8 @@
             <div class="calendar-controls">
                 <button class="calendar-nav-btn" onclick="window.logic.prevMonth()">◀</button>
                 <div class="calendar-title-selects">
-                    <select id="calendarMonthSelect" class="calendar-select" onchange="window.logic.updateCalendarView()">
+                    <select id="calendarMonthSelect" class="calendar-select"
+                        onchange="window.logic.updateCalendarView()">
                         <option value="0">Январь</option>
                         <option value="1">Февраль</option>
                         <option value="2">Март</option>
@@ -298,7 +315,8 @@
                         <option value="10">Ноябрь</option>
                         <option value="11">Декабрь</option>
                     </select>
-                    <select id="calendarYearSelect" class="calendar-select" onchange="window.logic.updateCalendarView()">
+                    <select id="calendarYearSelect" class="calendar-select"
+                        onchange="window.logic.updateCalendarView()">
                         <!-- Years will be populated dynamically -->
                     </select>
                 </div>
@@ -384,6 +402,17 @@
                             <div class="add-date-row">
                                 <input type="text" id="newShortDay" placeholder="ДД.ММ" maxlength="5">
                                 <button class="btn-add" onclick="window.logic.addShortDay()">+ Добавить</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-group"
+                            style="border-top: 1px solid #e0e0e0; padding-top: 15px; margin-top: 15px;">
+                            <label>📦 Импорт / Экспорт настроек:</label>
+                            <div class="add-date-row" style="gap: 10px;">
+                                <button class="btn-add" onclick="window.logic.exportSettings()" style="flex: 1;">⬇
+                                    Экспорт JSON</button>
+                                <button class="btn-add" onclick="window.logic.importSettings()" style="flex: 1;">⬆
+                                    Импорт JSON</button>
                             </div>
                         </div>
                     </div>
@@ -533,6 +562,7 @@
                 </div>
             </div>
         </div>
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
+
 </html>
