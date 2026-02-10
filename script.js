@@ -169,8 +169,6 @@ function initGrist() {
             if (!currentSettings.shortDays || typeof currentSettings.shortDays !== 'object') {
                 currentSettings.shortDays = {};
             }
-
-            updateCalendarSettingsTags(); // Update UI for settings if open
         } else {
             // Default settings if none
             currentSettings = {
