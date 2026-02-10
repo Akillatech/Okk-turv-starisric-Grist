@@ -79,6 +79,16 @@ function parseGristDate(val) {
     return null;
 }
 
+// Helper to auto-save settings to Grist
+async function autoSaveSettings() {
+    try {
+        await grist.setOption('settings', currentSettings);
+        console.log('Settings auto-saved');
+    } catch (err) {
+        console.error('Failed to auto-save settings:', err);
+    }
+}
+
 // --- Grist Integration ---
 
 function initGrist() {
@@ -379,6 +389,7 @@ window.logic = {
                 currentSettings.holidays[year].push(val);
                 input.value = '';
                 renderSettingsUI();
+                autoSaveSettings(); // Auto-save
             }
         }
     },
@@ -397,6 +408,7 @@ window.logic = {
                 currentSettings.shortDays[year].push(val);
                 input.value = '';
                 renderSettingsUI();
+                autoSaveSettings(); // Auto-save
             }
         }
     },
@@ -408,6 +420,7 @@ window.logic = {
             currentSettings.years = currentSettings.years.filter(y => y.toString() !== year.toString());
             renderSettingsUI();
             updateYearSelects(); // Sync all year selectors
+            autoSaveSettings(); // Auto-save
         }
     },
 
@@ -420,6 +433,7 @@ window.logic = {
                 currentSettings.years.sort((a, b) => b - a);
                 renderSettingsUI();
                 updateYearSelects(); // Sync all year selectors
+                autoSaveSettings(); // Auto-save
             }
         }
     },
@@ -524,6 +538,7 @@ window.logic = {
                     }
 
                     renderSettingsUI();
+                    autoSaveSettings(); // Auto-save imported settings
                     alert(`Импортировано: ${holidaysCount} праздников, ${shortDaysCount} сокращённых дней`);
                 } catch (err) {
                     console.error('Import error:', err);
@@ -1004,6 +1019,7 @@ window.removeSetting = function (type, index) {
     if (currentSettings[type] && currentSettings[type][year]) {
         currentSettings[type][year].splice(index, 1);
         renderSettingsUI();
+        autoSaveSettings(); // Auto-save
     }
 };
 
