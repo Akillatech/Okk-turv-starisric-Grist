@@ -1179,11 +1179,22 @@ function renderProjectsTable() {
 
 function analyzeProjects(records) {
     const map = {};
+    let otherOnlyHours = 0; // For rows with ONLY otherCheck (no projectCheck)
 
     records.forEach(row => {
-        // Only include rows where the Project checkbox is checked
         const isProject = getRecVal(row, 'projectCheck');
-        if (!isProject) return; // Skip non-project rows
+        const isOther = getRecVal(row, 'otherCheck');
+        const isMarkup = getRecVal(row, 'markupCheck');
+        const additional = Number(getRecVal(row, 'additionalHours')) || 0;
+
+        // Case 1: Only "Другое" checked (no "Проект") → goes to "Иные задачи" row
+        if (isOther && !isProject) {
+            otherOnlyHours += additional;
+            return;
+        }
+
+        // Case 2: "Проект" checked → goes to project row
+        if (!isProject) return; // Skip rows without project checkbox
 
         const name = getRecVal(row, 'project') || 'Без проекта';
 
@@ -1194,40 +1205,32 @@ function analyzeProjects(records) {
         };
 
         const pure = Number(getRecVal(row, 'pureHours')) || 0;
-        const additional = Number(getRecVal(row, 'additionalHours')) || 0;
         const markup = Number(getRecVal(row, 'markupHours')) || 0;
-
         const tasks = Number(getRecVal(row, 'checkedTasks')) || 0;
         const mTasks = Number(getRecVal(row, 'markedTasks')) || 0;
 
-        const isMarkup = getRecVal(row, 'markupCheck');
-        const isOther = getRecVal(row, 'otherCheck');
-
-        // Project checkbox already checked at top — always add project hours
+        // Project hours
         map[name].checkHours += pure;
         map[name].tasks += tasks;
         map[name].hasWork = true;
+
         if (isMarkup) {
             map[name].markupHours += markup;
             map[name].markupTasks += mTasks;
-            map[name].hasWork = true;
         }
-        // additionalHours (column L) go to "Иные задачи" row, not to individual projects
 
-        // Total = project hours + markup hours (no additionalHours here)
-        map[name].totalHours = map[name].checkHours + map[name].markupHours;
-    });
+        // Case 3: "Проект" + "Другое" → additional hours go to project's "Иные часы работы"
+        if (isOther) {
+            map[name].additionalHours += additional;
+        }
 
-    // --- Permanent "Иные задачи" row: sum column L for ALL rows, no checkbox check ---
-    let otherTotalHours = 0;
-    records.forEach(row => {
-        otherTotalHours += Number(getRecVal(row, 'additionalHours')) || 0;
+        map[name].totalHours = map[name].checkHours + map[name].markupHours + map[name].additionalHours;
     });
 
     // Filter out empties
     const list = Object.values(map).filter(p => p.hasWork || p.totalHours > 0);
 
-    // Calculate Avgs for project rows
+    // Calculate Avgs
     list.forEach(p => {
         p.avgMainTasks = p.checkHours > 0 ? (p.tasks / p.checkHours) : 0;
         p.avgMarkupTasks = p.markupHours > 0 ? (p.markupTasks / p.markupHours) : 0;
@@ -1236,12 +1239,12 @@ function analyzeProjects(records) {
     // Sort projects by total hours desc
     list.sort((a, b) => b.totalHours - a.totalHours);
 
-    // Always add "Иные задачи" at the TOP
+    // Always add "Иные задачи" at the TOP (only otherCheck rows, without projectCheck)
     list.unshift({
         name: 'Иные задачи',
         checkHours: 0, tasks: 0, markupHours: 0, markupTasks: 0,
-        additionalHours: otherTotalHours, totalHours: otherTotalHours,
-        hasWork: otherTotalHours > 0,
+        additionalHours: otherOnlyHours, totalHours: otherOnlyHours,
+        hasWork: otherOnlyHours > 0,
         avgMainTasks: 0, avgMarkupTasks: 0
     });
 
