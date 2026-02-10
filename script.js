@@ -755,10 +755,15 @@ function initTodayDatePickers() {
     // Set to today
     const now = new Date();
     const iso = now.toISOString().substring(0, 10);
-    document.getElementById('todayDateFrom').value = iso;
-    document.getElementById('todayDateTo').value = iso;
-    // Trigger update
-    refreshDashboard();
+    const fromInput = document.getElementById('todayDateFrom');
+    const toInput = document.getElementById('todayDateTo');
+    const btn = document.getElementById('returnTodayBtn');
+
+    if (fromInput) fromInput.value = iso;
+    if (toInput) toInput.value = iso;
+    if (btn) btn.style.display = 'none'; // Hide button when on today's date
+
+    // Don't call refreshDashboard here - it's called right after in init
 }
 
 function filterByPeriod(records, period) {
