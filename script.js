@@ -80,13 +80,15 @@ function parseGristDate(val) {
 }
 
 // Helper to auto-save settings to Grist
-async function autoSaveSettings() {
-    try {
-        await grist.setOption('settings', currentSettings);
-        console.log('Settings auto-saved');
-    } catch (err) {
-        console.error('Failed to auto-save settings:', err);
-    }
+function autoSaveSettings() {
+    console.log('Auto-saving settings...', currentSettings);
+    grist.setOption('settings', currentSettings)
+        .then(() => {
+            console.log('✅ Settings auto-saved successfully');
+        })
+        .catch(err => {
+            console.error('❌ Failed to auto-save settings:', err);
+        });
 }
 
 // --- Grist Integration ---
