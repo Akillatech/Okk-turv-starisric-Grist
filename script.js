@@ -424,6 +424,7 @@ window.logic = {
             reader.onload = (event) => {
                 try {
                     const data = JSON.parse(event.target.result);
+                    console.log('Imported JSON data:', data);
                     let holidaysCount = 0;
                     let shortDaysCount = 0;
 
@@ -435,6 +436,7 @@ window.logic = {
 
                     // Check format: old (array) or new (object with years)
                     if (data.holidays) {
+                        console.log('Holidays type:', Array.isArray(data.holidays) ? 'Array' : 'Object');
                         if (Array.isArray(data.holidays)) {
                             // Old format: ["DD.MM", ...]
                             currentSettings.holidays = data.holidays;
@@ -443,16 +445,21 @@ window.logic = {
                             // New format: { "2026": ["MM-DD", ...], "2027": [...] }
                             const converted = [];
                             for (const year in data.holidays) {
+                                console.log(`Processing holidays year ${year}:`, data.holidays[year]);
                                 data.holidays[year].forEach(mmdd => {
-                                    converted.push(convertDate(mmdd));
+                                    const ddmm = convertDate(mmdd);
+                                    console.log(`  ${mmdd} -> ${ddmm}`);
+                                    converted.push(ddmm);
                                 });
                             }
                             currentSettings.holidays = converted;
                             holidaysCount = converted.length;
+                            console.log('Final holidays:', converted);
                         }
                     }
 
                     if (data.shortDays) {
+                        console.log('ShortDays type:', Array.isArray(data.shortDays) ? 'Array' : 'Object');
                         if (Array.isArray(data.shortDays)) {
                             // Old format
                             currentSettings.shortDays = data.shortDays;
@@ -461,18 +468,23 @@ window.logic = {
                             // New format
                             const converted = [];
                             for (const year in data.shortDays) {
+                                console.log(`Processing shortDays year ${year}:`, data.shortDays[year]);
                                 data.shortDays[year].forEach(mmdd => {
-                                    converted.push(convertDate(mmdd));
+                                    const ddmm = convertDate(mmdd);
+                                    console.log(`  ${mmdd} -> ${ddmm}`);
+                                    converted.push(ddmm);
                                 });
                             }
                             currentSettings.shortDays = converted;
                             shortDaysCount = converted.length;
+                            console.log('Final shortDays:', converted);
                         }
                     }
 
                     renderSettingsUI();
                     alert(`Импортировано: ${holidaysCount} праздников, ${shortDaysCount} сокращённых дней`);
                 } catch (err) {
+                    console.error('Import error:', err);
                     alert('Ошибка чтения файла: ' + err.message);
                 }
             };
