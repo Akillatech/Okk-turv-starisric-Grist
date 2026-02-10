@@ -1054,19 +1054,20 @@ function renderCalendar() {
 
         // Classes
         const isoDate = formatDateShort(d); // DD.MM
+        const cellYear = d.getFullYear().toString();
         const isCurrentMonth = d.getMonth() === month;
 
         if (!isCurrentMonth) cell.classList.add('empty'); // Style for other month days
 
         if (isCurrentMonth) {
-            // Check properties
-            if (isHoliday(isoDate) || d.getDay() === 0 || d.getDay() === 6) {
+            // Check properties - NOW WITH YEAR PARAMETER
+            if (isHoliday(isoDate, cellYear) || d.getDay() === 0 || d.getDay() === 6) {
                 cell.classList.add('weekend');
-                if (isHoliday(isoDate)) {
+                if (isHoliday(isoDate, cellYear)) {
                     cell.classList.add('holiday');
                 }
             }
-            if (isShortDay(isoDate)) cell.classList.add('short-day');
+            if (isShortDay(isoDate, cellYear)) cell.classList.add('short-day');
 
             // Check today
             const now = new Date();
@@ -1076,8 +1077,8 @@ function renderCalendar() {
 
             // Content
             let html = `<div class="day-number">${d.getDate()}</div>`;
-            if (isHoliday(isoDate)) html += `<div class="holiday-name">Праздник</div>`;
-            if (isShortDay(isoDate)) html += `<div class="holiday-name" style="color:#fbc02d">Сокр. день</div>`;
+            if (isHoliday(isoDate, cellYear)) html += `<div class="holiday-name">Праздник</div>`;
+            if (isShortDay(isoDate, cellYear)) html += `<div class="holiday-name" style="color:#fbc02d">Сокр. день</div>`;
 
             // Compact Stats
             const dayStats = calculateDayStatsCompact(d);
