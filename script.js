@@ -82,13 +82,62 @@ function parseGristDate(val) {
 // Helper to auto-save settings to Grist
 function autoSaveSettings() {
     console.log('Auto-saving settings...', currentSettings);
+
+    // Save to localStorage for immediate persistence (user-specific)
+    try {
+        localStorage.setItem('okk_stats_settings', JSON.stringify(currentSettings));
+        console.log('✅ Settings saved to localStorage');
+    } catch (err) {
+        console.error('❌ Failed to save to localStorage:', err);
+    }
+
+    // Also save to Grist options for document-level sharing
+    // NOTE: This requires manual "Save" in Grist UI to persist!
     grist.setOption('settings', currentSettings)
         .then(() => {
-            console.log('✅ Settings auto-saved successfully');
+            console.log('✅ Settings staged in Grist (remember to save document!)');
+            // Show subtle reminder
+            showSaveReminder();
         })
         .catch(err => {
-            console.error('❌ Failed to auto-save settings:', err);
+            console.error('❌ Failed to stage Grist settings:', err);
         });
+}
+
+// Show save reminder notification
+let saveReminderTimeout;
+function showSaveReminder() {
+    // Clear previous timeout
+    if (saveReminderTimeout) clearTimeout(saveReminderTimeout);
+
+    // Show reminder in UI
+    let reminder = document.getElementById('saveReminder');
+    if (!reminder) {
+        reminder = document.createElement('div');
+        reminder.id = 'saveReminder';
+        reminder.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-size: 14px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        reminder.innerHTML = '💾 Настройки сохранены локально. Нажите Ctrl+S или Save в Grist для общего доступа';
+        document.body.appendChild(reminder);
+    }
+
+    reminder.style.display = 'block';
+
+    // Hide after 4 seconds
+    saveReminderTimeout = setTimeout(() => {
+        if (reminder) reminder.style.display = 'none';
+    }, 4000);
 }
 
 // --- Grist Integration ---
@@ -141,52 +190,63 @@ function initGrist() {
     });
 
     grist.onOptions(function (options) {
-        // Load settings from options
-        if (options && options.settings) {
+        // Try to load from localStorage first (most recent, immediate persistence)
+        const localSettings = localStorage.getItem('okk_stats_settings');
+        let loadedFromLocal = false;
+
+        if (localSettings) {
+            try {
+                currentSettings = JSON.parse(localSettings);
+                console.log('✅ Settings loaded from localStorage:', currentSettings);
+                loadedFromLocal = true;
+            } catch (e) {
+                console.error('Failed to parse localStorage settings', e);
+            }
+        }
+
+        // If localStorage failed or empty, try Grist options
+        if (!loadedFromLocal && options && options.settings) {
             currentSettings = options.settings;
-            console.log('Settings loaded:', currentSettings);
+            console.log('✅ Settings loaded from Grist options:', currentSettings);
+        }
 
-            // MIGRATION: Convert old format (array) to new format (object by year)
-            if (Array.isArray(currentSettings.holidays)) {
-                console.log('Migrating holidays from array to per-year format');
-                const currentYear = new Date().getFullYear();
-                currentSettings.holidays = {
-                    [currentYear]: currentSettings.holidays
-                };
-            }
-            if (Array.isArray(currentSettings.shortDays)) {
-                console.log('Migrating shortDays from array to per-year format');
-                const currentYear = new Date().getFullYear();
-                currentSettings.shortDays = {
-                    [currentYear]: currentSettings.shortDays
-                };
-            }
-
-            // Ensure structure exists
-            if (!currentSettings.holidays || typeof currentSettings.holidays !== 'object') {
-                currentSettings.holidays = {};
-            }
-            if (!currentSettings.shortDays || typeof currentSettings.shortDays !== 'object') {
-                currentSettings.shortDays = {};
-            }
-        } else {
-            // Default settings if none
+        // If both failed, use defaults
+        if (!currentSettings || Object.keys(currentSettings).length === 0) {
             currentSettings = {
                 holidays: {},
                 shortDays: {},
                 years: []
             };
-
-            // Try to load from LocalStorage as fallback (migration path)
-            const localSettings = localStorage.getItem('okk_stats_settings');
-            if (localSettings) {
-                try {
-                    currentSettings = JSON.parse(localSettings);
-                    // Save to Grist options for persistence
-                    grist.setOption('settings', currentSettings);
-                } catch (e) { console.error('Error parsing local settings', e); }
-            }
+            console.log('Using default settings');
         }
+
+        // MIGRATION: Convert old format (array) to new format (object by year)
+        if (Array.isArray(currentSettings.holidays)) {
+            console.log('Migrating holidays from array to per-year format');
+            const currentYear = new Date().getFullYear();
+            currentSettings.holidays = {
+                [currentYear]: currentSettings.holidays
+            };
+        }
+        if (Array.isArray(currentSettings.shortDays)) {
+            console.log('Migrating shortDays from array to per-year format');
+            const currentYear = new Date().getFullYear();
+            currentSettings.shortDays = {
+                [currentYear]: currentSettings.shortDays
+            };
+        }
+
+        // Ensure structure exists
+        if (!currentSettings.holidays || typeof currentSettings.holidays !== 'object') {
+            currentSettings.holidays = {};
+        }
+        if (!currentSettings.shortDays || typeof currentSettings.shortDays !== 'object') {
+            currentSettings.shortDays = {};
+        }
+        if (!currentSettings.years || !Array.isArray(currentSettings.years)) {
+            currentSettings.years = [];
+        }
+
         refreshDashboard(); // Settings might change stats (holidays etc)
     });
 }
