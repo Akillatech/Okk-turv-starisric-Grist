@@ -1218,20 +1218,26 @@ function analyzeProjects(records) {
         map[name].totalHours = map[name].checkHours + map[name].markupHours;
     });
 
-    // --- Permanent "Иные задачи" row: sum column L for all rows with otherCheck ---
+    // --- Permanent "Иные задачи" row: sum column L for ALL rows, no checkbox check ---
     let otherTotalHours = 0;
     records.forEach(row => {
-        const isOther = getRecVal(row, 'otherCheck');
-        if (isOther) {
-            otherTotalHours += Number(getRecVal(row, 'additionalHours')) || 0;
-        }
+        otherTotalHours += Number(getRecVal(row, 'additionalHours')) || 0;
     });
 
     // Filter out empties
     const list = Object.values(map).filter(p => p.hasWork || p.totalHours > 0);
 
-    // Always add "Иные задачи" row (even if 0 hours, to keep it permanent)
-    list.push({
+    // Calculate Avgs for project rows
+    list.forEach(p => {
+        p.avgMainTasks = p.checkHours > 0 ? (p.tasks / p.checkHours) : 0;
+        p.avgMarkupTasks = p.markupHours > 0 ? (p.markupTasks / p.markupHours) : 0;
+    });
+
+    // Sort projects by total hours desc
+    list.sort((a, b) => b.totalHours - a.totalHours);
+
+    // Always add "Иные задачи" at the TOP
+    list.unshift({
         name: 'Иные задачи',
         checkHours: 0, tasks: 0, markupHours: 0, markupTasks: 0,
         additionalHours: otherTotalHours, totalHours: otherTotalHours,
@@ -1239,16 +1245,7 @@ function analyzeProjects(records) {
         avgMainTasks: 0, avgMarkupTasks: 0
     });
 
-    // Calculate Avgs for project rows
-    list.forEach(p => {
-        if (p.name !== 'Иные задачи') {
-            p.avgMainTasks = p.checkHours > 0 ? (p.tasks / p.checkHours) : 0;
-            p.avgMarkupTasks = p.markupHours > 0 ? (p.markupTasks / p.markupHours) : 0;
-        }
-    });
-
-    // Default Sort (Total Hours desc)
-    return list.sort((a, b) => b.totalHours - a.totalHours);
+    return list;
 }
 
 function renderOvertimeTable() {
