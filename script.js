@@ -119,25 +119,63 @@ function showSaveReminder() {
             position: fixed;
             top: 10px;
             right: 10px;
-            background: #4caf50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            padding: 14px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             font-size: 14px;
+            font-weight: 500;
             z-index: 10000;
-            animation: slideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInFromTop 0.4s ease-out;
         `;
-        reminder.innerHTML = '💾 Настройки сохранены локально. Нажите Ctrl+S или Save в Grist для общего доступа';
+        reminder.innerHTML = `
+            <span style="font-size: 20px;">⬆️</span>
+            <span>Не забудь сохранить настройки</span>
+        `;
         document.body.appendChild(reminder);
+
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInFromTop {
+                from {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutToTop {
+                from {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    reminder.style.display = 'block';
+    reminder.style.display = 'flex';
 
-    // Hide after 4 seconds
+    // Hide after 5 seconds
     saveReminderTimeout = setTimeout(() => {
-        if (reminder) reminder.style.display = 'none';
-    }, 4000);
+        if (reminder) {
+            reminder.style.animation = 'slideOutToTop 0.4s ease-out';
+            setTimeout(() => {
+                reminder.style.display = 'none';
+            }, 400);
+        }
+    }, 5000);
 }
 
 // --- Grist Integration ---
