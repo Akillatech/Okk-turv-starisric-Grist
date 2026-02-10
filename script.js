@@ -111,6 +111,9 @@ function initGrist() {
         // Initialize Date Selectors (Years/Months)
         initDateSelectors();
 
+        // Initialize Today date pickers to current date
+        initTodayDatePickers();
+
         // Hide loading and show content
         document.getElementById('loading').style.display = 'none';
 
@@ -417,10 +420,24 @@ window.logic = {
     returnToToday: function () {
         // Reset date pickers to today
         initTodayDatePickers(); // Will trigger change
+        // Hide the return button
+        document.getElementById('returnTodayBtn').style.display = 'none';
     },
 
     loadTodayRange: function () {
         renderTodayStats();
+
+        // Show/hide return button based on whether dates match today
+        const today = new Date().toISOString().substring(0, 10);
+        const fromDate = document.getElementById('todayDateFrom').value;
+        const toDate = document.getElementById('todayDateTo').value;
+        const btn = document.getElementById('returnTodayBtn');
+
+        if (fromDate === today && toDate === today) {
+            btn.style.display = 'none';
+        } else {
+            btn.style.display = 'inline-flex';
+        }
     }
 };
 
