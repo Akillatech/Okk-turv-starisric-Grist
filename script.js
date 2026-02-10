@@ -132,8 +132,8 @@ function showSaveReminder() {
             animation: slideInFromTop 0.4s ease-out;
         `;
         reminder.innerHTML = `
-            <span style="font-size: 20px;">⬆️</span>
             <span>Не забудь сохранить настройки</span>
+            <span style="font-size: 20px;">⬆️</span>
         `;
         document.body.appendChild(reminder);
 
