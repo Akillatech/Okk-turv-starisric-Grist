@@ -366,6 +366,7 @@ window.logic = {
         if (year && confirm('Удалить год ' + year + '?')) {
             currentSettings.years = currentSettings.years.filter(y => y.toString() !== year.toString());
             renderSettingsUI();
+            updateYearSelects(); // Sync all year selectors
         }
     },
 
@@ -377,6 +378,7 @@ window.logic = {
                 currentSettings.years.push(parseInt(newYear));
                 currentSettings.years.sort((a, b) => b - a);
                 renderSettingsUI();
+                updateYearSelects(); // Sync all year selectors
             }
         }
     },
