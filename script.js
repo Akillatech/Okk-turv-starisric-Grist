@@ -424,16 +424,54 @@ window.logic = {
             reader.onload = (event) => {
                 try {
                     const data = JSON.parse(event.target.result);
+                    let holidaysCount = 0;
+                    let shortDaysCount = 0;
 
-                    if (data.holidays && Array.isArray(data.holidays)) {
-                        currentSettings.holidays = data.holidays;
+                    // Helper: convert "MM-DD" to "DD.MM"
+                    const convertDate = (mmdd) => {
+                        const [month, day] = mmdd.split('-');
+                        return `${day}.${month}`;
+                    };
+
+                    // Check format: old (array) or new (object with years)
+                    if (data.holidays) {
+                        if (Array.isArray(data.holidays)) {
+                            // Old format: ["DD.MM", ...]
+                            currentSettings.holidays = data.holidays;
+                            holidaysCount = data.holidays.length;
+                        } else if (typeof data.holidays === 'object') {
+                            // New format: { "2026": ["MM-DD", ...], "2027": [...] }
+                            const converted = [];
+                            for (const year in data.holidays) {
+                                data.holidays[year].forEach(mmdd => {
+                                    converted.push(convertDate(mmdd));
+                                });
+                            }
+                            currentSettings.holidays = converted;
+                            holidaysCount = converted.length;
+                        }
                     }
-                    if (data.shortDays && Array.isArray(data.shortDays)) {
-                        currentSettings.shortDays = data.shortDays;
+
+                    if (data.shortDays) {
+                        if (Array.isArray(data.shortDays)) {
+                            // Old format
+                            currentSettings.shortDays = data.shortDays;
+                            shortDaysCount = data.shortDays.length;
+                        } else if (typeof data.shortDays === 'object') {
+                            // New format
+                            const converted = [];
+                            for (const year in data.shortDays) {
+                                data.shortDays[year].forEach(mmdd => {
+                                    converted.push(convertDate(mmdd));
+                                });
+                            }
+                            currentSettings.shortDays = converted;
+                            shortDaysCount = converted.length;
+                        }
                     }
 
                     renderSettingsUI();
-                    alert(`Импортировано: ${data.holidays?.length || 0} праздников, ${data.shortDays?.length || 0} сокращённых дней`);
+                    alert(`Импортировано: ${holidaysCount} праздников, ${shortDaysCount} сокращённых дней`);
                 } catch (err) {
                     alert('Ошибка чтения файла: ' + err.message);
                 }
