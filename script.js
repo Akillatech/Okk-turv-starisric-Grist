@@ -1231,10 +1231,9 @@ function analyzeProjects(records) {
             map[name].markupTasks += mTasks;
         }
 
-        // Case 3: "Проект" + "Другое" → additional hours go to project's "Иные часы работы"
-        if (isOther) {
-            map[name].additionalHours += additional;
-        }
+        // Always add additionalHours (column L) to project's "Иные часы работы"
+        // (matches modal behavior in calculateProjectWeeklyInternal)
+        map[name].additionalHours += additional;
 
         map[name].totalHours = map[name].checkHours + map[name].markupHours + map[name].additionalHours;
     });
