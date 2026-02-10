@@ -133,9 +133,40 @@ function initGrist() {
         if (options && options.settings) {
             currentSettings = options.settings;
             console.log('Settings loaded:', currentSettings);
+
+            // MIGRATION: Convert old format (array) to new format (object by year)
+            if (Array.isArray(currentSettings.holidays)) {
+                console.log('Migrating holidays from array to per-year format');
+                const currentYear = new Date().getFullYear();
+                currentSettings.holidays = {
+                    [currentYear]: currentSettings.holidays
+                };
+            }
+            if (Array.isArray(currentSettings.shortDays)) {
+                console.log('Migrating shortDays from array to per-year format');
+                const currentYear = new Date().getFullYear();
+                currentSettings.shortDays = {
+                    [currentYear]: currentSettings.shortDays
+                };
+            }
+
+            // Ensure structure exists
+            if (!currentSettings.holidays || typeof currentSettings.holidays !== 'object') {
+                currentSettings.holidays = {};
+            }
+            if (!currentSettings.shortDays || typeof currentSettings.shortDays !== 'object') {
+                currentSettings.shortDays = {};
+            }
+
             updateCalendarSettingsTags(); // Update UI for settings if open
         } else {
             // Default settings if none
+            currentSettings = {
+                holidays: {},
+                shortDays: {},
+                years: []
+            };
+
             // Try to load from LocalStorage as fallback (migration path)
             const localSettings = localStorage.getItem('okk_stats_settings');
             if (localSettings) {
@@ -338,9 +369,14 @@ window.logic = {
         const input = document.getElementById('newHoliday');
         const val = input.value.trim();
         if (val) {
-            if (!currentSettings.holidays) currentSettings.holidays = [];
-            if (!currentSettings.holidays.includes(val)) {
-                currentSettings.holidays.push(val);
+            const yearSelect = document.getElementById('calendarYear');
+            const year = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
+
+            if (!currentSettings.holidays) currentSettings.holidays = {};
+            if (!currentSettings.holidays[year]) currentSettings.holidays[year] = [];
+
+            if (!currentSettings.holidays[year].includes(val)) {
+                currentSettings.holidays[year].push(val);
                 input.value = '';
                 renderSettingsUI();
             }
@@ -351,9 +387,14 @@ window.logic = {
         const input = document.getElementById('newShortDay');
         const val = input.value.trim();
         if (val) {
-            if (!currentSettings.shortDays) currentSettings.shortDays = [];
-            if (!currentSettings.shortDays.includes(val)) {
-                currentSettings.shortDays.push(val);
+            const yearSelect = document.getElementById('calendarYear');
+            const year = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
+
+            if (!currentSettings.shortDays) currentSettings.shortDays = {};
+            if (!currentSettings.shortDays[year]) currentSettings.shortDays[year] = [];
+
+            if (!currentSettings.shortDays[year].includes(val)) {
+                currentSettings.shortDays[year].push(val);
                 input.value = '';
                 renderSettingsUI();
             }
@@ -438,46 +479,47 @@ window.logic = {
                     if (data.holidays) {
                         console.log('Holidays type:', Array.isArray(data.holidays) ? 'Array' : 'Object');
                         if (Array.isArray(data.holidays)) {
-                            // Old format: ["DD.MM", ...]
-                            currentSettings.holidays = data.holidays;
+                            // Old format: ["DD.MM", ...] - assign to current year
+                            const currentYear = new Date().getFullYear().toString();
+                            currentSettings.holidays = { [currentYear]: data.holidays };
                             holidaysCount = data.holidays.length;
                         } else if (typeof data.holidays === 'object') {
                             // New format: { "2026": ["MM-DD", ...], "2027": [...] }
-                            const converted = [];
+                            // Convert MM-DD to DD.MM but KEEP year structure
+                            currentSettings.holidays = {};
                             for (const year in data.holidays) {
                                 console.log(`Processing holidays year ${year}:`, data.holidays[year]);
-                                data.holidays[year].forEach(mmdd => {
+                                currentSettings.holidays[year] = data.holidays[year].map(mmdd => {
                                     const ddmm = convertDate(mmdd);
                                     console.log(`  ${mmdd} -> ${ddmm}`);
-                                    converted.push(ddmm);
+                                    holidaysCount++;
+                                    return ddmm;
                                 });
                             }
-                            currentSettings.holidays = converted;
-                            holidaysCount = converted.length;
-                            console.log('Final holidays:', converted);
+                            console.log('Final holidays:', currentSettings.holidays);
                         }
                     }
 
                     if (data.shortDays) {
                         console.log('ShortDays type:', Array.isArray(data.shortDays) ? 'Array' : 'Object');
                         if (Array.isArray(data.shortDays)) {
-                            // Old format
-                            currentSettings.shortDays = data.shortDays;
+                            // Old format - assign to current year
+                            const currentYear = new Date().getFullYear().toString();
+                            currentSettings.shortDays = { [currentYear]: data.shortDays };
                             shortDaysCount = data.shortDays.length;
                         } else if (typeof data.shortDays === 'object') {
-                            // New format
-                            const converted = [];
+                            // New format - convert and preserve structure
+                            currentSettings.shortDays = {};
                             for (const year in data.shortDays) {
                                 console.log(`Processing shortDays year ${year}:`, data.shortDays[year]);
-                                data.shortDays[year].forEach(mmdd => {
+                                currentSettings.shortDays[year] = data.shortDays[year].map(mmdd => {
                                     const ddmm = convertDate(mmdd);
                                     console.log(`  ${mmdd} -> ${ddmm}`);
-                                    converted.push(ddmm);
+                                    shortDaysCount++;
+                                    return ddmm;
                                 });
                             }
-                            currentSettings.shortDays = converted;
-                            shortDaysCount = converted.length;
-                            console.log('Final shortDays:', converted);
+                            console.log('Final shortDays:', currentSettings.shortDays);
                         }
                     }
 
@@ -828,19 +870,23 @@ function renderWorkload() {
 
 function getDayNorm(date) {
     const dayStr = formatDateShort(date); // "DD.MM"
-    if (isHoliday(dayStr)) return 0;
-    if (isShortDay(dayStr)) return 7;
+    const year = date.getFullYear().toString();
+
+    if (isHoliday(dayStr, year)) return 0;
+    if (isShortDay(dayStr, year)) return 7;
     // Weekend?
     const day = date.getDay();
     if (day === 0 || day === 6) return 0; // Standard weekend
     return 8;
 }
 
-function isHoliday(dayStr) {
-    return (currentSettings.holidays || []).includes(dayStr);
+function isHoliday(dayStr, year) {
+    const yearHolidays = currentSettings.holidays && currentSettings.holidays[year];
+    return yearHolidays ? yearHolidays.includes(dayStr) : false;
 }
-function isShortDay(dayStr) {
-    return (currentSettings.shortDays || []).includes(dayStr);
+function isShortDay(dayStr, year) {
+    const yearShortDays = currentSettings.shortDays && currentSettings.shortDays[year];
+    return yearShortDays ? yearShortDays.includes(dayStr) : false;
 }
 
 // Helper Utils
@@ -905,41 +951,58 @@ function getPeriodDateRange(period) {
 // --- Settings UI ---
 
 function renderSettingsUI() {
-    // Render holidays
+    // Get currently selected year
+    const yearSelect = document.getElementById('calendarYear');
+    const selectedYear = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
+
+    // Render holidays for selected year
     const holidayContainer = document.getElementById('holidaysList');
     holidayContainer.innerHTML = '';
-    (currentSettings.holidays || []).forEach((h, index) => {
+    const yearHolidays = (currentSettings.holidays && currentSettings.holidays[selectedYear]) || [];
+    yearHolidays.forEach((h, index) => {
         const chip = document.createElement('div');
         chip.className = 'date-chip';
         chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('holidays', ${index})">×</button>`;
         holidayContainer.appendChild(chip);
     });
 
-    // Render short days
+    // Render short days for selected year
     const shortContainer = document.getElementById('shortDaysList');
     shortContainer.innerHTML = '';
-    (currentSettings.shortDays || []).forEach((h, index) => {
+    const yearShortDays = (currentSettings.shortDays && currentSettings.shortDays[selectedYear]) || [];
+    yearShortDays.forEach((h, index) => {
         const chip = document.createElement('div');
         chip.className = 'date-chip';
         chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('shortDays', ${index})">×</button>`;
         shortContainer.appendChild(chip);
     });
 
-    // Render year list for removing
-    const yearSelect = document.getElementById('calendarYear');
-    yearSelect.innerHTML = '';
-    (currentSettings.years || []).forEach(y => {
-        const opt = document.createElement('option');
-        opt.value = y;
-        opt.innerText = y;
-        yearSelect.appendChild(opt);
-    });
+    // Render year list in select
+    if (yearSelect) {
+        const currentVal = yearSelect.value;
+        yearSelect.innerHTML = '';
+        (currentSettings.years || []).forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.innerText = y;
+            yearSelect.appendChild(opt);
+        });
+        // Restore selection if exists
+        if (currentVal && (currentSettings.years || []).includes(parseInt(currentVal))) {
+            yearSelect.value = currentVal;
+        } else if ((currentSettings.years || []).length > 0) {
+            yearSelect.value = currentSettings.years[0];
+        }
+    }
 }
 
 // Global scope function for onclick access
 window.removeSetting = function (type, index) {
-    if (currentSettings[type]) {
-        currentSettings[type].splice(index, 1);
+    const yearSelect = document.getElementById('calendarYear');
+    const year = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
+
+    if (currentSettings[type] && currentSettings[type][year]) {
+        currentSettings[type][year].splice(index, 1);
         renderSettingsUI();
     }
 };
