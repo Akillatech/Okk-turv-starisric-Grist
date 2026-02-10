@@ -20,18 +20,18 @@ const CONFIG = {
         markupHours: ['Часов_разметки', 'Markup_Hours', 'Q'],
         // Tasks Marked
         markedTasks: ['Факт_разметка_шт', 'Marked_Tasks', 'P'], // Assuming P
-        // Markup Checkbox
-        markupCheck: ['Разметка', 'Markup_Check', 'D'],
+        // Markup Checkbox (G = Разметка)
+        markupCheck: ['Разметка', 'Markup_Check', 'G'],
 
         // Additional/Other Hours
         additionalHours: ['Иных_часов_работы', 'Other_Hours', 'Additional_Hours', 'L'],
-        // Other Checkbox
-        otherCheck: ['Другое', 'Other_Check', 'E'],
+        // Other Checkbox (D = Другое)
+        otherCheck: ['Другое', 'Other_Check', 'D'],
 
         // Overtime Hours
         overtimeHours: ['Часы_переработки', 'Overtime_Hours', 'M'],
-        // Overtime Checkbox
-        overtimeCheck: ['Переработка', 'Overtime_Check', 'F'],
+        // Overtime Checkbox (E = Переработки)
+        overtimeCheck: ['Переработка', 'Overtime_Check', 'E'],
 
         // Idle Hours
         idleHours: ['Часы_простоя', 'Idle_Hours', 'N']
