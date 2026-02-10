@@ -517,6 +517,9 @@ function calculateTodayStatsGeneric(records) {
 
 
 function refreshDashboard() {
+    // 0. Update Date Range Label in header
+    updateDateRangeLabel();
+
     // 1. Populate Year Selects if empty
     updateYearSelects();
 
@@ -528,6 +531,42 @@ function refreshDashboard() {
     if (document.getElementById('content').style.display !== 'none') {
         renderMainDashboard();
     }
+}
+
+function updateDateRangeLabel() {
+    const el = document.getElementById('dateRange');
+    if (!el) return;
+
+    if (currentPeriod === 'all') {
+        // Show full data range from records
+        if (allRecords.length > 0) {
+            const dates = allRecords
+                .map(r => parseGristDate(getRecVal(r, 'date')))
+                .filter(d => d)
+                .sort((a, b) => a - b);
+            if (dates.length > 0) {
+                el.innerText = formatDateFull(dates[0]) + ' — ' + formatDateFull(dates[dates.length - 1]);
+            } else {
+                el.innerText = 'Нет данных';
+            }
+        } else {
+            el.innerText = '-';
+        }
+    } else {
+        const range = getPeriodDateRange(currentPeriod);
+        if (range) {
+            el.innerText = formatDateFull(range.start) + ' — ' + formatDateFull(range.end);
+        } else {
+            el.innerText = '-';
+        }
+    }
+}
+
+function formatDateFull(date) {
+    const d = date.getDate();
+    const m = date.getMonth() + 1;
+    const y = date.getFullYear();
+    return (d < 10 ? '0' + d : d) + '.' + (m < 10 ? '0' + m : m) + '.' + y;
 }
 
 function updateYearSelects() {
@@ -1025,9 +1064,9 @@ function renderMainDashboard() {
     document.getElementById('projectSection').style.display = 'block';
     renderProjectsTable();
 
-    // 3. Overtime
-    document.getElementById('overtimeSection').style.display = 'block';
-    renderOvertimeTable();
+    // 3. Overtime — hidden from main screen
+    // document.getElementById('overtimeSection').style.display = 'block';
+    // renderOvertimeTable();
 }
 
 function renderWeeklyStats() {
