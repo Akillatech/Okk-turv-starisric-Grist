@@ -1181,9 +1181,9 @@ function analyzeProjects(records) {
     const map = {};
 
     records.forEach(row => {
-        // Only include if "Project" checked OR "Other" (Additional), "Markup"?
-        // GAS logic: Groups by Project Name (Column H). 
-        // Then sums based on checkbox logic.
+        // Only include rows where the Project checkbox is checked
+        const isProject = getRecVal(row, 'projectCheck');
+        if (!isProject) return; // Skip non-project rows
 
         const name = getRecVal(row, 'project') || 'Без проекта';
 
@@ -1200,40 +1200,51 @@ function analyzeProjects(records) {
         const tasks = Number(getRecVal(row, 'checkedTasks')) || 0;
         const mTasks = Number(getRecVal(row, 'markedTasks')) || 0;
 
-        const isProject = getRecVal(row, 'projectCheck');
         const isMarkup = getRecVal(row, 'markupCheck');
         const isOther = getRecVal(row, 'otherCheck');
 
-        // Sums
-        if (isProject) {
-            map[name].checkHours += pure;
-            map[name].tasks += tasks;
-            map[name].hasWork = true;
-        }
+        // Project checkbox already checked at top — always add project hours
+        map[name].checkHours += pure;
+        map[name].tasks += tasks;
+        map[name].hasWork = true;
         if (isMarkup) {
             map[name].markupHours += markup;
             map[name].markupTasks += mTasks;
             map[name].hasWork = true;
         }
-        if (isOther) {
-            map[name].additionalHours += additional;
-            map[name].hasWork = true;
-        }
+        // additionalHours (column L) go to "Иные задачи" row, not to individual projects
 
-        // Total is sum of components
-        // Note: Logic implies we only sum components that are "active" via checkboxes?
-        // GAS: result.totalHours += pure + additional + markup (inside filter loop)
-        // Let's assume yes.
-        map[name].totalHours = map[name].checkHours + map[name].markupHours + map[name].additionalHours;
+        // Total = project hours + markup hours (no additionalHours here)
+        map[name].totalHours = map[name].checkHours + map[name].markupHours;
     });
 
-    // Filter out empties?
+    // --- Permanent "Иные задачи" row: sum column L for all rows with otherCheck ---
+    let otherTotalHours = 0;
+    records.forEach(row => {
+        const isOther = getRecVal(row, 'otherCheck');
+        if (isOther) {
+            otherTotalHours += Number(getRecVal(row, 'additionalHours')) || 0;
+        }
+    });
+
+    // Filter out empties
     const list = Object.values(map).filter(p => p.hasWork || p.totalHours > 0);
 
-    // Calculate Avgs
+    // Always add "Иные задачи" row (even if 0 hours, to keep it permanent)
+    list.push({
+        name: 'Иные задачи',
+        checkHours: 0, tasks: 0, markupHours: 0, markupTasks: 0,
+        additionalHours: otherTotalHours, totalHours: otherTotalHours,
+        hasWork: otherTotalHours > 0,
+        avgMainTasks: 0, avgMarkupTasks: 0
+    });
+
+    // Calculate Avgs for project rows
     list.forEach(p => {
-        p.avgMainTasks = p.checkHours > 0 ? (p.tasks / p.checkHours) : 0;
-        p.avgMarkupTasks = p.markupHours > 0 ? (p.markupTasks / p.markupHours) : 0;
+        if (p.name !== 'Иные задачи') {
+            p.avgMainTasks = p.checkHours > 0 ? (p.tasks / p.checkHours) : 0;
+            p.avgMarkupTasks = p.markupHours > 0 ? (p.markupTasks / p.markupHours) : 0;
+        }
     });
 
     // Default Sort (Total Hours desc)
