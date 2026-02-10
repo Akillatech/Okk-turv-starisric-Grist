@@ -1181,11 +1181,23 @@ function analyzeProjects(records) {
     const map = {};
     let otherOnlyHours = 0; // For rows with ONLY otherCheck (no projectCheck)
 
-    records.forEach(row => {
+    records.forEach((row, idx) => {
         const isProject = getRecVal(row, 'projectCheck');
         const isOther = getRecVal(row, 'otherCheck');
         const isMarkup = getRecVal(row, 'markupCheck');
         const additional = Number(getRecVal(row, 'additionalHours')) || 0;
+
+        // Debug: log first 5 rows to see checkbox values
+        if (idx < 5) {
+            console.log(`analyzeProjects row[${idx}]:`, {
+                project: getRecVal(row, 'project'),
+                isProject, isOther, isMarkup,
+                additionalHours: getRecVal(row, 'additionalHours'),
+                additionalParsed: additional,
+                rawKeys: Object.keys(row),
+                E: row['E'], L: row['L'], C: row['C']
+            });
+        }
 
         // Case 1: Only "Другое" checked (no "Проект") → goes to "Иные задачи" row
         if (isOther && !isProject) {
