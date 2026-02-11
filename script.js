@@ -1197,9 +1197,9 @@ function renderCalendar() {
             const dayStats = calculateDayStatsCompact(d);
             if (dayStats) {
                 html += `<div class="day-stats-compact">`;
-                if (dayStats.hours > 0) html += `<span class="stat-pill hours">${formatNum(dayStats.hours)}ч</span>`;
-                if (dayStats.checked > 0) html += `<span class="stat-pill tasks">${dayStats.checked}✓</span>`;
-                if (dayStats.marked > 0) html += `<span class="stat-pill productivity">${dayStats.marked}✎</span>`;
+                if (dayStats.checkHours > 0) html += `<span class="stat-pill hours">${formatNum(dayStats.checkHours)}ч</span>`;
+                if (dayStats.checked > 0) html += `<span class="stat-pill tasks">${dayStats.checked}з</span>`;
+                if (dayStats.metric > 0) html += `<span class="stat-pill productivity">${formatNum(dayStats.metric)}м</span>`;
                 html += `</div>`;
             }
 
@@ -1224,8 +1224,7 @@ function getISOWeek(date) {
 
 function calculateDayStatsCompact(date) {
     // Filter data for this specific day
-    const result = { hours: 0, tasks: 0, checked: 0, marked: 0 };
-    // Optimize: Pre-index data by date? For now, simple iteration
+    const result = { checkHours: 0, checked: 0, metric: 0 };
     date.setHours(0, 0, 0, 0);
     const time = date.getTime();
 
@@ -1235,19 +1234,17 @@ function calculateDayStatsCompact(date) {
         d.setHours(0, 0, 0, 0);
         if (d.getTime() === time) {
             const pure = Number(getRecVal(row, 'pureHours')) || 0;
-            const markup = Number(getRecVal(row, 'markupHours')) || 0;
-            const additional = Number(getRecVal(row, 'additionalHours')) || 0;
             const checked = Number(getRecVal(row, 'checkedTasks')) || 0;
-            const marked = Number(getRecVal(row, 'markedTasks')) || 0;
 
-            result.hours += pure + markup + additional;
+            result.checkHours += pure;
             result.checked += checked;
-            result.marked += marked;
-            result.tasks += checked + marked;
         }
     });
 
-    return (result.hours > 0 || result.tasks > 0) ? result : null;
+    // Metric: tasks per hour
+    result.metric = result.checkHours > 0 ? (result.checked / result.checkHours) : 0;
+
+    return (result.checkHours > 0 || result.checked > 0) ? result : null;
 }
 
 function openDayModal(date) {
