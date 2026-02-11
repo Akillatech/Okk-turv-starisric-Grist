@@ -44,7 +44,8 @@ let tableColumns = []; // Store column list
 let currentSettings = {
     holidays: [],
     shortDays: [],
-    years: []
+    years: [],
+    userName: ''
 };
 let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 
@@ -469,7 +470,24 @@ window.logic = {
     },
 
     switchSettingsTab: function (tabName) {
-        // Only one tab implemented for now
+        // Toggle tabs
+        document.querySelectorAll('.settings-tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.settings-tab').forEach(el => el.classList.remove('active'));
+
+        if (tabName === 'user') {
+            document.getElementById('userTab').classList.add('active');
+            document.getElementById('tabBtnUser').classList.add('active');
+        } else {
+            document.getElementById('calendarTab').classList.add('active');
+            document.getElementById('tabBtnCalendar').classList.add('active');
+        }
+    },
+
+    saveUserName: function () {
+        const input = document.getElementById('userName');
+        currentSettings.userName = input.value.trim();
+        autoSaveSettings();
+        updateGreeting();
     },
 
     addHoliday: function () {
@@ -794,7 +812,10 @@ function calculateTodayStatsGeneric(records) {
 
 
 function refreshDashboard() {
-    // 0. Update Date Range Label in header
+    // 0. Update greeting
+    updateGreeting();
+
+    // 0b. Update Date Range Label in header
     updateDateRangeLabel();
 
     // 1. Populate Year Selects if empty
@@ -808,6 +829,30 @@ function refreshDashboard() {
     if (document.getElementById('content').style.display !== 'none') {
         renderMainDashboard();
     }
+}
+
+function updateGreeting() {
+    const el = document.getElementById('greetingText');
+    const sheetName = document.getElementById('sheetName');
+    if (!el) return;
+
+    const name = currentSettings.userName || '';
+    if (!name) {
+        el.style.display = 'none';
+        if (sheetName) sheetName.style.display = '';
+        return;
+    }
+
+    const hour = new Date().getHours();
+    let greeting;
+    if (hour >= 5 && hour < 12) greeting = 'Доброе утро';
+    else if (hour >= 12 && hour < 17) greeting = 'Добрый день';
+    else if (hour >= 17 && hour < 23) greeting = 'Добрый вечер';
+    else greeting = 'Доброй ночи';
+
+    el.textContent = `${greeting}, ${name}`;
+    el.style.display = '';
+    if (sheetName) sheetName.style.display = 'none';
 }
 
 function updateDateRangeLabel() {
@@ -1063,6 +1108,12 @@ function getPeriodDateRange(period) {
 // --- Settings UI ---
 
 function renderSettingsUI() {
+    // Load username into input
+    const userNameInput = document.getElementById('userName');
+    if (userNameInput && currentSettings.userName) {
+        userNameInput.value = currentSettings.userName;
+    }
+
     // Get currently selected year
     const yearSelect = document.getElementById('calendarYear');
     const selectedYear = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
