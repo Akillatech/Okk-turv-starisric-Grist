@@ -1198,7 +1198,8 @@ function renderCalendar() {
             if (dayStats) {
                 html += `<div class="day-stats-compact">`;
                 if (dayStats.hours > 0) html += `<span class="stat-pill hours">${formatNum(dayStats.hours)}ч</span>`;
-                if (dayStats.tasks > 0) html += `<span class="stat-pill tasks">${dayStats.tasks}з</span>`;
+                if (dayStats.checked > 0) html += `<span class="stat-pill tasks">${dayStats.checked}✓</span>`;
+                if (dayStats.marked > 0) html += `<span class="stat-pill productivity">${dayStats.marked}✎</span>`;
                 html += `</div>`;
             }
 
@@ -1223,16 +1224,10 @@ function getISOWeek(date) {
 
 function calculateDayStatsCompact(date) {
     // Filter data for this specific day
-    const result = { hours: 0, tasks: 0 };
+    const result = { hours: 0, tasks: 0, checked: 0, marked: 0 };
     // Optimize: Pre-index data by date? For now, simple iteration
     date.setHours(0, 0, 0, 0);
     const time = date.getTime();
-
-    // Can rely on global allRecords
-    // This optimization is crucial if methods are called 42 times per render
-    // Ideally we should compute month stats once.
-    // For MVP, linear scan might be slow if thousands of records.
-    // Let's rely on simple filter.
 
     allRecords.forEach(row => {
         const d = parseGristDate(getRecVal(row, 'date'));
@@ -1245,9 +1240,9 @@ function calculateDayStatsCompact(date) {
             const checked = Number(getRecVal(row, 'checkedTasks')) || 0;
             const marked = Number(getRecVal(row, 'markedTasks')) || 0;
 
-            // Logic from DataService: what counts for "Compact Stats"?
-            // Usually sum of work
             result.hours += pure + markup + additional;
+            result.checked += checked;
+            result.marked += marked;
             result.tasks += checked + marked;
         }
     });
@@ -1278,10 +1273,10 @@ function openDayModal(date) {
             <td class="project-name">${p.name}</td>
             <td>${formatNum(p.checkHours)}</td>
             <td>${p.checked}</td>
-            <td>-</td> 
+            <td>${formatNum(p.avgCheck)}</td>
             <td>${formatNum(p.markupHours)}</td>
             <td>${p.marked}</td>
-            <td>-</td> 
+            <td>${formatNum(p.avgMarkup)}</td>
             <td>${formatNum(p.otherHours)}</td>
             <td><strong>${formatNum(p.totalHours)}</strong></td>
         `;
@@ -1342,6 +1337,12 @@ function calculateFullDayStats(date) {
             projectsMap[projectName].totalHours += checkHours + markup;
             totalHours += checkHours + markup;
             totalTasks += checked + marked;
+
+            // Calculate metrics (tasks per hour)
+            projectsMap[projectName].avgCheck = projectsMap[projectName].checkHours > 0
+                ? (projectsMap[projectName].checked / projectsMap[projectName].checkHours) : 0;
+            projectsMap[projectName].avgMarkup = projectsMap[projectName].markupHours > 0
+                ? (projectsMap[projectName].marked / projectsMap[projectName].markupHours) : 0;
         }
     });
 
