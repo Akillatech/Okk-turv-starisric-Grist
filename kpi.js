@@ -83,7 +83,7 @@ function renderTriangleChart(qData) {
     // Center circle at triangle centroid
     var cx = 350, cy = Math.round((vTop.y + vBotL.y + vBotR.y) / 3); // ≈ 454
     var R = 110;
-    var gap = 40;
+    var gap = -22;
     var rr = 150;
 
     var sectionFill = '#e8ecf1';
