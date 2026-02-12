@@ -107,6 +107,8 @@
 .triangle-chart-container {
     position: relative;
     width: 100%;
+    max-width: 1000px;
+    max-height: 1000px;
 }
 
 .triangle-svg {
