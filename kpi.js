@@ -71,16 +71,16 @@ function renderTriangleChart(qData) {
 
     // ---- GEOMETRY ----
     var W = 700, H = 720;
-    var cx = 350, cy = 385, R = 110;
-    var gap = 22;    // big gap between sections
+    var cx = 350, cy = 365, R = 110;
+    var gap = 40;    // very large gap between sections
     var rr = 150;    // 150px rounding - very blob-like
 
     var sectionFill = '#e8ecf1';
 
-    // Triangle vertices - big triangle
-    var vTop = { x: 350, y: 15 };
-    var vBotL = { x: 10, y: 630 };
-    var vBotR = { x: 690, y: 630 };
+    // Triangle vertices - big triangle, pushed up
+    var vTop = { x: 350, y: 10 };
+    var vBotL = { x: 10, y: 650 };
+    var vBotR = { x: 690, y: 650 };
 
     // Edge midpoints
     var mAB = { x: (vTop.x + vBotL.x) / 2, y: (vTop.y + vBotL.y) / 2 };
