@@ -781,6 +781,23 @@ function showView(viewId) {
     document.getElementById('homeBtn').classList.toggle('active', viewId === 'content');
     document.getElementById('calendarBtn').classList.toggle('active', viewId === 'calendarView');
     document.getElementById('kpiBtn').classList.toggle('active', viewId === 'kpiView');
+
+    // Toggle Header Selectors
+    const mainSel = document.getElementById('mainSelectors');
+    const kpiSel = document.getElementById('kpiSelectors');
+
+    if (mainSel && kpiSel) {
+        if (viewId === 'content') {
+            mainSel.style.display = 'flex';
+            kpiSel.style.display = 'none';
+        } else if (viewId === 'kpiView') {
+            mainSel.style.display = 'none';
+            kpiSel.style.display = 'flex';
+        } else if (viewId === 'calendarView') {
+            mainSel.style.display = 'none';
+            kpiSel.style.display = 'none'; // Hide all in calendar
+        }
+    }
 }
 
 

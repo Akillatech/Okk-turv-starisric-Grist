@@ -38,7 +38,8 @@ function renderKpiView() {
     if (!container) return;
     var yearSelect = document.getElementById('kpiYearSelect');
     if (yearSelect) yearSelect.value = kpiState.year;
-    updateQuarterDisplay();
+    var qSel = document.getElementById('kpiQuarterSelect');
+    if (qSel) qSel.value = kpiState.quarter;
     var yearData = KPI_DEMO[kpiState.year];
     var qData = yearData ? yearData[kpiState.quarter] : null;
     renderTriangleChart(qData);
@@ -47,10 +48,7 @@ function renderKpiView() {
     renderTransitionsCard();
 }
 
-function updateQuarterDisplay() {
-    var el = document.getElementById('kpiQuarterLabel');
-    if (el) el.textContent = 'КВАРТАЛ : Q' + kpiState.quarter;
-}
+
 
 function getBadgeColor(v) { return v >= 80 ? '#4CAF50' : v >= 60 ? '#FFC107' : '#f44336'; }
 function getBadgeTextColor(v) { return (v >= 60 && v < 80) ? '#333' : '#fff'; }
@@ -362,14 +360,9 @@ function renderTransitionsCard() {
 
 // =================== NAVIGATION ===================
 
-function kpiPrevQuarter() {
-    kpiState.quarter--;
-    if (kpiState.quarter < 1) { kpiState.quarter = 4; kpiState.year--; }
-    renderKpiView();
-}
-function kpiNextQuarter() {
-    kpiState.quarter++;
-    if (kpiState.quarter > 4) { kpiState.quarter = 1; kpiState.year++; }
+function kpiQuarterChanged() {
+    var sel = document.getElementById('kpiQuarterSelect');
+    if (sel) kpiState.quarter = parseInt(sel.value);
     renderKpiView();
 }
 function kpiYearChanged() {

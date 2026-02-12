@@ -15,37 +15,60 @@
         <!-- New Main Header -->
         <div class="main-header">
             <div class="header-filters">
-                <div class="filter-group">
-                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
-                        Год:</label>
-                    <select id="yearSelect" onchange="window.logic.applyCustomPeriod()">
-                        <option value="all">Весь период</option>
-                    </select>
+                <div id="mainSelectors" style="display: flex; align-items: center; gap: 16px;">
+                    <div class="filter-group">
+                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                            Год:</label>
+                        <select id="yearSelect" onchange="window.logic.applyCustomPeriod()">
+                            <option value="all">Весь период</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                            Месяц:</label>
+                        <select id="monthSelect" onchange="window.logic.applyCustomPeriod()">
+                            <option value="all">Все месяцы</option>
+                            <option value="1">Январь</option>
+                            <option value="2">Февраль</option>
+                            <option value="3">Март</option>
+                            <option value="4">Апрель</option>
+                            <option value="5">Май</option>
+                            <option value="6">Июнь</option>
+                            <option value="7">Июль</option>
+                            <option value="8">Август</option>
+                            <option value="9">Сентябрь</option>
+                            <option value="10">Октябрь</option>
+                            <option value="11">Ноябрь</option>
+                            <option value="12">Декабрь</option>
+                        </select>
+                    </div>
+                    <div class="period-selector" style="margin-top: 0; padding-top: 0; border-top: none;">
+                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                            Диапазон:</label>
+                        <span id="dateRange"
+                            style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">-</span>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
-                        Месяц:</label>
-                    <select id="monthSelect" onchange="window.logic.applyCustomPeriod()">
-                        <option value="all">Все месяцы</option>
-                        <option value="1">Январь</option>
-                        <option value="2">Февраль</option>
-                        <option value="3">Март</option>
-                        <option value="4">Апрель</option>
-                        <option value="5">Май</option>
-                        <option value="6">Июнь</option>
-                        <option value="7">Июль</option>
-                        <option value="8">Август</option>
-                        <option value="9">Сентябрь</option>
-                        <option value="10">Октябрь</option>
-                        <option value="11">Ноябрь</option>
-                        <option value="12">Декабрь</option>
-                    </select>
-                </div>
-                <div class="period-selector" style="margin-top: 0; padding-top: 0; border-top: none;">
-                    <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
-                        Диапазон:</label>
-                    <span id="dateRange"
-                        style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">-</span>
+
+                <!-- KPI Selectors (Hidden by default) -->
+                <div id="kpiSelectors" style="display: none; align-items: center; gap: 16px;">
+                    <div class="filter-group">
+                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                            KPI Год:</label>
+                        <select id="kpiYearSelect" onchange="kpiYearChanged()">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                            Квартал:</label>
+                        <select id="kpiQuarterSelect" onchange="kpiQuarterChanged()">
+                            <option value="1">1 Квартал</option>
+                            <option value="2">2 Квартал</option>
+                            <option value="3">3 Квартал</option>
+                            <option value="4">4 Квартал</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="header-right">

@@ -1,25 +1,7 @@
 <!-- KPI Section Template (loaded dynamically into #kpiView) -->
 <div id="kpiContent" class="kpi-view">
 
-    <!-- KPI Header: Year + Quarter -->
-    <div class="kpi-header">
-        <div class="kpi-header-left">
-            <div class="filter-group">
-                <label>Год:</label>
-                <select id="kpiYearSelect" onchange="kpiYearChanged()">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                </select>
-            </div>
-            <!-- Quarter moved here -->
-            <div class="kpi-quarter-nav">
-                <button class="kpi-quarter-btn" onclick="kpiPrevQuarter()">◀</button>
-                <span class="kpi-quarter-display" id="kpiQuarterLabel">КВАРТАЛ : Q1</span>
-                <button class="kpi-quarter-btn" onclick="kpiNextQuarter()">▶</button>
-            </div>
-        </div>
-
-    </div>
+    <!-- KPI Header removed (moved to main header) -->
 
     <!-- Main KPI Layout: Triangle + Cards -->
     <div class="kpi-layout">
