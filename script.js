@@ -406,6 +406,39 @@ window.logic = {
         this.updateCalendarView(); // Trigger render
     },
 
+    showKpi: function () {
+        showView('kpiView');
+        const container = document.getElementById('kpiView');
+        // Load kpi.html dynamically on first open
+        if (container && !container.dataset.loaded) {
+            fetch('kpi.html')
+                .then(r => r.text())
+                .then(html => {
+                    container.innerHTML = html;
+                    container.dataset.loaded = 'true';
+                    // Populate year select from available data
+                    const kpiYearSelect = document.getElementById('kpiYearSelect');
+                    if (kpiYearSelect) {
+                        const years = new Set();
+                        years.add(new Date().getFullYear());
+                        allRecords.forEach(r => {
+                            const d = parseGristDate(getRecVal(r, 'date'));
+                            if (d) years.add(d.getFullYear());
+                        });
+                        const sortedYears = Array.from(years).sort((a, b) => b - a);
+                        kpiYearSelect.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+                    }
+                    if (typeof renderKpiView === 'function') renderKpiView();
+                })
+                .catch(err => {
+                    container.innerHTML = '<p style="padding:40px;text-align:center;color:#999;">Не удалось загрузить KPI раздел</p>';
+                    console.error('Failed to load kpi.html:', err);
+                });
+        } else {
+            if (typeof renderKpiView === 'function') renderKpiView();
+        }
+    },
+
     updateCalendarView: function () {
         renderCalendar();
     },
@@ -728,9 +761,11 @@ initGrist();
 function showView(viewId) {
     document.getElementById('content').style.display = viewId === 'content' ? 'block' : 'none';
     document.getElementById('calendarView').style.display = viewId === 'calendarView' ? 'block' : 'none';
+    document.getElementById('kpiView').style.display = viewId === 'kpiView' ? 'block' : 'none';
 
     document.getElementById('homeBtn').classList.toggle('active', viewId === 'content');
     document.getElementById('calendarBtn').classList.toggle('active', viewId === 'calendarView');
+    document.getElementById('kpiBtn').classList.toggle('active', viewId === 'kpiView');
 }
 
 

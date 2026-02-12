@@ -7,6 +7,7 @@
     <!-- Grist Plugin API -->
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="kpi.css">
 </head>
 
 <body>
@@ -54,6 +55,7 @@
                     title="Главная"></button>
                 <button class="nav-btn icon icon-calendar" id="calendarBtn" onclick="window.logic.showCalendar()"
                     title="Календарь"></button>
+                <button class="nav-btn icon icon-kpi" id="kpiBtn" onclick="window.logic.showKpi()" title="KPI"></button>
                 <button class="settings-btn icon icon-settings" onclick="window.logic.openSettings()"
                     title="Настройки"></button>
             </div>
@@ -353,6 +355,9 @@
             </div>
         </div>
 
+        <!-- KPI View (loaded dynamically from kpi.html) -->
+        <div id="kpiView" style="display: none;"></div>
+
         <!-- Settings Modal -->
         <div id="settingsModal" class="modal-overlay">
             <div class="modal" style="max-width: 600px;">
@@ -577,6 +582,7 @@
             </div>
         </div>
         <script src="script.js"></script>
+        <script src="kpi.js"></script>
 </body>
 
 </html>
