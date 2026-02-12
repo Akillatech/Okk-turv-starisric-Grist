@@ -394,6 +394,12 @@ window.logic = {
             currentPeriod = `month:${year}-${month}`;
         }
 
+        // Sync KPI state if available
+        if (typeof kpiState !== 'undefined' && year !== 'all') {
+            kpiState.year = parseInt(year);
+            if (typeof renderKpiView === 'function') renderKpiView();
+        }
+
         refreshDashboard();
     },
 
@@ -416,18 +422,20 @@ window.logic = {
                 .then(html => {
                     container.innerHTML = html;
                     container.dataset.loaded = 'true';
-                    // Populate year select from available data
-                    const kpiYearSelect = document.getElementById('kpiYearSelect');
-                    if (kpiYearSelect) {
-                        const years = new Set();
-                        years.add(new Date().getFullYear());
-                        allRecords.forEach(r => {
-                            const d = parseGristDate(getRecVal(r, 'date'));
-                            if (d) years.add(d.getFullYear());
-                        });
-                        const sortedYears = Array.from(years).sort((a, b) => b - a);
-                        kpiYearSelect.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+
+                    // Populate year selectors including the new kpiYearSelect
+                    updateYearSelects();
+
+                    // Sync state from currentPeriod
+                    if (typeof kpiState !== 'undefined') {
+                        // Extract year from currentPeriod if possible
+                        let y = new Date().getFullYear();
+                        if (currentPeriod.startsWith('year:')) y = parseInt(currentPeriod.split(':')[1]);
+                        else if (currentPeriod.startsWith('month:')) y = parseInt(currentPeriod.split(':')[1].split('-')[0]);
+
+                        kpiState.year = y;
                     }
+
                     if (typeof renderKpiView === 'function') renderKpiView();
                 })
                 .catch(err => {
@@ -435,6 +443,13 @@ window.logic = {
                     console.error('Failed to load kpi.html:', err);
                 });
         } else {
+            // Sync state from currentPeriod on re-show
+            if (typeof kpiState !== 'undefined') {
+                let y = new Date().getFullYear();
+                if (currentPeriod.startsWith('year:')) y = parseInt(currentPeriod.split(':')[1]);
+                else if (currentPeriod.startsWith('month:')) y = parseInt(currentPeriod.split(':')[1].split('-')[0]);
+                kpiState.year = y;
+            }
             if (typeof renderKpiView === 'function') renderKpiView();
         }
     },
@@ -939,7 +954,7 @@ function updateYearSelects() {
 
     const sortedYears = Array.from(years).sort((a, b) => b - a);
 
-    const selects = ['yearSelect', 'calendarYearSelect', 'calendarYear', 'projectYearSelect'];
+    const selects = ['yearSelect', 'calendarYearSelect', 'calendarYear', 'projectYearSelect', 'kpiYearSelect'];
     selects.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;

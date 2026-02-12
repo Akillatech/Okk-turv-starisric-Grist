@@ -11,12 +11,14 @@
                     <option value="2025">2025</option>
                 </select>
             </div>
+            <!-- Quarter moved here -->
+            <div class="kpi-quarter-nav">
+                <button class="kpi-quarter-btn" onclick="kpiPrevQuarter()">◀</button>
+                <span class="kpi-quarter-display" id="kpiQuarterLabel">КВАРТАЛ : Q1</span>
+                <button class="kpi-quarter-btn" onclick="kpiNextQuarter()">▶</button>
+            </div>
         </div>
-        <div class="kpi-quarter-nav">
-            <button class="kpi-quarter-btn" onclick="kpiPrevQuarter()">◀</button>
-            <span class="kpi-quarter-display" id="kpiQuarterLabel">КВАРТАЛ : Q1</span>
-            <button class="kpi-quarter-btn" onclick="kpiNextQuarter()">▶</button>
-        </div>
+
     </div>
 
     <!-- Main KPI Layout: Triangle + Cards -->
@@ -41,8 +43,17 @@
                         ПОСЛЕДНИЙ ВКЛАД
                         <button class="kpi-open-all-btn">ВСЕ ВКЛАДЫ</button>
                     </div>
-                    <div class="kpi-contrib-field-label">Кодовое обозначение</div>
-                    <div class="kpi-contrib-field" id="kpiContribCode">КОДОВОЕ ОБОЗНАЧЕНИЕ</div>
+                    <div class="kpi-contrib-row">
+                        <div class="kpi-contrib-col" style="flex: 2;">
+                            <div class="kpi-contrib-field-label">Кодовое обозначение</div>
+                            <div class="kpi-contrib-field" id="kpiContribCode">КОДОВОЕ ОБОЗНАЧЕНИЕ</div>
+                        </div>
+                        <div class="kpi-contrib-col" style="flex: 1;">
+                            <div class="kpi-contrib-field-label">Дата</div>
+                            <div class="kpi-contrib-field" id="kpiContribDate" style="text-align: center;">--.--.----
+                            </div>
+                        </div>
+                    </div>
                     <div class="kpi-contrib-field-label">Описание</div>
                     <div class="kpi-contrib-field" id="kpiContribDesc">ОПИСАНИЕ</div>
                 </div>

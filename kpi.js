@@ -25,7 +25,7 @@ const KPI_DEMO = {
 };
 
 const KPI_GRADE_DEMO = { current: 'JUNIOR', next: 'JUNIOR+', image: '🎖️' };
-const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', description: 'Описание последнего вклада' };
+const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', date: '01.02.2026', description: 'Описание последнего вклада' };
 const KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
     { type: 'ТАРГЕТ + ВКЛАД', available: true, lastDate: '01.01.2026', nextDate: '01.07.2026', progress: 40, variant: 'orange' },
@@ -86,7 +86,7 @@ function renderTriangleChart(qData) {
     var gapFactor = 0.06;  // move midpoints 6% toward their section's vertex
     var rr = 150;
 
-    var sectionFill = '#e8ecf1';
+    var sectionFill = '#f4f6f9'; // near-white, shadows will separate from bg
 
     // Edge midpoints
     var mAB = { x: (vTop.x + vBotL.x) / 2, y: (vTop.y + vBotL.y) / 2 };
@@ -160,27 +160,35 @@ function renderTriangleChart(qData) {
     var liquidLevel = 200 - (total / 100) * 160;
     var liqTop = cy - R + liquidLevel;
 
-    // Badge rendering - BIGGER badges
-    function badgeSVG(m, bx, by) {
-        var oW = 80, oH = 30, sg = 52;
-        var subR = 22; // circle badge radius
+    // Badge rendering — premium neumorphic style
+    function getBadgeGradient(v) {
+        if (v >= 80) return 'url(#gradGreen)';
+        if (v >= 60) return 'url(#gradYellow)';
+        return 'url(#gradRed)';
+    }
+
+    function badgeSVG(m, bx, by, circleYShift) {
+        var oW = 80, oH = 30, sg = 40;
+        var subR = 16;
+        var cY = by + oH + 42 + (circleYShift || 0);
+
+        function circleBadge(cx, cy, val, label) {
+            return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (subR + 2) + '" fill="#dde1e7" filter="url(#badgeNeuOuter)" />' +
+                '<circle cx="' + cx + '" cy="' + cy + '" r="' + subR + '" fill="' + getBadgeGradient(val) + '" filter="url(#badgeGlow)" />' +
+                '<text x="' + cx + '" y="' + (cy + 1) + '" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif">' + val + '%</text>' +
+                '<text x="' + cx + '" y="' + (cy + subR + 13) + '" text-anchor="middle" font-size="7" font-weight="700" fill="#8a8f99" font-family="Segoe UI,sans-serif" letter-spacing="0.5">' + label + '</text>';
+        }
+
         return '' +
-            // ОБЩИЕ rounded rect badge
-            '<rect x="' + (bx - oW / 2) + '" y="' + by + '" width="' + oW + '" height="' + oH + '" rx="10" fill="#6d7a2a" />' +
-            '<text x="' + bx + '" y="' + (by + 21) + '" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" font-family="Segoe UI,sans-serif">' + m.overall + '%</text>' +
-            '<text x="' + bx + '" y="' + (by + oH + 15) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="1">ОБЩИЕ</text>' +
-            // СКОРОСТЬ circle
-            '<circle cx="' + (bx - sg) + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.speed) + '" />' +
-            '<text x="' + (bx - sg) + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.speed) + '" font-family="Segoe UI,sans-serif">' + m.speed + '%</text>' +
-            '<text x="' + (bx - sg) + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">СКОРОСТЬ</text>' +
-            // ER circle
-            '<circle cx="' + bx + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.er) + '" />' +
-            '<text x="' + bx + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.er) + '" font-family="Segoe UI,sans-serif">' + m.er + '%</text>' +
-            '<text x="' + bx + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ER</text>' +
-            // ТЕСТ circle
-            '<circle cx="' + (bx + sg) + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.test) + '" />' +
-            '<text x="' + (bx + sg) + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.test) + '" font-family="Segoe UI,sans-serif">' + m.test + '%</text>' +
-            '<text x="' + (bx + sg) + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ТЕСТ</text>';
+            // ОБЩИЕ pill badge
+            '<rect x="' + (bx - oW / 2) + '" y="' + by + '" width="' + oW + '" height="' + oH + '" rx="12" fill="url(#gradOverall)" filter="url(#badgePillShadow)" />' +
+            '<text x="' + bx + '" y="' + (by + 21) + '" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif" letter-spacing="0.5">' + m.overall + '%</text>' +
+            // ОБЩИЕ label
+            '<text x="' + bx + '" y="' + (by + oH + 14) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#8a8f99" font-family="Segoe UI,sans-serif" letter-spacing="2">ОБЩИЕ</text>' +
+            // Sub-circles
+            circleBadge(bx - sg, cY, m.speed, 'СКОРОСТЬ') +
+            circleBadge(bx, cY, m.er, 'ER') +
+            circleBadge(bx + sg, cY, m.test, 'ТЕСТ');
     }
 
     // Badge positions INSIDE sections
@@ -190,36 +198,109 @@ function renderTriangleChart(qData) {
 
     container.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="triangle-svg">' +
         '<defs>' +
-        '<filter id="neuShadow" x="-15%" y="-15%" width="130%" height="130%">' +
-        '<feDropShadow dx="6" dy="6" stdDeviation="8" flood-color="#b8bec7" flood-opacity="0.6"/>' +
-        '<feDropShadow dx="-4" dy="-4" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.9"/>' +
+        // Neumorphic raised shadow for sections
+        '<filter id="neuShadow" x="-18%" y="-18%" width="136%" height="136%">' +
+        '<feDropShadow dx="8" dy="8" stdDeviation="12" flood-color="#b0b8c4" flood-opacity="0.55"/>' +
+        '<feDropShadow dx="-6" dy="-6" stdDeviation="10" flood-color="#ffffff" flood-opacity="0.85"/>' +
         '</filter>' +
-        '<filter id="cShadow"><feDropShadow dx="0" dy="3" stdDeviation="12" flood-opacity="0.2"/></filter>' +
+        // Inset shadow for center circle — simple approach
+        '<filter id="cInsetDark" x="-10%" y="-10%" width="120%" height="120%">' +
+        '<feDropShadow dx="4" dy="4" stdDeviation="8" flood-color="#a0a8b8" flood-opacity="0.6"/>' +
+        '</filter>' +
+        '<filter id="cInsetLight" x="-10%" y="-10%" width="120%" height="120%">' +
+        '<feDropShadow dx="-3" dy="-3" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.8"/>' +
+        '</filter>' +
+        // Badge neumorphic outer ring
+        '<filter id="badgeNeuOuter" x="-30%" y="-30%" width="160%" height="160%">' +
+        '<feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#b0b5be" flood-opacity="0.5"/>' +
+        '<feDropShadow dx="-1" dy="-1" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.7"/>' +
+        '</filter>' +
+        // Badge inner glow
+        '<filter id="badgeGlow" x="-20%" y="-20%" width="140%" height="140%">' +
+        '<feDropShadow dx="0" dy="1" stdDeviation="3" flood-color="rgba(0,0,0,0.25)" flood-opacity="0.4"/>' +
+        '</filter>' +
+        // Pill badge shadow
+        '<filter id="badgePillShadow" x="-15%" y="-15%" width="130%" height="130%">' +
+        '<feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.2)" flood-opacity="0.5"/>' +
+        '</filter>' +
+        // Gradients for badges
+        '<linearGradient id="gradOverall" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#8a9a30"/><stop offset="100%" stop-color="#5c6a1e"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="gradGreen" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#5ece5e"/><stop offset="100%" stop-color="#3a9e3a"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="gradYellow" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#ffd54f"/><stop offset="100%" stop-color="#f9a825"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="gradRed" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#ef5350"/><stop offset="100%" stop-color="#c62828"/>' +
+        '</linearGradient>' +
+        // Liquid fill
         '<clipPath id="kpiCC"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" /></clipPath>' +
         '<linearGradient id="kpiLiq" x1="0%" y1="0%" x2="0%" y2="100%">' +
         '<stop offset="0%" style="stop-color:#E3FB1E;stop-opacity:0.9"/>' +
         '<stop offset="100%" style="stop-color:#9ab012;stop-opacity:1"/>' +
         '</linearGradient>' +
+        // Inner shadow gradient for petal edges
+        '<linearGradient id="innerShadowGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+        '<stop offset="0%" stop-color="#b0b8c4" stop-opacity="0.4"/>' +
+        '<stop offset="50%" stop-color="#b0b8c4" stop-opacity="0.05"/>' +
+        '<stop offset="100%" stop-color="#ffffff" stop-opacity="0.3"/>' +
+        '</linearGradient>' +
+        // Depth gradient for center circle
+        '<radialGradient id="circleDepth" cx="50%" cy="45%" r="50%">' +
+        '<stop offset="0%" stop-color="#ffffff"/>' +
+        '<stop offset="60%" stop-color="#f0f2f6"/>' +
+        '<stop offset="100%" stop-color="#d5dae4"/>' +
+        '</radialGradient>' +
+        // Depth gradients for petals
+        '<radialGradient id="petalDepthTop" cx="50%" cy="30%" r="60%">' +
+        '<stop offset="0%" stop-color="#ffffff"/>' +
+        '<stop offset="55%" stop-color="#f2f4f8"/>' +
+        '<stop offset="100%" stop-color="#dce1ea"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="petalDepthBL" cx="35%" cy="65%" r="60%">' +
+        '<stop offset="0%" stop-color="#ffffff"/>' +
+        '<stop offset="55%" stop-color="#f2f4f8"/>' +
+        '<stop offset="100%" stop-color="#dce1ea"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="petalDepthBR" cx="65%" cy="65%" r="60%">' +
+        '<stop offset="0%" stop-color="#ffffff"/>' +
+        '<stop offset="55%" stop-color="#f2f4f8"/>' +
+        '<stop offset="100%" stop-color="#dce1ea"/>' +
+        '</radialGradient>' +
+        // Glass shine for liquid — sharper reflection
+        '<linearGradient id="glassShine" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>' +
+        '<stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>' +
+        '</linearGradient>' +
         '</defs>' +
 
-        // 3 SECTIONS
-        '<path d="' + pathTop + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
-        '<path d="' + pathBL + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
-        '<path d="' + pathBR + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
+        // 3 SECTIONS — raised neumorphism with depth gradient
+        '<path d="' + pathTop + '" fill="url(#petalDepthTop)" filter="url(#neuShadow)" />' +
+        '<path d="' + pathBL + '" fill="url(#petalDepthBL)" filter="url(#neuShadow)" />' +
+        '<path d="' + pathBR + '" fill="url(#petalDepthBR)" filter="url(#neuShadow)" />' +
+        // Subtle inner shadow for depth (dark top-left edge)
+        '<path d="' + pathTop + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
+        '<path d="' + pathBL + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
+        '<path d="' + pathBR + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
 
-        // MONTH LABELS inside sections
-        '<text x="350" y="160" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
-        '<text x="170" y="475" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
-        '<text x="530" y="475" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
+        // MONTH LABELS inside sections — Lighter and Thinner (SemiBold)
+        '<text x="350" y="160" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
+        '<text x="170" y="475" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
+        '<text x="530" y="475" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
 
         // BADGES inside sections
-        badgeSVG(months[0], 350, topBadgeY) +
-        badgeSVG(months[1], 170, blBadgeY) +
-        badgeSVG(months[2], 530, brBadgeY) +
+        badgeSVG(months[0], 350, topBadgeY, 0) +
+        badgeSVG(months[1], 170, blBadgeY, 0) +
+        badgeSVG(months[2], 530, brBadgeY, 0) +
 
-        // CENTER CIRCLE
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 10) + '" fill="white" filter="url(#cShadow)" />' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 4) + '" fill="white" stroke="#eee" stroke-width="1" />' +
+        // CENTER CIRCLE — inset neumorphic via layered circles
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 12) + '" fill="#dce0e8" filter="url(#cInsetDark)" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 10) + '" fill="#d4d9e2" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 5) + '" fill="#dce0e8" filter="url(#cInsetLight)" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" fill="url(#circleDepth)" />' +
 
         // LIQUID FILL
         '<g clip-path="url(#kpiCC)">' +
@@ -228,6 +309,9 @@ function renderTriangleChart(qData) {
         '</rect>' +
         '<path class="wave-path" d="M' + (cx - R - 40) + ',' + (liqTop + 10) + ' Q' + (cx - 40) + ',' + (liqTop - 10) + ' ' + cx + ',' + (liqTop + 10) + ' Q' + (cx + 40) + ',' + (liqTop + 30) + ' ' + (cx + R + 40) + ',' + (liqTop + 10) + ' L' + (cx + R + 40) + ',' + (cy + R + 20) + ' L' + (cx - R - 40) + ',' + (cy + R + 20) + ' Z" fill="#c4d916" />' +
         '<path class="wave-path wave-path-2" d="M' + (cx - R - 40) + ',' + (liqTop + 5) + ' Q' + (cx - 20) + ',' + (liqTop - 14) + ' ' + (cx + 20) + ',' + (liqTop + 5) + ' Q' + (cx + 60) + ',' + (liqTop + 24) + ' ' + (cx + R + 40) + ',' + (liqTop + 5) + ' L' + (cx + R + 40) + ',' + (cy + R + 20) + ' L' + (cx - R - 40) + ',' + (cy + R + 20) + ' Z" fill="rgba(227,251,30,0.5)" />' +
+        // Gloss effect — Meniscus reflection (sharp top curve)
+        '<path d="M' + (cx - R * 0.8) + ',' + (liqTop + 12) + ' Q' + cx + ',' + (liqTop - 8) + ' ' + (cx + R * 0.8) + ',' + (liqTop + 12) +
+        ' Q' + cx + ',' + (liqTop + 18) + ' ' + (cx - R * 0.8) + ',' + (liqTop + 12) + ' Z" fill="url(#glassShine)" />' +
         '</g>' +
 
         // ИТОГ text
@@ -250,8 +334,11 @@ function renderGradeCard() {
 
 function renderContributionCard() {
     var codeEl = document.getElementById('kpiContribCode');
+    var dateEl = document.getElementById('kpiContribDate');
     var descEl = document.getElementById('kpiContribDesc');
+
     if (codeEl) codeEl.textContent = KPI_CONTRIBUTION_DEMO.code;
+    if (dateEl) dateEl.textContent = KPI_CONTRIBUTION_DEMO.date;
     if (descEl) descEl.textContent = KPI_CONTRIBUTION_DEMO.description;
 }
 
@@ -287,6 +374,18 @@ function kpiNextQuarter() {
 }
 function kpiYearChanged() {
     var sel = document.getElementById('kpiYearSelect');
-    if (sel) kpiState.year = parseInt(sel.value);
-    renderKpiView();
+    if (sel) {
+        var val = sel.value;
+        kpiState.year = parseInt(val);
+
+        // Sync with global selector if available
+        var globalSel = document.getElementById('yearSelect');
+        if (globalSel && window.logic && window.logic.applyCustomPeriod) {
+            globalSel.value = val;
+            window.logic.applyCustomPeriod();
+        } else {
+            // Fallback if no global logic (standalone mode)
+            renderKpiView();
+        }
+    }
 }
