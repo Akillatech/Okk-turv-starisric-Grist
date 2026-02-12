@@ -83,7 +83,7 @@ function renderTriangleChart(qData) {
     // Center circle at triangle centroid
     var cx = 350, cy = Math.round((vTop.y + vBotL.y + vBotR.y) / 3); // ≈ 454
     var R = 110;
-    var gap = -22;
+    var gapFactor = 0.06;  // move midpoints 6% toward their section's vertex
     var rr = 150;
 
     var sectionFill = '#e8ecf1';
@@ -98,35 +98,45 @@ function renderTriangleChart(qData) {
         var dx = b.x - a.x, dy = b.y - a.y, len = Math.sqrt(dx * dx + dy * dy);
         return { x: dx / len, y: dy / len };
     }
-    function offsetPerp(pt, center, px, side) {
-        var dx = pt.x - center.x, dy = pt.y - center.y;
-        var len = Math.sqrt(dx * dx + dy * dy);
-        return { x: pt.x + (-dy / len) * px * side, y: pt.y + (dx / len) * px * side };
+    // Lerp: move point 'from' toward point 'to' by fraction t
+    function lerp(from, to, t) {
+        return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t };
     }
     function p(pt) { return Math.round(pt.x) + ',' + Math.round(pt.y); }
 
+    // Angles from center to edge midpoints
     var angAB = Math.atan2(mAB.y - cy, mAB.x - cx);
     var angBC = Math.atan2(mBC.y - cy, mBC.x - cx);
     var angAC = Math.atan2(mAC.y - cy, mAC.x - cx);
 
-    var gapAngle = gap / R;
+    // Gap on circle: offset angle ~3 degrees
+    var gapAng = 0.06;
 
-    var topArcS = circlePoint(angAC + gapAngle);
-    var topArcE = circlePoint(angAB - gapAngle);
-    var blArcS = circlePoint(angAB + gapAngle);
-    var blArcE = circlePoint(angBC - gapAngle);
-    var brArcS = circlePoint(angBC + gapAngle);
-    var brArcE = circlePoint(angAC - gapAngle);
+    // Circle arc points per section (offset from dividing line angles)
+    // TOP section arc: between angAB and angAC, going through the top of circle
+    var topArcE = circlePoint(angAB - gapAng);  // shift away from AB toward top
+    var topArcS = circlePoint(angAC + gapAng);  // shift away from AC toward top
 
-    var O = { x: cx, y: cy };
-    var mAB_t = offsetPerp(mAB, O, gap, -1);
-    var mAB_bl = offsetPerp(mAB, O, gap, 1);
-    var mBC_bl = offsetPerp(mBC, O, gap, -1);
-    var mBC_br = offsetPerp(mBC, O, gap, 1);
-    var mAC_t = offsetPerp(mAC, O, gap, 1);
-    var mAC_br = offsetPerp(mAC, O, gap, -1);
+    // BOTTOM-LEFT section arc: between angAB and angBC, going through bottom-left
+    var blArcS = circlePoint(angAB + gapAng);  // shift away from AB toward bot-left
+    var blArcE = circlePoint(angBC - gapAng);  // shift away from BC toward bot-left
 
-    // Build section paths with QUADRATIC bezier (Q) for rounding - no control points needed
+    // BOTTOM-RIGHT section arc: between angBC and angAC, going through bottom-right
+    var brArcS = circlePoint(angBC + gapAng);  // shift away from BC toward bot-right
+    var brArcE = circlePoint(angAC - gapAng);  // shift away from AC toward bot-right
+
+    // Gap on midpoints: lerp each midpoint toward the section's vertex
+    // TOP section uses mAB and mAC, lerped toward vTop
+    var mAB_t = lerp(mAB, vTop, gapFactor);
+    var mAC_t = lerp(mAC, vTop, gapFactor);
+    // BOTTOM-LEFT section uses mAB and mBC, lerped toward vBotL
+    var mAB_bl = lerp(mAB, vBotL, gapFactor);
+    var mBC_bl = lerp(mBC, vBotL, gapFactor);
+    // BOTTOM-RIGHT section uses mBC and mAC, lerped toward vBotR
+    var mBC_br = lerp(mBC, vBotR, gapFactor);
+    var mAC_br = lerp(mAC, vBotR, gapFactor);
+
+    // Build section paths with QUADRATIC bezier for rounding
     function sectionPath(arcStart, midStart, vertex, midEnd, arcEnd) {
         var d1 = unitVec(vertex, midStart);
         var d2 = unitVec(vertex, midEnd);
