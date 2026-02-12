@@ -5,8 +5,6 @@
 .kpi-view {
     padding: 10px 0;
     animation: fadeIn 0.5s ease-in;
-    max-height: calc(100vh - 120px);
-    overflow: hidden;
 }
 
 /* --- KPI Header --- */
@@ -97,7 +95,6 @@
     grid-template-columns: 1fr 1fr;
     gap: 24px;
     align-items: start;
-    max-height: calc(100vh - 180px);
 }
 
 /* --- Triangle Chart Area --- */
@@ -110,12 +107,12 @@
 .triangle-chart-container {
     position: relative;
     width: 100%;
-    max-height: calc(100vh - 200px);
 }
 
 .triangle-svg {
     width: 100%;
     height: auto;
+    max-height: calc(100vh - 200px);
     overflow: visible;
 }
 
