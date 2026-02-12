@@ -70,25 +70,23 @@ function renderTriangleChart(qData) {
     var total = qData ? qData.total : 0;
 
     // ---- GEOMETRY ----
-    // Bigger viewBox for larger triangle
     var W = 700, H = 720;
-    var cx = 350, cy = 380, R = 110;
-    var gap = 14;    // bigger gap between sections
-    var rr = 130;    // VERY large rounding for blob-like corners
+    var cx = 350, cy = 385, R = 110;
+    var gap = 22;    // big gap between sections
+    var rr = 150;    // 150px rounding - very blob-like
 
     var sectionFill = '#e8ecf1';
 
-    // Triangle vertices pushed further out for bigger scale
-    var vTop = { x: 350, y: 20 };
-    var vBotL = { x: 15, y: 620 };
-    var vBotR = { x: 685, y: 620 };
+    // Triangle vertices - big triangle
+    var vTop = { x: 350, y: 15 };
+    var vBotL = { x: 10, y: 630 };
+    var vBotR = { x: 690, y: 630 };
 
     // Edge midpoints
     var mAB = { x: (vTop.x + vBotL.x) / 2, y: (vTop.y + vBotL.y) / 2 };
     var mBC = { x: (vBotL.x + vBotR.x) / 2, y: (vBotL.y + vBotR.y) / 2 };
     var mAC = { x: (vTop.x + vBotR.x) / 2, y: (vTop.y + vBotR.y) / 2 };
 
-    // Helper functions
     function circlePoint(angle) { return { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) }; }
     function unitVec(a, b) {
         var dx = b.x - a.x, dy = b.y - a.y, len = Math.sqrt(dx * dx + dy * dy);
@@ -101,14 +99,12 @@ function renderTriangleChart(qData) {
     }
     function p(pt) { return Math.round(pt.x) + ',' + Math.round(pt.y); }
 
-    // Angles from center to edge midpoints
     var angAB = Math.atan2(mAB.y - cy, mAB.x - cx);
     var angBC = Math.atan2(mBC.y - cy, mBC.x - cx);
     var angAC = Math.atan2(mAC.y - cy, mAC.x - cx);
 
     var gapAngle = gap / R;
 
-    // Circle boundary points per section (offset by gap)
     var topArcS = circlePoint(angAC + gapAngle);
     var topArcE = circlePoint(angAB - gapAngle);
     var blArcS = circlePoint(angAB + gapAngle);
@@ -116,7 +112,6 @@ function renderTriangleChart(qData) {
     var brArcS = circlePoint(angBC + gapAngle);
     var brArcE = circlePoint(angAC - gapAngle);
 
-    // Offset midpoints for gap
     var O = { x: cx, y: cy };
     var mAB_t = offsetPerp(mAB, O, gap, -1);
     var mAB_bl = offsetPerp(mAB, O, gap, 1);
@@ -125,21 +120,17 @@ function renderTriangleChart(qData) {
     var mAC_t = offsetPerp(mAC, O, gap, 1);
     var mAC_br = offsetPerp(mAC, O, gap, -1);
 
-    // Build section paths with VERY rounded vertices (cubic bezier)
+    // Build section paths with QUADRATIC bezier (Q) for rounding - no control points needed
     function sectionPath(arcStart, midStart, vertex, midEnd, arcEnd) {
         var d1 = unitVec(vertex, midStart);
         var d2 = unitVec(vertex, midEnd);
-        // Points where rounding starts/ends (far from vertex = more rounding)
         var before = { x: vertex.x + d1.x * rr, y: vertex.y + d1.y * rr };
         var after = { x: vertex.x + d2.x * rr, y: vertex.y + d2.y * rr };
-        // Control points very close to vertex for smooth big curve
-        var cp1 = { x: vertex.x + d1.x * (rr * 0.15), y: vertex.y + d1.y * (rr * 0.15) };
-        var cp2 = { x: vertex.x + d2.x * (rr * 0.15), y: vertex.y + d2.y * (rr * 0.15) };
 
         return 'M ' + p(arcStart) +
             ' L ' + p(midStart) +
             ' L ' + p(before) +
-            ' C ' + p(cp1) + ' ' + p(cp2) + ' ' + p(after) +
+            ' Q ' + p(vertex) + ' ' + p(after) +
             ' L ' + p(midEnd) +
             ' L ' + p(arcEnd) +
             ' A ' + R + ' ' + R + ' 0 0 1 ' + p(arcStart) + ' Z';
@@ -153,33 +144,33 @@ function renderTriangleChart(qData) {
     var liquidLevel = 200 - (total / 100) * 160;
     var liqTop = cy - R + liquidLevel;
 
-    // Badge rendering inside sections (all in SVG)
+    // Badge rendering - BIGGER badges
     function badgeSVG(m, bx, by) {
-        var oW = 68, oH = 26, sg = 44;
+        var oW = 80, oH = 30, sg = 52;
+        var subR = 22; // circle badge radius
         return '' +
-            '<rect x="' + (bx - oW / 2) + '" y="' + by + '" width="' + oW + '" height="' + oH + '" rx="8" fill="#6d7a2a" />' +
-            '<text x="' + bx + '" y="' + (by + 18) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Segoe UI,sans-serif">' + m.overall + '%</text>' +
-            '<text x="' + bx + '" y="' + (by + oH + 13) + '" text-anchor="middle" font-size="9" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="1">ОБЩИЕ</text>' +
-            // Circles
-            '<circle cx="' + (bx - sg) + '" cy="' + (by + oH + 38) + '" r="18" fill="' + getBadgeColor(m.speed) + '" />' +
-            '<text x="' + (bx - sg) + '" y="' + (by + oH + 43) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + getBadgeTextColor(m.speed) + '" font-family="Segoe UI,sans-serif">' + m.speed + '%</text>' +
-            '<text x="' + (bx - sg) + '" y="' + (by + oH + 60) + '" text-anchor="middle" font-size="7" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">СКОРОСТЬ</text>' +
-            '<circle cx="' + bx + '" cy="' + (by + oH + 38) + '" r="18" fill="' + getBadgeColor(m.er) + '" />' +
-            '<text x="' + bx + '" y="' + (by + oH + 43) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + getBadgeTextColor(m.er) + '" font-family="Segoe UI,sans-serif">' + m.er + '%</text>' +
-            '<text x="' + bx + '" y="' + (by + oH + 60) + '" text-anchor="middle" font-size="7" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ER</text>' +
-            '<circle cx="' + (bx + sg) + '" cy="' + (by + oH + 38) + '" r="18" fill="' + getBadgeColor(m.test) + '" />' +
-            '<text x="' + (bx + sg) + '" y="' + (by + oH + 43) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + getBadgeTextColor(m.test) + '" font-family="Segoe UI,sans-serif">' + m.test + '%</text>' +
-            '<text x="' + (bx + sg) + '" y="' + (by + oH + 60) + '" text-anchor="middle" font-size="7" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ТЕСТ</text>';
+            // ОБЩИЕ rounded rect badge
+            '<rect x="' + (bx - oW / 2) + '" y="' + by + '" width="' + oW + '" height="' + oH + '" rx="10" fill="#6d7a2a" />' +
+            '<text x="' + bx + '" y="' + (by + 21) + '" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" font-family="Segoe UI,sans-serif">' + m.overall + '%</text>' +
+            '<text x="' + bx + '" y="' + (by + oH + 15) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="1">ОБЩИЕ</text>' +
+            // СКОРОСТЬ circle
+            '<circle cx="' + (bx - sg) + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.speed) + '" />' +
+            '<text x="' + (bx - sg) + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.speed) + '" font-family="Segoe UI,sans-serif">' + m.speed + '%</text>' +
+            '<text x="' + (bx - sg) + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">СКОРОСТЬ</text>' +
+            // ER circle
+            '<circle cx="' + bx + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.er) + '" />' +
+            '<text x="' + bx + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.er) + '" font-family="Segoe UI,sans-serif">' + m.er + '%</text>' +
+            '<text x="' + bx + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ER</text>' +
+            // ТЕСТ circle
+            '<circle cx="' + (bx + sg) + '" cy="' + (by + oH + 42) + '" r="' + subR + '" fill="' + getBadgeColor(m.test) + '" />' +
+            '<text x="' + (bx + sg) + '" y="' + (by + oH + 48) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + getBadgeTextColor(m.test) + '" font-family="Segoe UI,sans-serif">' + m.test + '%</text>' +
+            '<text x="' + (bx + sg) + '" y="' + (by + oH + 68) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#666" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ТЕСТ</text>';
     }
 
-    // Positions for labels & badges INSIDE sections
-    // Top section: centered near top
-    var topLabelY = 105;
-    var topBadgeY = 125;
-    // Bottom-left: inside section
-    var blLabelX = 165, blLabelY = 470, blBadgeY = 488;
-    // Bottom-right: inside section
-    var brLabelX = 535, brLabelY = 470, brBadgeY = 488;
+    // Badge positions INSIDE sections
+    var topBadgeY = 115;
+    var blBadgeY = 468;
+    var brBadgeY = 468;
 
     container.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="triangle-svg">' +
         '<defs>' +
@@ -201,14 +192,14 @@ function renderTriangleChart(qData) {
         '<path d="' + pathBR + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
 
         // MONTH LABELS inside sections
-        '<text x="350" y="' + topLabelY + '" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
-        '<text x="' + blLabelX + '" y="' + blLabelY + '" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
-        '<text x="' + brLabelX + '" y="' + brLabelY + '" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
+        '<text x="350" y="100" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
+        '<text x="170" y="455" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
+        '<text x="530" y="455" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
 
         // BADGES inside sections
         badgeSVG(months[0], 350, topBadgeY) +
-        badgeSVG(months[1], blLabelX, blBadgeY) +
-        badgeSVG(months[2], brLabelX, brBadgeY) +
+        badgeSVG(months[1], 170, blBadgeY) +
+        badgeSVG(months[2], 530, brBadgeY) +
 
         // CENTER CIRCLE
         '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 10) + '" fill="white" filter="url(#cShadow)" />' +
@@ -224,8 +215,8 @@ function renderTriangleChart(qData) {
         '</g>' +
 
         // ИТОГ text
-        '<text x="' + cx + '" y="' + (cy - 16) + '" text-anchor="middle" font-size="24" font-weight="800" fill="#333" font-family="Segoe UI,sans-serif">ИТОГ</text>' +
-        '<text x="' + cx + '" y="' + (cy + 32) + '" text-anchor="middle" font-size="52" font-weight="900" fill="#7a8f0f" font-family="Segoe UI,sans-serif" font-style="italic">' + total + '%</text>' +
+        '<text x="' + cx + '" y="' + (cy - 16) + '" text-anchor="middle" font-size="26" font-weight="800" fill="#333" font-family="Segoe UI,sans-serif">ИТОГ</text>' +
+        '<text x="' + cx + '" y="' + (cy + 34) + '" text-anchor="middle" font-size="54" font-weight="900" fill="#7a8f0f" font-family="Segoe UI,sans-serif" font-style="italic">' + total + '%</text>' +
 
         '</svg>';
 }
