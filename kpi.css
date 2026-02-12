@@ -2,13 +2,12 @@
    KPI Section Styles
    ============================ */
 
-/* --- KPI View Container --- */
 .kpi-view {
     padding: 10px 0;
     animation: fadeIn 0.5s ease-in;
 }
 
-/* --- KPI Header (Year + Quarter) --- */
+/* --- KPI Header --- */
 .kpi-header {
     display: flex;
     align-items: center;
@@ -34,9 +33,6 @@
     font-weight: 600;
     font-size: 14px;
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .kpi-header-left .filter-group select {
@@ -50,7 +46,6 @@
     font-weight: 500;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .kpi-quarter-display {
@@ -94,11 +89,12 @@
         inset -2px -2px 4px var(--shadow-light);
 }
 
-/* --- Main KPI Layout --- */
+/* --- Main Layout --- */
 .kpi-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
+    align-items: start;
 }
 
 /* --- Triangle Chart Area --- */
@@ -106,171 +102,112 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 460px;
 }
 
 .triangle-chart-container {
     position: relative;
     width: 100%;
-    max-width: 480px;
+    max-width: 520px;
 }
 
 .triangle-svg {
     width: 100%;
     height: auto;
-    filter: drop-shadow(4px 4px 10px rgba(0, 0, 0, 0.08));
 }
 
-/* Triangle fill */
-.triangle-body {
-    fill: #e8e8e8;
-    stroke: #d0d0d0;
-    stroke-width: 1;
+/* --- Badge overlay layer --- */
+.kpi-badges-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
 }
 
-/* Center circle */
-.triangle-center-circle {
-    fill: var(--bg-color);
-    stroke: #e0e0e0;
-    stroke-width: 2;
-}
-
-.triangle-center-text {
-    font-size: 14px;
-    font-weight: 600;
-    fill: var(--text-secondary);
-    text-anchor: middle;
-}
-
-.triangle-center-value {
-    font-size: 36px;
-    font-weight: 800;
-    fill: var(--accent-text);
-    text-anchor: middle;
-}
-
-/* Liquid fill inside triangle */
-.triangle-liquid {
-    fill: var(--accent-color);
-    opacity: 0.7;
-    transition: d 0.8s ease;
-}
-
-/* Month labels */
-.month-label {
-    font-size: 13px;
-    font-weight: 700;
-    fill: var(--text-primary);
-    text-anchor: middle;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Month metrics group */
-.month-metrics {
+/* --- Month badges group --- */
+.kpi-month-badges {
+    position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 2px;
+}
+
+/* Badge positions (relative to triangle container) */
+.kpi-month-badges-top {
+    top: 23%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.kpi-month-badges-bottom-left {
+    bottom: 2%;
+    left: 10%;
+}
+
+.kpi-month-badges-bottom-right {
+    bottom: 2%;
+    right: 10%;
+}
+
+/* ОБЩИЕ badge */
+.kpi-overall-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 16px;
+    border-radius: 8px;
+    background: #6d7a2a;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: center;
+}
+
+.kpi-overall-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+/* Sub-badges row */
+.kpi-sub-badges {
+    display: flex;
     gap: 6px;
 }
 
-/* Metric badges */
-.kpi-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    height: 24px;
-    padding: 0 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.kpi-badge.green {
-    background: linear-gradient(135deg, #4CAF50, #2E7D32);
-}
-
-.kpi-badge.yellow {
-    background: linear-gradient(135deg, #FFC107, #F9A825);
-    color: #333;
-}
-
-.kpi-badge.red {
-    background: linear-gradient(135deg, #f44336, #C62828);
-}
-
-.kpi-badge.accent {
-    background: var(--accent-gradient);
-    color: #333;
-}
-
-.kpi-badge-label {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-anchor: middle;
-}
-
-/* Общие badge for overall */
-.kpi-badge-overall {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 14px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 700;
-    background: var(--accent-gradient);
-    color: #333;
-    box-shadow: 0 2px 8px rgba(227, 251, 30, 0.3);
-}
-
-/* Refresh icon on triangle */
-.kpi-refresh-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
-    border: none;
+/* Circle badges for СКОРОСТЬ / ER / ТЕСТ */
+.kpi-circle-badge {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: var(--bg-color);
-    box-shadow: 3px 3px 6px var(--shadow-dark),
-        -3px -3px 6px var(--shadow-light);
-    cursor: pointer;
-    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.kpi-refresh-btn:hover {
-    color: var(--accent-text);
-    transform: rotate(90deg);
-}
-
-/* --- Right Side Cards --- */
-.kpi-cards-area {
+.kpi-sub-labels {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    gap: 6px;
 }
 
-.kpi-cards-top-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+.kpi-sub-labels span {
+    width: 40px;
+    text-align: center;
+    font-size: 7px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.5px;
 }
 
-/* --- Neumorphic Card Base --- */
+/* --- Card Base --- */
 .kpi-card {
     background: var(--block-bg);
     border-radius: 20px;
@@ -303,6 +240,19 @@
     gap: 8px;
 }
 
+/* --- Cards area --- */
+.kpi-cards-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.kpi-cards-top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
 /* --- Contributions Card --- */
 .kpi-contribution-card .kpi-card-title {
     background: var(--accent-gradient);
@@ -315,44 +265,46 @@
 .kpi-open-all-btn {
     display: inline-flex;
     align-items: center;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 8px;
     border: none;
     background: var(--bg-color);
     box-shadow: 2px 2px 4px var(--shadow-dark),
         -2px -2px 4px var(--shadow-light);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: all 0.2s ease;
+    -webkit-text-fill-color: var(--text-secondary);
 }
 
 .kpi-open-all-btn:hover {
     color: var(--accent-text);
+    -webkit-text-fill-color: var(--accent-text);
 }
 
 .kpi-contrib-field {
     background: var(--bg-color);
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
     box-shadow: inset 3px 3px 6px var(--shadow-dark),
         inset -3px -3px 6px var(--shadow-light);
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
-    min-height: 36px;
+    min-height: 32px;
 }
 
 .kpi-contrib-field-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }
 
 /* --- Grade Card --- */
@@ -364,8 +316,8 @@
 }
 
 .kpi-grade-image-placeholder {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     border-radius: 16px;
     background: var(--bg-color);
     box-shadow: inset 4px 4px 8px var(--shadow-dark),
@@ -373,20 +325,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
-    font-size: 32px;
+    margin-bottom: 10px;
+    font-size: 28px;
 }
 
 .kpi-grade-name {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     letter-spacing: 1px;
 }
 
 .kpi-grade-next {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-secondary);
 }
@@ -396,12 +348,12 @@
     font-weight: 700;
 }
 
-/* --- Grade Transitions Card --- */
+/* --- Transitions Card --- */
 .kpi-transition-block {
     background: var(--bg-color);
     border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
     box-shadow: inset 3px 3px 6px rgba(209, 217, 230, 0.5),
         inset -3px -3px 6px rgba(255, 255, 255, 0.7);
 }
@@ -414,11 +366,11 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .kpi-transition-type {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-primary);
     text-transform: uppercase;
@@ -426,8 +378,8 @@
 
 .kpi-transition-dates {
     display: flex;
-    gap: 16px;
-    font-size: 11px;
+    gap: 12px;
+    font-size: 10px;
     color: var(--text-secondary);
 }
 
@@ -439,42 +391,41 @@
 }
 
 .kpi-transition-dates .label {
-    font-size: 9px;
+    font-size: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
 }
 
 .kpi-transition-available {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .kpi-transition-available strong {
     color: var(--text-primary);
 }
 
-/* Progress bar */
 .kpi-progress-bar-container {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 6px;
 }
 
 .kpi-progress-bar {
     flex: 1;
-    height: 12px;
+    height: 10px;
     background: #e8e8e8;
-    border-radius: 6px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .kpi-progress-fill {
     height: 100%;
-    border-radius: 6px;
+    border-radius: 5px;
     transition: width 0.8s ease;
     background: var(--accent-gradient);
 }
@@ -484,7 +435,7 @@
 }
 
 .kpi-progress-date {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-secondary);
     white-space: nowrap;
@@ -500,10 +451,6 @@
 @media (max-width: 900px) {
     .kpi-layout {
         grid-template-columns: 1fr;
-    }
-
-    .kpi-triangle-area {
-        min-height: 350px;
     }
 
     .kpi-cards-top-row {

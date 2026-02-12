@@ -5,10 +5,7 @@
     <div class="kpi-header">
         <div class="kpi-header-left">
             <div class="filter-group">
-                <label>
-                    <span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
-                    Год:
-                </label>
+                <label>Год:</label>
                 <select id="kpiYearSelect" onchange="kpiYearChanged()">
                     <option value="2026">2026</option>
                     <option value="2025">2025</option>
@@ -27,10 +24,8 @@
 
         <!-- Left: Triangle Chart -->
         <div class="kpi-triangle-area">
-            <div class="triangle-chart-container">
-                <svg id="triangleSvg" viewBox="0 0 500 500" class="triangle-svg">
-                    <!-- Rendered by kpi.js -->
-                </svg>
+            <div id="kpiTriangleContainer" class="triangle-chart-container">
+                <!-- Rendered by kpi.js -->
             </div>
         </div>
 
@@ -43,13 +38,13 @@
                 <!-- Contributions Card -->
                 <div class="kpi-card kpi-contribution-card">
                     <div class="kpi-card-title">
-                        ПОСЛЕДНИЙ ВКЛАД+ВСЕ ВКЛАДЫ
-                        <button class="kpi-open-all-btn">ОТКРЫТЬ ВСЕ ВКЛАДЫ</button>
+                        ПОСЛЕДНИЙ ВКЛАД
+                        <button class="kpi-open-all-btn">ВСЕ ВКЛАДЫ</button>
                     </div>
                     <div class="kpi-contrib-field-label">Кодовое обозначение</div>
                     <div class="kpi-contrib-field" id="kpiContribCode">КОДОВОЕ ОБОЗНАЧЕНИЕ</div>
                     <div class="kpi-contrib-field-label">Описание</div>
-                    <div class="kpi-contrib-field" id="kpiContribDesc">ОПИСАНИЕ ПОСЛЕДНЕГО ВКЛАДА</div>
+                    <div class="kpi-contrib-field" id="kpiContribDesc">ОПИСАНИЕ</div>
                 </div>
 
                 <!-- Grade Card -->
@@ -66,17 +61,12 @@
 
             <!-- Transitions Card -->
             <div class="kpi-card kpi-transitions-card">
-                <div class="kpi-card-title">
-                    <span class="icon icon-stats" style="width:24px;height:24px;"></span>
-                    ПЕРЕВОДЫ ПО ГРЕЙДУ
-                </div>
-                <div id="kpiTransitionsBody">
-                    <!-- Rendered by kpi.js -->
-                </div>
+                <div class="kpi-card-title">ПЕРЕВОДЫ ПО ГРЕЙДУ</div>
+                <div id="kpiTransitionsBody"></div>
             </div>
 
-        </div><!-- end kpi-cards-area -->
+        </div>
 
-    </div><!-- end kpi-layout -->
+    </div>
 
 </div>
