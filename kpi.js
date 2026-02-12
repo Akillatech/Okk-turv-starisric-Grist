@@ -71,14 +71,14 @@ function renderTriangleChart(qData) {
 
     // ---- GEOMETRY ----
     // Equilateral triangle: side = 680, height = 680 * sqrt(3)/2 ≈ 589
-    var W = 700, H = 720;
+    var W = 700, H = 670;
     var side = 680;
     var triH = Math.round(side * Math.sqrt(3) / 2); // ≈ 589
 
-    // Vertices of equilateral triangle
-    var vTop = { x: 350, y: 650 - triH };   // ≈ 61
-    var vBotL = { x: 10, y: 650 };
-    var vBotR = { x: 690, y: 650 };
+    // Vertices of equilateral triangle — pushed up
+    var vTop = { x: 350, y: 610 - triH };   // ≈ 21
+    var vBotL = { x: 10, y: 610 };
+    var vBotR = { x: 690, y: 610 };
 
     // Center circle at triangle centroid
     var cx = 350, cy = Math.round((vTop.y + vBotL.y + vBotR.y) / 3); // ≈ 454
@@ -184,9 +184,9 @@ function renderTriangleChart(qData) {
     }
 
     // Badge positions INSIDE sections
-    var topBadgeY = 130;
-    var blBadgeY = 530;
-    var brBadgeY = 530;
+    var topBadgeY = 175;
+    var blBadgeY = 490;
+    var brBadgeY = 490;
 
     container.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="triangle-svg">' +
         '<defs>' +
@@ -208,9 +208,9 @@ function renderTriangleChart(qData) {
         '<path d="' + pathBR + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
 
         // MONTH LABELS inside sections
-        '<text x="350" y="115" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
-        '<text x="170" y="515" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
-        '<text x="530" y="515" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
+        '<text x="350" y="160" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
+        '<text x="170" y="475" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
+        '<text x="530" y="475" text-anchor="middle" font-size="20" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
 
         // BADGES inside sections
         badgeSVG(months[0], 350, topBadgeY) +
