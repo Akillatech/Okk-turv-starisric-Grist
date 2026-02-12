@@ -33,22 +33,8 @@ const KPI_DEMO = {
             ],
             total: 55,
         },
-        3: {
-            months: [
-                { overall: 0, speed: 0, er: 0, test: 0 },
-                { overall: 0, speed: 0, er: 0, test: 0 },
-                { overall: 0, speed: 0, er: 0, test: 0 },
-            ],
-            total: 0,
-        },
-        4: {
-            months: [
-                { overall: 0, speed: 0, er: 0, test: 0 },
-                { overall: 0, speed: 0, er: 0, test: 0 },
-                { overall: 0, speed: 0, er: 0, test: 0 },
-            ],
-            total: 0,
-        },
+        3: { months: [{ overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }], total: 0 },
+        4: { months: [{ overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }], total: 0 },
     }
 };
 
@@ -62,13 +48,13 @@ const KPI_TRANSITIONS_DEMO = [
 // =================== RENDER ===================
 
 function renderKpiView() {
-    const container = document.getElementById('kpiContent');
+    var container = document.getElementById('kpiContent');
     if (!container) return;
-    const yearSelect = document.getElementById('kpiYearSelect');
+    var yearSelect = document.getElementById('kpiYearSelect');
     if (yearSelect) yearSelect.value = kpiState.year;
     updateQuarterDisplay();
-    const yearData = KPI_DEMO[kpiState.year];
-    const qData = yearData ? yearData[kpiState.quarter] : null;
+    var yearData = KPI_DEMO[kpiState.year];
+    var qData = yearData ? yearData[kpiState.quarter] : null;
     renderTriangleChart(qData);
     renderGradeCard();
     renderContributionCard();
@@ -76,214 +62,11 @@ function renderKpiView() {
 }
 
 function updateQuarterDisplay() {
-    const el = document.getElementById('kpiQuarterLabel');
+    var el = document.getElementById('kpiQuarterLabel');
     if (el) el.textContent = 'КВАРТАЛ : Q' + kpiState.quarter;
 }
 
-// =================== TRIANGLE CHART ===================
-
-function renderTriangleChart(qData) {
-    const container = document.getElementById('kpiTriangleContainer');
-    if (!container) return;
-
-    const monthNames = QUARTER_MONTHS[kpiState.quarter] || ['—', '—', '—'];
-    const months = qData ? qData.months : [
-        { overall: 0, speed: 0, er: 0, test: 0 },
-        { overall: 0, speed: 0, er: 0, test: 0 },
-        { overall: 0, speed: 0, er: 0, test: 0 },
-    ];
-    const total = qData ? qData.total : 0;
-
-    // Geometry
-    const cx = 300, cy = 340, R = 95;
-    const gap = 5; // half-gap between sections
-
-    // Triangle vertices
-    const A = { x: 300, y: 55 };   // top
-    const B = { x: 40, y: 540 };   // bottom-left
-    const C = { x: 560, y: 540 };  // bottom-right
-
-    // Edge midpoints
-    const mAB = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 }; // ~170, 298
-    const mBC = { x: (B.x + C.x) / 2, y: (B.y + C.y) / 2 }; // 300, 540
-    const mAC = { x: (A.x + C.x) / 2, y: (A.y + C.y) / 2 }; // ~430, 298
-
-    // Direction vectors from center to midpoints (for gap offsets)
-    function unitVec(from, to) {
-        const dx = to.x - from.x, dy = to.y - from.y;
-        const len = Math.sqrt(dx * dx + dy * dy);
-        return { x: dx / len, y: dy / len };
-    }
-    function perpCW(v) { return { x: -v.y, y: v.x }; }
-    function perpCCW(v) { return { x: v.y, y: -v.x }; }
-    function add(p, v, s) { return { x: p.x + v.x * s, y: p.y + v.y * s }; }
-
-    const dAB = unitVec({ x: cx, y: cy }, mAB);
-    const dBC = unitVec({ x: cx, y: cy }, mBC);
-    const dAC = unitVec({ x: cx, y: cy }, mAC);
-
-    // Circle intersection points (where dividing lines meet the circle)
-    const iAB = add({ x: cx, y: cy }, dAB, R);
-    const iBC = add({ x: cx, y: cy }, dBC, R);
-    const iAC = add({ x: cx, y: cy }, dAC, R);
-
-    // Gap-offset points (shift perpendicular to dividing line)
-    // For each dividing line, create two offset points (one per adjacent section)
-    const pAB_cw = perpCW(dAB);   // perpendicular clockwise
-    const pAB_ccw = perpCCW(dAB);
-    const pBC_cw = perpCW(dBC);
-    const pBC_ccw = perpCCW(dBC);
-    const pAC_cw = perpCW(dAC);
-    const pAC_ccw = perpCCW(dAC);
-
-    // Section 1 (TOP): bounded by M_AB divider (right side) and M_AC divider (left side)
-    const s1_iL = add(iAB, pAB_ccw, gap);   // circle point near M_AB, shifted toward top
-    const s1_mL = add(mAB, pAB_ccw, gap);   // midpoint near M_AB, shifted toward top
-    const s1_iR = add(iAC, pAC_cw, gap);    // circle point near M_AC, shifted toward top
-    const s1_mR = add(mAC, pAC_cw, gap);    // midpoint near M_AC, shifted toward top
-
-    // Section 2 (BOT-LEFT): bounded by M_AB (left side) and M_BC (left side)
-    const s2_iT = add(iAB, pAB_cw, gap);
-    const s2_mT = add(mAB, pAB_cw, gap);
-    const s2_iB = add(iBC, pBC_cw, gap);
-    const s2_mB = add(mBC, pBC_cw, gap);
-
-    // Section 3 (BOT-RIGHT): bounded by M_BC (right side) and M_AC (right side)
-    const s3_iB = add(iBC, pBC_ccw, gap);
-    const s3_mB = add(mBC, pBC_ccw, gap);
-    const s3_iT = add(iAC, pAC_ccw, gap);
-    const s3_mT = add(mAC, pAC_ccw, gap);
-
-    // Vertex rounding helpers
-    function roundedVertex(v, from, to, r) {
-        const d1 = unitVec(v, from);
-        const d2 = unitVec(v, to);
-        const p1 = add(v, d1, r);
-        const p2 = add(v, d2, r);
-        return { before: p1, control: v, after: p2 };
-    }
-
-    const rA = roundedVertex(A, mAB, mAC, 30);
-    const rB = roundedVertex(B, A, C, 30);
-    const rC = roundedVertex(C, B, A, 30);
-
-    // Liquid fill level for center circle
-    const liquidLevel = 200 - (total / 100) * 160; // in 200x200 viewBox
-
-    // Build SVG
-    const p = (pt) => `${Math.round(pt.x)},${Math.round(pt.y)}`;
-
-    container.innerHTML = `
-        <svg viewBox="0 0 600 640" class="triangle-svg" style="width:100%;height:auto;">
-            <defs>
-                <filter id="sectionShadow">
-                    <feDropShadow dx="0" dy="3" stdDeviation="5" flood-opacity="0.15"/>
-                </filter>
-                <filter id="circleShadow2">
-                    <feDropShadow dx="0" dy="2" stdDeviation="10" flood-opacity="0.2"/>
-                </filter>
-                <clipPath id="kpiCircleClip">
-                    <circle cx="${cx}" cy="${cy}" r="${R}" />
-                </clipPath>
-                <linearGradient id="kpiLiquid" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#E3FB1E;stop-opacity:0.9" />
-                    <stop offset="100%" style="stop-color:#9ab012;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-
-            <!-- SECTION 1: TOP (${monthNames[0]}) -->
-            <path d="
-                M ${p(s1_iL)}
-                L ${p(s1_mL)}
-                L ${p(rA.before)}
-                Q ${p(rA.control)} ${p(rA.after)}
-                L ${p(s1_mR)}
-                L ${p(s1_iR)}
-                A ${R} ${R} 0 0 1 ${p(s1_iL)}
-                Z
-            " fill="#9e9e9e" filter="url(#sectionShadow)" />
-
-            <!-- SECTION 2: BOTTOM-LEFT (${monthNames[1]}) -->
-            <path d="
-                M ${p(s2_iT)}
-                L ${p(s2_mT)}
-                L ${p(rB.before)}
-                Q ${p(rB.control)} ${p(rB.after)}
-                L ${p(s2_mB)}
-                L ${p(s2_iB)}
-                A ${R} ${R} 0 0 1 ${p(s2_iT)}
-                Z
-            " fill="#9e9e9e" filter="url(#sectionShadow)" />
-
-            <!-- SECTION 3: BOTTOM-RIGHT (${monthNames[2]}) -->
-            <path d="
-                M ${p(s3_iB)}
-                L ${p(s3_mB)}
-                L ${p(rC.before)}
-                Q ${p(rC.control)} ${p(rC.after)}
-                L ${p(s3_mT)}
-                L ${p(s3_iT)}
-                A ${R} ${R} 0 0 1 ${p(s3_iB)}
-                Z
-            " fill="#9e9e9e" filter="url(#sectionShadow)" />
-
-            <!-- CENTER CIRCLE: liquid progress bar -->
-            <circle cx="${cx}" cy="${cy}" r="${R + 6}" fill="white" filter="url(#circleShadow2)" />
-            <circle cx="${cx}" cy="${cy}" r="${R + 2}" fill="white" stroke="#eee" stroke-width="1" />
-
-            <!-- Liquid fill inside circle -->
-            <g clip-path="url(#kpiCircleClip)">
-                <!-- Base liquid rect -->
-                <rect x="${cx - R}" y="${cy - R + liquidLevel}" width="${R * 2}" height="${R * 2}" fill="url(#kpiLiquid)">
-                    <animate attributeName="y" values="${cy - R + liquidLevel + 2};${cy - R + liquidLevel - 2};${cy - R + liquidLevel + 2}" dur="4s" repeatCount="indefinite" />
-                </rect>
-                <!-- Wave 1 -->
-                <path class="wave-path" d="M${cx - R - 40},${cy - R + liquidLevel + 10} Q${cx - R + 20},${cy - R + liquidLevel - 5} ${cx - R + 60},${cy - R + liquidLevel + 10} Q${cx - R + 100},${cy - R + liquidLevel + 25} ${cx},${cy - R + liquidLevel + 10} Q${cx + 40},${cy - R + liquidLevel - 5} ${cx + 80},${cy - R + liquidLevel + 10} Q${cx + R},${cy - R + liquidLevel + 25} ${cx + R + 40},${cy - R + liquidLevel + 10} L${cx + R + 40},${cy + R + 20} L${cx - R - 40},${cy + R + 20} Z" fill="#c4d916" />
-                <!-- Wave 2 -->
-                <path class="wave-path wave-path-2" d="M${cx - R - 40},${cy - R + liquidLevel + 5} Q${cx - R + 30},${cy - R + liquidLevel - 10} ${cx - R + 70},${cy - R + liquidLevel + 5} Q${cx - R + 110},${cy - R + liquidLevel + 20} ${cx + 10},${cy - R + liquidLevel + 5} Q${cx + 50},${cy - R + liquidLevel - 10} ${cx + 90},${cy - R + liquidLevel + 5} Q${cx + R + 10},${cy - R + liquidLevel + 20} ${cx + R + 40},${cy - R + liquidLevel + 5} L${cx + R + 40},${cy + R + 20} L${cx - R - 40},${cy + R + 20} Z" fill="rgba(227,251,30,0.5)" />
-            </g>
-
-            <!-- ИТОГ text -->
-            <text x="${cx}" y="${cy - 12}" text-anchor="middle" font-size="20" font-weight="800" fill="#333" font-family="Segoe UI,sans-serif">ИТОГ</text>
-            <text x="${cx}" y="${cy + 30}" text-anchor="middle" font-size="46" font-weight="900" fill="#555" font-family="Segoe UI,sans-serif" font-style="italic">${total}%</text>
-
-            <!-- MONTH LABELS inside sections -->
-            <!-- Month 1 (top) -->
-            <text x="300" y="135" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif" letter-spacing="2">${monthNames[0]}</text>
-
-            <!-- Month 2 (bottom-left) -->
-            <text x="155" y="470" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif" letter-spacing="2">${monthNames[1]}</text>
-
-            <!-- Month 3 (bottom-right) -->
-            <text x="445" y="470" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif" letter-spacing="2">${monthNames[2]}</text>
-        </svg>
-
-        <!-- Badges positioned outside/below sections via HTML -->
-        <div class="kpi-badges-layer">
-            ${renderMonthBadges(months[0], 'top')}
-            ${renderMonthBadges(months[1], 'bottom-left')}
-            ${renderMonthBadges(months[2], 'bottom-right')}
-        </div>
-    `;
-}
-
-function renderMonthBadges(m, position) {
-    const posClass = 'kpi-month-badges-' + position;
-    return `
-        <div class="kpi-month-badges ${posClass}">
-            <div class="kpi-overall-badge">${m.overall}%</div>
-            <div class="kpi-overall-label">ОБЩИЕ</div>
-            <div class="kpi-sub-badges">
-                <div class="kpi-circle-badge" style="background:${getBadgeColor(m.speed)};color:${getBadgeTextColor(m.speed)}">${m.speed}%</div>
-                <div class="kpi-circle-badge" style="background:${getBadgeColor(m.er)};color:${getBadgeTextColor(m.er)}">${m.er}%</div>
-                <div class="kpi-circle-badge" style="background:${getBadgeColor(m.test)};color:${getBadgeTextColor(m.test)}">${m.test}%</div>
-            </div>
-            <div class="kpi-sub-labels">
-                <span>СКОРОСТЬ</span><span>ER</span><span>ТЕСТ</span>
-            </div>
-        </div>
-    `;
-}
+// =================== HELPERS ===================
 
 function getBadgeColor(v) {
     if (v >= 80) return '#4CAF50';
@@ -294,30 +77,250 @@ function getBadgeTextColor(v) {
     return (v >= 60 && v < 80) ? '#333' : '#fff';
 }
 
+// =================== TRIANGLE CHART ===================
+
+function renderTriangleChart(qData) {
+    var container = document.getElementById('kpiTriangleContainer');
+    if (!container) return;
+
+    var monthNames = QUARTER_MONTHS[kpiState.quarter] || ['—', '—', '—'];
+    var months = qData ? qData.months : [
+        { overall: 0, speed: 0, er: 0, test: 0 },
+        { overall: 0, speed: 0, er: 0, test: 0 },
+        { overall: 0, speed: 0, er: 0, test: 0 },
+    ];
+    var total = qData ? qData.total : 0;
+
+    // Geometry - viewBox 600x650
+    var cx = 300, cy = 340, R = 100;
+    var gap = 8; // gap between sections
+
+    // Neumorphic section fill color (matches --block-bg)
+    var sectionFill = '#e8ecf1';
+    var sectionStroke = 'none';
+
+    // Triangle vertices (very rounded)
+    // We build 3 sections using cubic bezier curves for very smooth rounding
+    // Each section: from circle edge → along gap edge → rounded vertex → along other gap edge → back to circle
+
+    // The key points for each section:
+    // TOP section: vertex at top, opens downward
+    // BOTTOM-LEFT: vertex at bottom-left
+    // BOTTOM-RIGHT: vertex at bottom-right
+
+    // Direction from center to each edge midpoint
+    var mAB = { x: 155, y: 285 };  // midpoint of top-left edge
+    var mBC = { x: 300, y: 545 };  // midpoint of bottom edge
+    var mAC = { x: 445, y: 285 };  // midpoint of top-right edge
+
+    // Vertex positions (these are the "peak" of each section)
+    var vTop = { x: 300, y: 40 };
+    var vBotL = { x: 25, y: 545 };
+    var vBotR = { x: 575, y: 545 };
+
+    // Circle intersection points along dividing lines
+    function circlePoint(angle) {
+        return {
+            x: cx + R * Math.cos(angle),
+            y: cy + R * Math.sin(angle)
+        };
+    }
+
+    // Angles of dividing lines from center
+    var angToMAB = Math.atan2(mAB.y - cy, mAB.x - cx);  // upper-left ~= -200deg
+    var angToMBC = Math.atan2(mBC.y - cy, mBC.x - cx);   // bottom ~= 90deg
+    var angToMAC = Math.atan2(mAC.y - cy, mAC.x - cx);   // upper-right
+
+    // Gap offset in radians (~gap pixels / R)
+    var gapAngle = gap / R;
+
+    // Circle boundary points for each section (offset by gap)
+    // TOP section: from angToMAC+gap to angToMAB-gap (going CCW through top)
+    var topArcStart = circlePoint(angToMAC + gapAngle);
+    var topArcEnd = circlePoint(angToMAB - gapAngle);
+
+    // BOT-LEFT section: from angToMAB+gap to angToMBC-gap (going CW through left-bottom)
+    var blArcStart = circlePoint(angToMAB + gapAngle);
+    var blArcEnd = circlePoint(angToMBC - gapAngle);
+
+    // BOT-RIGHT section: from angToMBC+gap to angToMAC-gap (going CW through right)
+    var brArcStart = circlePoint(angToMBC + gapAngle);
+    var brArcEnd = circlePoint(angToMAC - gapAngle);
+
+    // Offset edge midpoints along the gap perpendicular
+    function offsetPoint(pt, center, gapPx, side) {
+        var dx = pt.x - center.x, dy = pt.y - center.y;
+        var len = Math.sqrt(dx * dx + dy * dy);
+        // perpendicular: rotate 90 degrees
+        var px = -dy / len * gapPx * side;
+        var py = dx / len * gapPx * side;
+        return { x: pt.x + px, y: pt.y + py };
+    }
+
+    // For each section, offset the midpoints to create gap
+    var mAB_top = offsetPoint(mAB, { x: cx, y: cy }, gap, -1);
+    var mAB_bl = offsetPoint(mAB, { x: cx, y: cy }, gap, 1);
+    var mBC_bl = offsetPoint(mBC, { x: cx, y: cy }, gap, -1);
+    var mBC_br = offsetPoint(mBC, { x: cx, y: cy }, gap, 1);
+    var mAC_top = offsetPoint(mAC, { x: cx, y: cy }, gap, 1);
+    var mAC_br = offsetPoint(mAC, { x: cx, y: cy }, gap, -1);
+
+    // Rounding radius for vertices - VERY large for blob-like corners
+    var rr = 70;
+
+    function p(pt) { return Math.round(pt.x) + ',' + Math.round(pt.y); }
+
+    // Build section paths with cubic bezier for very smooth rounding
+    // Each path: circle point → edge midpoint → approach vertex → CUBIC curve at vertex → other edge midpoint → other circle point → arc along circle
+    function sectionPath(arcStart, midStart, vertex, midEnd, arcEnd, sweepLarge) {
+        // Direction from vertex toward each midpoint
+        var d1x = midStart.x - vertex.x, d1y = midStart.y - vertex.y;
+        var d1len = Math.sqrt(d1x * d1x + d1y * d1y);
+        var d2x = midEnd.x - vertex.x, d2y = midEnd.y - vertex.y;
+        var d2len = Math.sqrt(d2x * d2x + d2y * d2y);
+
+        // Points before/after vertex for rounding
+        var before = {
+            x: vertex.x + (d1x / d1len) * rr,
+            y: vertex.y + (d1y / d1len) * rr
+        };
+        var after = {
+            x: vertex.x + (d2x / d2len) * rr,
+            y: vertex.y + (d2y / d2len) * rr
+        };
+
+        // Control points for cubic bezier (pull toward vertex for smooth round)
+        var cp1 = {
+            x: vertex.x + (d1x / d1len) * (rr * 0.25),
+            y: vertex.y + (d1y / d1len) * (rr * 0.25)
+        };
+        var cp2 = {
+            x: vertex.x + (d2x / d2len) * (rr * 0.25),
+            y: vertex.y + (d2y / d2len) * (rr * 0.25)
+        };
+
+        return 'M ' + p(arcStart) +
+            ' L ' + p(midStart) +
+            ' L ' + p(before) +
+            ' C ' + p(cp1) + ' ' + p(cp2) + ' ' + p(after) +
+            ' L ' + p(midEnd) +
+            ' L ' + p(arcEnd) +
+            ' A ' + R + ' ' + R + ' 0 ' + (sweepLarge ? '1' : '0') + ' 1 ' + p(arcStart) +
+            ' Z';
+    }
+
+    // Build 3 section paths
+    var pathTop = sectionPath(topArcEnd, mAB_top, vTop, mAC_top, topArcStart, 0);
+    var pathBL = sectionPath(blArcStart, mAB_bl, vBotL, mBC_bl, blArcEnd, 0);
+    var pathBR = sectionPath(brArcStart, mBC_br, vBotR, mAC_br, brArcEnd, 0);
+
+    // Liquid fill level
+    var liquidLevel = 200 - (total / 100) * 160;
+    var liqTop = cy - R + liquidLevel;
+
+    // Neumorphic drop shadow filter
+    var neuFilter = '<filter id="neuShadow" x="-10%" y="-10%" width="120%" height="120%">' +
+        '<feDropShadow dx="6" dy="6" stdDeviation="8" flood-color="#b8bec7" flood-opacity="0.6"/>' +
+        '<feDropShadow dx="-4" dy="-4" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.8"/>' +
+        '</filter>';
+
+    // Build badge SVG elements (INSIDE sections)
+    function badgeSVG(m, labelX, labelY, badgeY, subY) {
+        var subGap = 48;
+        var overallW = 70, overallH = 28;
+        return '' +
+            // ОБЩИЕ badge (rounded rect)
+            '<rect x="' + (labelX - overallW / 2) + '" y="' + badgeY + '" width="' + overallW + '" height="' + overallH + '" rx="8" fill="#6d7a2a" />' +
+            '<text x="' + labelX + '" y="' + (badgeY + 19) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="Segoe UI,sans-serif">' + m.overall + '%</text>' +
+            '<text x="' + labelX + '" y="' + (badgeY + overallH + 13) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="1">ОБЩИЕ</text>' +
+            // СКОРОСТЬ circle
+            '<circle cx="' + (labelX - subGap) + '" cy="' + (subY + 18) + '" r="20" fill="' + getBadgeColor(m.speed) + '" />' +
+            '<text x="' + (labelX - subGap) + '" y="' + (subY + 23) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + getBadgeTextColor(m.speed) + '" font-family="Segoe UI,sans-serif">' + m.speed + '%</text>' +
+            '<text x="' + (labelX - subGap) + '" y="' + (subY + 52) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="0.5">СКОРОСТЬ</text>' +
+            // ER circle
+            '<circle cx="' + labelX + '" cy="' + (subY + 18) + '" r="20" fill="' + getBadgeColor(m.er) + '" />' +
+            '<text x="' + labelX + '" y="' + (subY + 23) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + getBadgeTextColor(m.er) + '" font-family="Segoe UI,sans-serif">' + m.er + '%</text>' +
+            '<text x="' + labelX + '" y="' + (subY + 52) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ER</text>' +
+            // ТЕСТ circle
+            '<circle cx="' + (labelX + subGap) + '" cy="' + (subY + 18) + '" r="20" fill="' + getBadgeColor(m.test) + '" />' +
+            '<text x="' + (labelX + subGap) + '" y="' + (subY + 23) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + getBadgeTextColor(m.test) + '" font-family="Segoe UI,sans-serif">' + m.test + '%</text>' +
+            '<text x="' + (labelX + subGap) + '" y="' + (subY + 52) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="0.5">ТЕСТ</text>';
+    }
+
+    container.innerHTML = '<svg viewBox="0 0 600 650" class="triangle-svg" style="width:100%;height:auto;">' +
+        '<defs>' +
+        neuFilter +
+        '<filter id="circleShadow3"><feDropShadow dx="0" dy="3" stdDeviation="10" flood-opacity="0.2"/></filter>' +
+        '<clipPath id="kpiCircleClip"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" /></clipPath>' +
+        '<linearGradient id="kpiLiquid" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" style="stop-color:#E3FB1E;stop-opacity:0.9" />' +
+        '<stop offset="100%" style="stop-color:#9ab012;stop-opacity:1" />' +
+        '</linearGradient>' +
+        '</defs>' +
+
+        // Section 1: TOP
+        '<path d="' + pathTop + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
+        // Section 2: BOTTOM-LEFT
+        '<path d="' + pathBL + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
+        // Section 3: BOTTOM-RIGHT
+        '<path d="' + pathBR + '" fill="' + sectionFill + '" filter="url(#neuShadow)" />' +
+
+        // Month labels INSIDE sections
+        '<text x="300" y="110" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
+        '<text x="145" y="480" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
+        '<text x="455" y="480" text-anchor="middle" font-size="18" font-weight="800" fill="#555" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
+
+        // Badges INSIDE sections
+        // Top section badges
+        badgeSVG(months[0], 300, 122, 122, 170) +
+        // Bottom-left section badges
+        badgeSVG(months[1], 145, 492, 492, 540) +
+        // Bottom-right section badges
+        badgeSVG(months[2], 455, 492, 492, 540) +
+
+        // CENTER CIRCLE - white background with shadow
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 8) + '" fill="white" filter="url(#circleShadow3)" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 3) + '" fill="white" stroke="#eee" stroke-width="1" />' +
+
+        // Liquid fill
+        '<g clip-path="url(#kpiCircleClip)">' +
+        '<rect x="' + (cx - R) + '" y="' + liqTop + '" width="' + (R * 2) + '" height="' + (R * 2) + '" fill="url(#kpiLiquid)">' +
+        '<animate attributeName="y" values="' + (liqTop + 2) + ';' + (liqTop - 2) + ';' + (liqTop + 2) + '" dur="4s" repeatCount="indefinite" />' +
+        '</rect>' +
+        '<path class="wave-path" d="M' + (cx - R - 40) + ',' + (liqTop + 10) + ' Q' + (cx - 50) + ',' + (liqTop - 8) + ' ' + cx + ',' + (liqTop + 10) + ' Q' + (cx + 50) + ',' + (liqTop + 28) + ' ' + (cx + R + 40) + ',' + (liqTop + 10) + ' L' + (cx + R + 40) + ',' + (cy + R + 20) + ' L' + (cx - R - 40) + ',' + (cy + R + 20) + ' Z" fill="#c4d916" />' +
+        '<path class="wave-path wave-path-2" d="M' + (cx - R - 40) + ',' + (liqTop + 5) + ' Q' + (cx - 30) + ',' + (liqTop - 12) + ' ' + (cx + 20) + ',' + (liqTop + 5) + ' Q' + (cx + 70) + ',' + (liqTop + 22) + ' ' + (cx + R + 40) + ',' + (liqTop + 5) + ' L' + (cx + R + 40) + ',' + (cy + R + 20) + ' L' + (cx - R - 40) + ',' + (cy + R + 20) + ' Z" fill="rgba(227,251,30,0.5)" />' +
+        '</g>' +
+
+        // ИТОГ text
+        '<text x="' + cx + '" y="' + (cy - 14) + '" text-anchor="middle" font-size="22" font-weight="800" fill="#333" font-family="Segoe UI,sans-serif">ИТОГ</text>' +
+        '<text x="' + cx + '" y="' + (cy + 30) + '" text-anchor="middle" font-size="48" font-weight="900" fill="#7a8f0f" font-family="Segoe UI,sans-serif" font-style="italic">' + total + '%</text>' +
+
+        '</svg>';
+}
+
 // =================== CARDS ===================
 
 function renderGradeCard() {
-    const el = document.getElementById('kpiGradeName');
-    const nextEl = document.getElementById('kpiGradeNext');
-    const imgEl = document.getElementById('kpiGradeImage');
+    var el = document.getElementById('kpiGradeName');
+    var nextEl = document.getElementById('kpiGradeNext');
+    var imgEl = document.getElementById('kpiGradeImage');
     if (el) el.textContent = KPI_GRADE_DEMO.current;
     if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + KPI_GRADE_DEMO.next + '</span>';
     if (imgEl) imgEl.textContent = KPI_GRADE_DEMO.image;
 }
 
 function renderContributionCard() {
-    const codeEl = document.getElementById('kpiContribCode');
-    const descEl = document.getElementById('kpiContribDesc');
+    var codeEl = document.getElementById('kpiContribCode');
+    var descEl = document.getElementById('kpiContribDesc');
     if (codeEl) codeEl.textContent = KPI_CONTRIBUTION_DEMO.code;
     if (descEl) descEl.textContent = KPI_CONTRIBUTION_DEMO.description;
 }
 
 function renderTransitionsCard() {
-    const container = document.getElementById('kpiTransitionsBody');
-    if (!container) return;
-    container.innerHTML = KPI_TRANSITIONS_DEMO.map(function (t) {
-        return '<div class="kpi-transition-block">' +
-            '<div class="kpi-transition-header"><div>' +
+    var c = document.getElementById('kpiTransitionsBody');
+    if (!c) return;
+    c.innerHTML = KPI_TRANSITIONS_DEMO.map(function (t) {
+        return '<div class="kpi-transition-block"><div class="kpi-transition-header"><div>' +
             '<div class="kpi-transition-type">' + t.type + '</div>' +
             '<div class="kpi-transition-available">ДОСТУПЕН ЛИ ПЕРЕВОД? <strong>' + (t.available ? 'ДА' : 'НЕТ') + '</strong></div>' +
             '</div><div class="kpi-transition-dates">' +
@@ -327,8 +330,7 @@ function renderTransitionsCard() {
             '<div class="kpi-progress-bar-container">' +
             '<span class="kpi-progress-date">' + t.lastDate + '</span>' +
             '<div class="kpi-progress-bar"><div class="kpi-progress-fill ' + (t.variant === 'orange' ? 'orange' : '') + '" style="width:' + t.progress + '%"></div></div>' +
-            '<span class="kpi-progress-date">' + t.nextDate + '</span>' +
-            '</div></div>';
+            '<span class="kpi-progress-date">' + t.nextDate + '</span></div></div>';
     }).join('');
 }
 
