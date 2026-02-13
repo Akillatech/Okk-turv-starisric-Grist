@@ -43,12 +43,33 @@
                 <!-- Grade Card -->
                 <div class="kpi-card kpi-grade-card">
                     <div class="kpi-card-title" style="align-self: stretch;">МОЙ ГРЕЙД</div>
+                    <button class="kpi-grade-edit-btn" id="kpiGradeEditBtn" title="Изменить грейд">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                            <path d="m15 5 4 4" />
+                        </svg>
+                    </button>
                     <div class="kpi-grade-image-placeholder" id="kpiGradeImage">🎖️</div>
                     <div class="kpi-grade-name" id="kpiGradeName">JUNIOR</div>
                     <div class="kpi-grade-next" id="kpiGradeNext">
                         СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">JUNIOR+</span>
                     </div>
                 </div>
+
+                <!-- Grade Selector Modal -->
+                <div class="kpi-grade-modal-overlay" id="kpiGradeModal">
+                    <div class="kpi-grade-modal">
+                        <div class="kpi-grade-modal-title">Выберите грейд</div>
+                        <div class="kpi-grade-modal-grid" id="kpiGradeModalGrid">
+                            <!-- filled by JS -->
+                        </div>
+                        <div class="kpi-grade-modal-actions">
+                            <button class="kpi-grade-modal-cancel" id="kpiGradeModalCancel">Отмена</button>
+                        </div>
+                    </div>
+                </div>
+
 
             </div>
 

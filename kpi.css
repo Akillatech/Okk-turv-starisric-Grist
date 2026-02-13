@@ -307,6 +307,184 @@
     font-weight: 700;
 }
 
+/* --- Edit Button (Pencil) --- */
+.kpi-grade-edit-btn {
+    position: absolute;
+    top: 24px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    box-shadow: 2px 2px 5px var(--shadow-dark),
+        -2px -2px 5px var(--shadow-light);
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.kpi-grade-edit-btn:hover {
+    color: var(--accent-text);
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+        -3px -3px 6px var(--shadow-light);
+}
+
+.kpi-grade-edit-btn:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+/* --- Grade Selector Modal --- */
+.kpi-grade-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.kpi-grade-modal-overlay.active {
+    display: flex;
+}
+
+.kpi-grade-modal {
+    background: var(--block-bg, #f0f0f3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.15),
+        -6px -6px 12px rgba(255, 255, 255, 0.8);
+    max-width: 380px;
+    width: 90%;
+    animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.kpi-grade-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+}
+
+.kpi-grade-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.kpi-grade-option {
+    padding: 12px 6px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.kpi-grade-option:hover {
+    color: var(--accent-text, #7a8f0f);
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 8px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -4px -4px 8px var(--shadow-light, rgba(255, 255, 255, 0.7));
+}
+
+.kpi-grade-option:active {
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        inset -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7));
+}
+
+.kpi-grade-option.selected {
+    background: var(--accent-gradient, linear-gradient(135deg, #c4d916, #8fb300));
+    color: #fff;
+    box-shadow: 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+}
+
+.kpi-grade-modal-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.kpi-grade-modal-cancel {
+    padding: 8px 24px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.kpi-grade-modal-cancel:hover {
+    color: #e53935;
+}
+
+/* --- Save Toast --- */
+.kpi-save-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--block-bg, #f0f0f3);
+    border-radius: 12px;
+    padding: 10px 20px;
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.12),
+        -3px -3px 6px rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-text, #7a8f0f);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.4s ease;
+    pointer-events: none;
+}
+
+.kpi-save-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* --- Transitions Card --- */
 .kpi-transition-block {
     background: var(--bg-color);

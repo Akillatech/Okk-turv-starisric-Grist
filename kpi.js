@@ -24,7 +24,7 @@ const KPI_DEMO = {
     }
 };
 
-const KPI_GRADE_DEMO = { current: 'JUNIOR+', next: 'JUNIOR+', image: '🎖️' };
+const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
 const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', date: '01.02.2026', description: 'Описание последнего вклада' };
 const KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
@@ -350,200 +350,298 @@ function renderGradeCard() {
     var imgEl = document.getElementById('kpiGradeImage');
 
     if (el) el.textContent = KPI_GRADE_DEMO.current;
-    if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + KPI_GRADE_DEMO.next + '</span>';
+
+    // Calculate next grade
+    var ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
+    var currentIdx = ALL_GRADES.indexOf(KPI_GRADE_DEMO.current);
+    var nextGrade = currentIdx < ALL_GRADES.length - 1 ? ALL_GRADES[currentIdx + 1] : '—';
+    KPI_GRADE_DEMO.next = nextGrade;
+
+    if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + nextGrade + '</span>';
 
     // Render dynamic character
     if (imgEl) {
         imgEl.innerHTML = getGradeCharacterSVG(KPI_GRADE_DEMO.current);
-        imgEl.style.fontSize = '1rem'; // Reset font size since we use SVG
-        imgEl.style.background = 'none'; // Remove gray placeholder bg
+        imgEl.style.fontSize = '1rem';
+        imgEl.style.background = 'none';
         imgEl.style.boxShadow = 'none';
-        imgEl.style.width = '120px';
-
+        imgEl.style.width = '100%';
+        imgEl.style.maxWidth = '220px';
+        imgEl.style.height = 'auto';
+        imgEl.style.margin = '8px auto';
+        imgEl.style.display = 'flex';
+        imgEl.style.justifyContent = 'center';
+        imgEl.style.alignItems = 'center';
     }
+
+    // Init modal (once)
+    initGradeModal();
 }
 
+// =================== GRADE MODAL ===================
+
+var _gradeModalInited = false;
+
+function initGradeModal() {
+    if (_gradeModalInited) return;
+    _gradeModalInited = true;
+
+    var ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
+    var modal = document.getElementById('kpiGradeModal');
+    var grid = document.getElementById('kpiGradeModalGrid');
+    var editBtn = document.getElementById('kpiGradeEditBtn');
+    var cancelBtn = document.getElementById('kpiGradeModalCancel');
+    var toast = document.getElementById('kpiSaveToast');
+
+    if (!modal || !grid || !editBtn) return;
+
+    // Build grade option buttons
+    grid.innerHTML = '';
+    ALL_GRADES.forEach(function (grade) {
+        var btn = document.createElement('button');
+        btn.className = 'kpi-grade-option';
+        btn.textContent = grade;
+        btn.setAttribute('data-grade', grade);
+
+        if (grade === KPI_GRADE_DEMO.current) {
+            btn.classList.add('selected');
+        }
+
+        btn.addEventListener('click', function () {
+            // Update current grade
+            KPI_GRADE_DEMO.current = grade;
+
+            // Close modal
+            modal.classList.remove('active');
+
+            // Re-render card
+            _gradeModalInited = false; // allow re-init for selection update
+            renderGradeCard();
+
+            // Show save toast
+            if (typeof showSaveReminder === 'function') showSaveReminder();
+        });
+
+        grid.appendChild(btn);
+    });
+
+    // Open modal
+    editBtn.addEventListener('click', function () {
+        // Update selected state
+        var options = grid.querySelectorAll('.kpi-grade-option');
+        options.forEach(function (opt) {
+            opt.classList.toggle('selected', opt.getAttribute('data-grade') === KPI_GRADE_DEMO.current);
+        });
+        modal.classList.add('active');
+    });
+
+    // Close modal
+    cancelBtn.addEventListener('click', function () {
+        modal.classList.remove('active');
+    });
+
+    // Close on overlay click
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+}
+
+// Save reminder uses the global showSaveReminder() from script.js
+
 function getGradeCharacterSVG(grade) {
-    // HIGH-FIDELITY MEMOJI STYLE (Apple-like 3D)
-    // Complex paths, layering, and gradients for "Toy Realism"
+    // 3D CHIP-ROBOT — matches brand logo mascot
+    // Rounded-square chip head, connector pins, circular eyes, smile
     let base = grade.replace(/[-+]/g, '').trim();
     let mod = grade.includes('+') ? 'plus' : grade.includes('-') ? 'minus' : 'std';
 
     let svg = '<svg viewBox="0 0 200 200" width="100%" height="100%">';
 
+    // Unique IDs to avoid collisions
+    let uid = 'cr' + Math.random().toString(36).substr(2, 4);
+
     svg += '<defs>';
-    // 1. Skin: Warm Yellow-Orange (Simpsons/Lego Premium)
-    svg += '<radialGradient id="skinBase" cx="40%" cy="35%" r="65%">';
-    svg += '<stop offset="0%" stop-color="#FFEB3B"/>';   // Highlight
-    svg += '<stop offset="100%" stop-color="#FBC02D"/>';  // Shadow
+
+    // 1. Chip body gradient (3D lime-green)
+    svg += '<radialGradient id="' + uid + 'chipBody" cx="35%" cy="30%" r="70%">';
+    svg += '<stop offset="0%" stop-color="#E3FB1E"/>';    // Bright highlight
+    svg += '<stop offset="50%" stop-color="#C4D916"/>';   // Brand color
+    svg += '<stop offset="100%" stop-color="#9AAE0B"/>';  // Shadow
     svg += '</radialGradient>';
 
-    // 2. Cheek Blush (Soft Pink tint on Yellow)
-    svg += '<radialGradient id="blush" cx="50%" cy="50%" r="50%">';
-    svg += '<stop offset="0%" stop-color="#FF5252" stop-opacity="0.15"/>';
-    svg += '<stop offset="100%" stop-color="#FF5252" stop-opacity="0"/>';
+    // 2. Chip face (inner area — lighter)
+    svg += '<radialGradient id="' + uid + 'chipFace" cx="40%" cy="35%" r="65%">';
+    svg += '<stop offset="0%" stop-color="#ffffff"/>';
+    svg += '<stop offset="100%" stop-color="#F5F5F0"/>';
     svg += '</radialGradient>';
 
-    // 3. Hair Gradients (Volumetric)
-    svg += '<linearGradient id="hairDark" x1="0%" y1="0%" x2="0%" y2="100%">';
-    svg += '<stop offset="0%" stop-color="#4E342E"/>';
-    svg += '<stop offset="100%" stop-color="#210F0B"/>';
-    svg += '</linearGradient>';
-    svg += '<linearGradient id="hairBlonde" x1="0%" y1="0%" x2="0%" y2="100%">';
-    svg += '<stop offset="0%" stop-color="#FFF59D"/>';
-    svg += '<stop offset="100%" stop-color="#FBC02D"/>';
+    // 3. Pin gradient (metallic)
+    svg += '<linearGradient id="' + uid + 'pin" x1="0%" y1="0%" x2="0%" y2="100%">';
+    svg += '<stop offset="0%" stop-color="#E3FB1E"/>';
+    svg += '<stop offset="50%" stop-color="#C4D916"/>';
+    svg += '<stop offset="100%" stop-color="#8FA00A"/>';
     svg += '</linearGradient>';
 
-    // 4. Eyes (Shiny)
-    svg += '<radialGradient id="eyeIris" cx="50%" cy="50%" r="50%">';
-    svg += '<stop offset="60%" stop-color="#42A5F5"/>';
-    svg += '<stop offset="100%" stop-color="#0D47A1"/>';
+    // 4. Eye color (per grade)
+    let eyeColor1 = '#C4D916';  // Default lime
+    let eyeColor2 = '#8FA00A';
+    if (base.includes('MIDDLE')) { eyeColor1 = '#42A5F5'; eyeColor2 = '#1565C0'; }
+    if (base.includes('SENIOR')) { eyeColor1 = '#78909C'; eyeColor2 = '#37474F'; }
+
+    svg += '<radialGradient id="' + uid + 'eye" cx="40%" cy="35%" r="60%">';
+    svg += '<stop offset="0%" stop-color="' + eyeColor1 + '"/>';
+    svg += '<stop offset="100%" stop-color="' + eyeColor2 + '"/>';
     svg += '</radialGradient>';
 
-    // 5. Gold (Crown)
-    svg += '<linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">';
-    svg += '<stop offset="0%" stop-color="#FFEC8B"/>';
-    svg += '<stop offset="50%" stop-color="#FFC107"/>';
-    svg += '<stop offset="100%" stop-color="#FF6F00"/>';
-    svg += '</linearGradient>';
+    // 5. Specular highlight
+    svg += '<radialGradient id="' + uid + 'spec" cx="30%" cy="20%" r="50%">';
+    svg += '<stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>';
+    svg += '<stop offset="100%" stop-color="rgba(255,255,255,0)"/>';
+    svg += '</radialGradient>';
 
-    // 6. Glasses Lens
-    svg += '<linearGradient id="glassLens" x1="0%" y1="0%" x2="100%" y2="100%">';
-    svg += '<stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>';
-    svg += '<stop offset="50%" stop-color="rgba(255,255,255,0.1)"/>';
-    svg += '<stop offset="100%" stop-color="rgba(255,255,255,0.2)"/>';
-    svg += '</linearGradient>';
-
-    // 7. Soft Drop Shadow
-    svg += '<filter id="softDrop" x="-20%" y="-20%" width="140%" height="140%">';
+    // 6. Drop shadow
+    svg += '<filter id="' + uid + 'shadow" x="-20%" y="-20%" width="140%" height="140%">';
     svg += '<feGaussianBlur in="SourceAlpha" stdDeviation="4"/>';
-    svg += '<feOffset dx="0" dy="4" result="offsetblur"/>';
-    svg += '<feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>';
-    svg += '<feMerge><feMergeNode in="offsetblur"/><feMergeNode in="SourceGraphic"/></feMerge>';
+    svg += '<feOffset dx="0" dy="4" result="s"/>';
+    svg += '<feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>';
+    svg += '<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>';
     svg += '</filter>';
+
+    // 7. Gold badge
+    svg += '<linearGradient id="' + uid + 'gold" x1="0%" y1="0%" x2="100%" y2="100%">';
+    svg += '<stop offset="0%" stop-color="#FFE082"/>';
+    svg += '<stop offset="50%" stop-color="#FFC107"/>';
+    svg += '<stop offset="100%" stop-color="#FF8F00"/>';
+    svg += '</linearGradient>';
+
+    // 8. Glasses lens
+    svg += '<linearGradient id="' + uid + 'lens" x1="0%" y1="0%" x2="100%" y2="100%">';
+    svg += '<stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>';
+    svg += '<stop offset="100%" stop-color="rgba(200,230,255,0.15)"/>';
+    svg += '</linearGradient>';
+
     svg += '</defs>';
 
-    // Animate Float
-    svg += '<g filter="url(#softDrop)">';
-    svg += '<animateTransform attributeName="transform" type="translate" values="0 0; 0 -3; 0 0" dur="5s" repeatCount="indefinite" />';
+    // === FLOATING ANIMATION ===
+    svg += '<g filter="url(#' + uid + 'shadow)">';
+    svg += '<animateTransform attributeName="transform" type="translate" values="0 0; 0 -3; 0 0" dur="4s" repeatCount="indefinite" />';
 
-    // --- CLOTHING (Bust) ---
-    // Shoulders
-    let clotheColor = '#37474F'; // Default Grey Hoodie
-    if (base.includes('MIDDLE')) clotheColor = '#1565C0'; // Blue Shirt
-    if (base.includes('SENIOR')) clotheColor = '#212121'; // Black Turtleneck
-    if (base.includes('LEAD')) clotheColor = '#4A148C'; // Purple Royal
+    // === CONNECTOR PINS ===
+    // Top pins (2)
+    svg += '<rect x="72" y="22" width="8" height="16" rx="2" fill="url(#' + uid + 'pin)"/>';
+    svg += '<rect x="120" y="22" width="8" height="16" rx="2" fill="url(#' + uid + 'pin)"/>';
+    // Left pins (2)
+    svg += '<rect x="28" y="70" width="16" height="7" rx="2" fill="url(#' + uid + 'pin)"/>';
+    svg += '<rect x="28" y="105" width="16" height="7" rx="2" fill="url(#' + uid + 'pin)"/>';
+    // Right pins (2)
+    svg += '<rect x="156" y="70" width="16" height="7" rx="2" fill="url(#' + uid + 'pin)"/>';
+    svg += '<rect x="156" y="105" width="16" height="7" rx="2" fill="url(#' + uid + 'pin)"/>';
 
-    svg += '<path d="M40 160 Q100 165 160 160 L180 200 L20 200 Z" fill="' + clotheColor + '" />';
-    // Neck
-    svg += '<path d="M75 135 L75 165 L125 165 L125 135" fill="#F9A825" />'; // Darker neck shadow
-    // Shadow under chin
-    svg += '<path d="M75 135 Q100 155 125 135" fill="rgba(0,0,0,0.15)" />';
+    // === CHIP HEAD (Rounded Square) ===
+    svg += '<rect x="42" y="35" width="116" height="116" rx="22" fill="url(#' + uid + 'chipBody)"/>';
+    // Inner face area (white/light)
+    svg += '<rect x="52" y="45" width="96" height="96" rx="16" fill="url(#' + uid + 'chipFace)"/>';
+    // Specular highlight on body
+    svg += '<rect x="42" y="35" width="116" height="60" rx="22" fill="url(#' + uid + 'spec)" opacity="0.5"/>';
 
-    // --- HAIR BACK (Behind Head) ---
-    if (base.includes('LEAD') || base.includes('MIDDLE')) {
-        // Long/Bob style back
-        svg += '<path d="M50 80 Q40 160 160 160 Q160 80 150 80" fill="url(#hairDark)" stroke="#210F0B" stroke-width="2"/>';
-    }
+    // === EYES (Big & Cute!) ===
+    let eyeY = 82;
+    let eyeLX = 78;
+    let eyeRX = 122;
+    let eyeR = 14;
 
-    // --- HEAD SHAPE (Squircle Jaw) ---
-    // Complex path for cheekbones and chin
-    svg += '<path d="M50 70 Q50 20 100 20 Q150 20 150 70 Q152 110 135 135 Q100 155 65 135 Q48 110 50 70 Z" fill="url(#skinBase)" />';
+    svg += '<circle cx="' + eyeLX + '" cy="' + eyeY + '" r="' + eyeR + '" fill="url(#' + uid + 'eye)"/>';
+    svg += '<circle cx="' + eyeRX + '" cy="' + eyeY + '" r="' + eyeR + '" fill="url(#' + uid + 'eye)"/>';
+    // Big cute highlights (kawaii style)
+    svg += '<circle cx="' + (eyeLX - 4) + '" cy="' + (eyeY - 5) + '" r="5" fill="white" opacity="0.9"/>';
+    svg += '<circle cx="' + (eyeRX - 4) + '" cy="' + (eyeY - 5) + '" r="5" fill="white" opacity="0.9"/>';
+    svg += '<circle cx="' + (eyeLX + 4) + '" cy="' + (eyeY + 4) + '" r="2" fill="white" opacity="0.5"/>';
+    svg += '<circle cx="' + (eyeRX + 4) + '" cy="' + (eyeY + 4) + '" r="2" fill="white" opacity="0.5"/>';
 
-    // Cheeks Blush
-    svg += '<ellipse cx="65" cy="105" rx="15" ry="10" fill="url(#blush)" />';
-    svg += '<ellipse cx="135" cy="105" rx="15" ry="10" fill="url(#blush)" />';
-
-    // --- EYES (Detailed) ---
-    // Whites
-    let eyeY = 90;
-    svg += '<path d="M60 ' + eyeY + ' Q75 ' + (eyeY - 12) + ' 90 ' + eyeY + ' Q75 ' + (eyeY + 12) + ' 60 ' + eyeY + ' Z" fill="white" />';
-    svg += '<path d="M110 ' + eyeY + ' Q125 ' + (eyeY - 12) + ' 140 ' + eyeY + ' Q125 ' + (eyeY + 12) + ' 110 ' + eyeY + ' Z" fill="white" />';
-
-    // Iris
-    svg += '<circle cx="75" cy="' + eyeY + '" r="6" fill="url(#eyeIris)" />';
-    svg += '<circle cx="125" cy="' + eyeY + '" r="6" fill="url(#eyeIris)" />';
-
-    // Pupil
-    svg += '<circle cx="75" cy="' + eyeY + '" r="2.5" fill="#111" />';
-    svg += '<circle cx="125" cy="' + eyeY + '" r="2.5" fill="#111" />';
-
-    // Highlight (Reflection)
-    svg += '<circle cx="73" cy="' + (eyeY - 2) + '" r="1.5" fill="white" opacity="0.8" />';
-    svg += '<circle cx="123" cy="' + (eyeY - 2) + '" r="1.5" fill="white" opacity="0.8" />';
-
-    // Eyelashes/Liner (Thick top line)
-    svg += '<path d="M60 ' + eyeY + ' Q75 ' + (eyeY - 14) + ' 90 ' + eyeY + '" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" />';
-    svg += '<path d="M110 ' + eyeY + ' Q125 ' + (eyeY - 14) + ' 140 ' + eyeY + '" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" />';
-
-    // Eyebrows
-    let browY = eyeY - 18;
-    let browColor = '#4E342E';
+    // === SMILE (Always friendly & cute) ===
+    let smileY = 110;
     if (base.includes('JUNIOR')) {
-        // Surprised/High brows
-        svg += '<path d="M60 ' + browY + ' Q75 ' + (browY - 5) + ' 90 ' + browY + '" fill="none" stroke="' + browColor + '" stroke-width="3" stroke-linecap="round" />';
-        svg += '<path d="M110 ' + browY + ' Q125 ' + (browY - 5) + ' 140 ' + browY + '" fill="none" stroke="' + browColor + '" stroke-width="3" stroke-linecap="round" />';
+        // Big happy grin :D
+        svg += '<path d="M72 ' + smileY + ' Q100 ' + (smileY + 20) + ' 128 ' + smileY + '" fill="none" stroke="' + eyeColor2 + '" stroke-width="4" stroke-linecap="round"/>';
+        // Rosy cheeks (blush)
+        svg += '<circle cx="60" cy="' + (smileY - 2) + '" r="7" fill="#FF8A80" opacity="0.3"/>';
+        svg += '<circle cx="140" cy="' + (smileY - 2) + '" r="7" fill="#FF8A80" opacity="0.3"/>';
+    } else if (base.includes('SENIOR')) {
+        // Warm knowing smile :)
+        svg += '<path d="M76 ' + smileY + ' Q100 ' + (smileY + 14) + ' 124 ' + smileY + '" fill="none" stroke="' + eyeColor2 + '" stroke-width="3.5" stroke-linecap="round"/>';
     } else {
-        // Confident/Lower
-        svg += '<path d="M60 ' + (browY + 2) + ' Q75 ' + (browY) + ' 90 ' + (browY + 2) + '" fill="none" stroke="' + browColor + '" stroke-width="3.5" stroke-linecap="round" />';
-        svg += '<path d="M110 ' + (browY + 2) + ' Q125 ' + (browY) + ' 140 ' + (browY + 2) + '" fill="none" stroke="' + browColor + '" stroke-width="3.5" stroke-linecap="round" />';
+        // Friendly smile
+        svg += '<path d="M74 ' + smileY + ' Q100 ' + (smileY + 16) + ' 126 ' + smileY + '" fill="none" stroke="' + eyeColor2 + '" stroke-width="3.5" stroke-linecap="round"/>';
     }
 
-    // --- NOSE ---
-    // Simple 3D nose shading
-    svg += '<path d="M95 105 Q100 115 105 105" fill="none" stroke="#F57F17" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />';
-    svg += '<path d="M90 100 Q100 112 110 100" fill="none" stroke="none" />'; // Invisible guide
-
-    // --- MOUTH ---
-    let mouthY = 125;
+    // === GRADE-SPECIFIC ACCESSORIES ===
     if (base.includes('JUNIOR')) {
-        // Smile with teeth
-        svg += '<path d="M80 ' + mouthY + ' Q100 ' + (mouthY + 15) + ' 120 ' + mouthY + '" fill="white" stroke="none" />'; // Teeth
-        svg += '<path d="M80 ' + mouthY + ' Q100 ' + (mouthY + 15) + ' 120 ' + mouthY + '" fill="none" stroke="#D84315" stroke-width="2" stroke-linecap="round" />'; // Outline
-        svg += '<path d="M80 ' + mouthY + ' Q100 ' + (mouthY + 5) + ' 120 ' + mouthY + '" fill="none" stroke="#D84315" stroke-width="1" stroke-linecap="round" opacity="0.5" />'; // Lip crease
-    } else {
-        // Smirk / Closed
-        svg += '<path d="M85 ' + (mouthY + 2) + ' Q100 ' + (mouthY + 6) + ' 115 ' + (mouthY + 2) + '" fill="none" stroke="#D84315" stroke-width="3" stroke-linecap="round" />';
+        // --- Pulsing green LED "heart" at bottom center ---
+        svg += '<circle cx="100" cy="132" r="4" fill="#4CAF50" opacity="0.9">';
+        svg += '<animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite"/>';
+        svg += '</circle>';
+        // Soft glow
+        svg += '<circle cx="100" cy="132" r="10" fill="#4CAF50" opacity="0.1">';
+        svg += '<animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>';
+        svg += '</circle>';
     }
 
-    // --- HAIR FRONT & ACCESSORIES ---
-    if (base.includes('JUNIOR')) {
-        // Baseball Cap (Orange)
-        svg += '<path d="M45 60 Q100 30 155 60 L155 50 Q100 0 45 50 Z" fill="#FF5722" />'; // Dome
-        svg += '<path d="M40 60 Q100 50 160 60 L150 70 Q100 80 50 70 Z" fill="#D84315" />'; // Visor
-        // Messy hair popping out sides
-        svg += '<path d="M45 70 Q35 80 45 90" fill="none" stroke="#4E342E" stroke-width="6" stroke-linecap="round" />';
-        svg += '<path d="M155 70 Q165 80 155 90" fill="none" stroke="#4E342E" stroke-width="6" stroke-linecap="round" />';
-    }
-    else if (base.includes('MIDDLE')) {
-        // Neat Side Part Hair
-        svg += '<path d="M50 70 Q40 50 50 40 Q80 20 140 30 Q155 40 150 70 L150 50 Q100 25 50 50 Z" fill="url(#hairDark)" />';
-        // Glasses (Thick Black Frames)
-        // Lenses
-        svg += '<rect x="58" y="78" width="34" height="24" rx="6" fill="url(#glassLens)" stroke="#111" stroke-width="3" />'; // Left
-        svg += '<rect x="108" y="78" width="34" height="24" rx="6" fill="url(#glassLens)" stroke="#111" stroke-width="3" />'; // Right
-        // Bridge
-        svg += '<line x1="92" y1="85" x2="108" y2="85" stroke="#111" stroke-width="3" />';
-    }
-    else if (base.includes('SENIOR')) {
-        // Slick Back Hair
-        svg += '<path d="M50 60 Q100 10 150 60 L150 40 Q100 0 50 40 Z" fill="#212121" />';
-        // Stubble/Beard
-        svg += '<path d="M60 110 Q100 140 140 110 L140 120 Q100 160 60 120 Z" fill="#212121" opacity="0.2" />';
-    }
-    else if (base.includes('LEAD')) {
-        // Crown (Physical 3D Object)
-        svg += '<path d="M60 40 L60 15 L85 30 L100 5 L115 30 L140 15 L140 40 Q100 50 60 40 Z" fill="url(#gold)" stroke="#E65100" stroke-width="1" />';
-        // Hair under crown
-        svg += '<path d="M55 50 Q100 60 145 50" fill="none" stroke="#212121" stroke-width="4" />';
+    if (base.includes('MIDDLE')) {
+        // --- Circuit traces from left pins to left eye ---
+        svg += '<path d="M44 74 L55 74 L60 80" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
+        svg += '<path d="M44 109 L55 109 L60 100" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
+        // Traces from right pins to right eye
+        svg += '<path d="M156 74 L145 74 L140 80" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
+        svg += '<path d="M156 109 L145 109 L140 100" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
+        // Tiny dots at trace corners
+        svg += '<circle cx="55" cy="74" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
+        svg += '<circle cx="55" cy="109" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
+        svg += '<circle cx="145" cy="74" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
+        svg += '<circle cx="145" cy="109" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
+
+        // --- WiFi icon above head ---
+        svg += '<g transform="translate(100, 18)" opacity="0.7">';
+        svg += '<path d="M-10 0 Q0 -8 10 0" fill="none" stroke="' + eyeColor1 + '" stroke-width="2" stroke-linecap="round"/>';
+        svg += '<path d="M-6 3 Q0 -2 6 3" fill="none" stroke="' + eyeColor1 + '" stroke-width="2" stroke-linecap="round"/>';
+        svg += '<circle cx="0" cy="6" r="1.5" fill="' + eyeColor1 + '"/>';
+        svg += '</g>';
     }
 
-    // "Plus" Star (3D Badge)
+    if (base.includes('SENIOR')) {
+        // --- Heatsink fins on top ---
+        for (let i = 0; i < 5; i++) {
+            let fx = 76 + i * 12;
+            svg += '<rect x="' + fx + '" y="28" width="8" height="10" rx="1" fill="' + eyeColor2 + '" opacity="0.5"/>';
+        }
+        // Heatsink base bar
+        svg += '<rect x="74" y="36" width="52" height="3" rx="1" fill="' + eyeColor2 + '" opacity="0.4"/>';
+
+        // --- Status LEDs (3 dots top-right inside face) ---
+        svg += '<circle cx="133" cy="53" r="2.5" fill="#4CAF50" opacity="0.8">';
+        svg += '<animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>';
+        svg += '</circle>';
+        svg += '<circle cx="140" cy="53" r="2.5" fill="#2196F3" opacity="0.7"/>';
+        svg += '<circle cx="126" cy="53" r="2.5" fill="#FF9800" opacity="0.6">';
+        svg += '<animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>';
+        svg += '</circle>';
+    }
+
+    // === "PLUS" STAR BADGE ===
     if (mod === 'plus') {
-        svg += '<g transform="translate(150, 150)">';
-        svg += '<path d="M10 0 L13 7 L20 7 L15 12 L17 19 L10 15 L3 19 L5 12 L0 7 L7 7 Z" fill="url(#gold)" stroke="#fff" stroke-width="1" filter="url(#softDrop)">';
-        svg += '<animateTransform attributeName="transform" type="rotate" values="0 10 10; 360 10 10" dur="8s" repeatCount="indefinite" />';
-        svg += '</path>';
+        svg += '<g transform="translate(148, 138)">';
+        svg += '<circle cx="10" cy="10" r="12" fill="url(#' + uid + 'gold)" stroke="#fff" stroke-width="1.5"/>';
+        svg += '<text x="10" y="15" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">+</text>';
+        svg += '<animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="2s" repeatCount="indefinite" additive="sum"/>';
+        svg += '</g>';
+    }
+
+    // === "MINUS" INDICATOR ===
+    if (mod === 'minus') {
+        svg += '<g transform="translate(148, 138)">';
+        svg += '<circle cx="10" cy="10" r="12" fill="#78909C" stroke="#fff" stroke-width="1.5"/>';
+        svg += '<text x="10" y="14" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">−</text>';
         svg += '</g>';
     }
 
