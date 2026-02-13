@@ -173,7 +173,7 @@
 
 .kpi-cards-top-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 3fr 2fr;
     gap: 16px;
 }
 
@@ -289,17 +289,36 @@
 }
 
 .kpi-grade-name {
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    padding: 8px 24px;
+    border-radius: 14px;
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    position: relative;
+    /* Gradient text on top of neumorphic bg */
+    background-image: var(--accent-gradient);
+    background-size: 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
 }
 
 .kpi-grade-next {
     font-size: 11px;
     font-weight: 600;
     color: var(--text-secondary);
+    padding: 5px 14px;
+    border-radius: 10px;
+    background: var(--bg-color);
+    box-shadow: 2px 2px 4px var(--shadow-dark),
+        -2px -2px 4px var(--shadow-light);
 }
 
 .kpi-grade-next-value {

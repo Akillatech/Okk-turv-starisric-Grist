@@ -601,55 +601,99 @@ function getGradeCharacterSVG(grade) {
 
     // === GRADE-SPECIFIC ACCESSORIES ===
     if (base.includes('JUNIOR')) {
-        // --- Pulsing green LED "heart" at bottom center ---
-        svg += '<circle cx="100" cy="132" r="4" fill="#4CAF50" opacity="0.9">';
-        svg += '<animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>';
-        svg += '<animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite"/>';
-        svg += '</circle>';
-        // Soft glow
-        svg += '<circle cx="100" cy="132" r="10" fill="#4CAF50" opacity="0.1">';
-        svg += '<animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>';
-        svg += '</circle>';
+        // --- ✨ Sparkles around the chip (just unpacked!) ---
+        // Star helper: 4-point star at (cx, cy) with size s
+        var stars = [
+            { x: 38, y: 42, s: 5, d: '1.2s', del: '0s' },
+            { x: 162, y: 52, s: 4, d: '1.5s', del: '0.3s' },
+            { x: 155, y: 140, s: 6, d: '1.8s', del: '0.6s' },
+            { x: 45, y: 135, s: 4, d: '1.4s', del: '0.9s' },
+            { x: 100, y: 24, s: 5, d: '2s', del: '0.4s' }
+        ];
+        stars.forEach(function (st) {
+            svg += '<g transform="translate(' + st.x + ',' + st.y + ')">';
+            svg += '<path d="M0 -' + st.s + ' L' + (st.s * 0.3) + ' -' + (st.s * 0.3) + ' L' + st.s + ' 0 L' + (st.s * 0.3) + ' ' + (st.s * 0.3) + ' L0 ' + st.s + ' L-' + (st.s * 0.3) + ' ' + (st.s * 0.3) + ' L-' + st.s + ' 0 L-' + (st.s * 0.3) + ' -' + (st.s * 0.3) + ' Z" fill="' + eyeColor1 + '">';
+            svg += '<animate attributeName="opacity" values="0.9;0.2;0.9" dur="' + st.d + '" begin="' + st.del + '" repeatCount="indefinite"/>';
+            svg += '<animateTransform attributeName="transform" type="rotate" values="0;45;0" dur="' + st.d + '" begin="' + st.del + '" repeatCount="indefinite"/>';
+            svg += '</path>';
+            svg += '</g>';
+        });
     }
 
     if (base.includes('MIDDLE')) {
-        // --- Circuit traces from left pins to left eye ---
-        svg += '<path d="M44 74 L55 74 L60 80" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
-        svg += '<path d="M44 109 L55 109 L60 100" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
-        // Traces from right pins to right eye
-        svg += '<path d="M156 74 L145 74 L140 80" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
-        svg += '<path d="M156 109 L145 109 L140 100" fill="none" stroke="' + eyeColor1 + '" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>';
-        // Tiny dots at trace corners
-        svg += '<circle cx="55" cy="74" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
-        svg += '<circle cx="55" cy="109" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
-        svg += '<circle cx="145" cy="74" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
-        svg += '<circle cx="145" cy="109" r="1.5" fill="' + eyeColor1 + '" opacity="0.6"/>';
+        // --- 🎧 Headphones ---
+        // Headband arc
+        svg += '<path d="M38 75 Q38 15 100 15 Q162 15 162 75" fill="none" stroke="#333" stroke-width="5" stroke-linecap="round"/>';
+        svg += '<path d="M42 75 Q42 20 100 20 Q158 20 158 75" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.3"/>';
 
-        // --- WiFi icon above head ---
-        svg += '<g transform="translate(100, 18)" opacity="0.7">';
-        svg += '<path d="M-10 0 Q0 -8 10 0" fill="none" stroke="' + eyeColor1 + '" stroke-width="2" stroke-linecap="round"/>';
-        svg += '<path d="M-6 3 Q0 -2 6 3" fill="none" stroke="' + eyeColor1 + '" stroke-width="2" stroke-linecap="round"/>';
-        svg += '<circle cx="0" cy="6" r="1.5" fill="' + eyeColor1 + '"/>';
-        svg += '</g>';
+        // Left ear cup (with bass pulse)
+        svg += '<rect x="26" y="65" width="16" height="22" rx="6" fill="#333"/>';
+        svg += '<rect x="28" y="68" width="12" height="16" rx="4" fill="' + eyeColor1 + '" opacity="0.7">';
+        svg += '<animate attributeName="opacity" values="0.7;1;0.7" dur="0.8s" repeatCount="indefinite"/>';
+        svg += '</rect>';
+        svg += '<rect x="29" y="69" width="4" height="8" rx="2" fill="white" opacity="0.3"/>';
+
+        // Right ear cup (with bass pulse, offset)
+        svg += '<rect x="158" y="65" width="16" height="22" rx="6" fill="#333"/>';
+        svg += '<rect x="160" y="68" width="12" height="16" rx="4" fill="' + eyeColor1 + '" opacity="0.7">';
+        svg += '<animate attributeName="opacity" values="0.7;1;0.7" dur="0.8s" begin="0.4s" repeatCount="indefinite"/>';
+        svg += '</rect>';
+        svg += '<rect x="161" y="69" width="4" height="8" rx="2" fill="white" opacity="0.3"/>';
+
+        // Floating music notes ♪ from left
+        svg += '<text x="18" y="60" font-size="12" fill="' + eyeColor1 + '">';
+        svg += '♪';
+        svg += '<animate attributeName="y" values="60;40;20" dur="2.5s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0.8;0.5;0" dur="2.5s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="x" values="18;12;8" dur="2.5s" repeatCount="indefinite"/>';
+        svg += '</text>';
+
+        // Floating music notes ♫ from right
+        svg += '<text x="178" y="55" font-size="10" fill="' + eyeColor1 + '">';
+        svg += '♫';
+        svg += '<animate attributeName="y" values="55;35;15" dur="3s" begin="0.8s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0.7;0.4;0" dur="3s" begin="0.8s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="x" values="178;183;188" dur="3s" begin="0.8s" repeatCount="indefinite"/>';
+        svg += '</text>';
+
+        // Extra note from left (offset)
+        svg += '<text x="22" y="70" font-size="9" fill="' + eyeColor2 + '">';
+        svg += '♪';
+        svg += '<animate attributeName="y" values="70;50;25" dur="3.2s" begin="1.5s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0.6;0.3;0" dur="3.2s" begin="1.5s" repeatCount="indefinite"/>';
+        svg += '</text>';
     }
 
     if (base.includes('SENIOR')) {
-        // --- Heatsink fins on top ---
-        for (let i = 0; i < 5; i++) {
-            let fx = 76 + i * 12;
-            svg += '<rect x="' + fx + '" y="28" width="8" height="10" rx="1" fill="' + eyeColor2 + '" opacity="0.5"/>';
-        }
-        // Heatsink base bar
-        svg += '<rect x="74" y="36" width="52" height="3" rx="1" fill="' + eyeColor2 + '" opacity="0.4"/>';
+        // --- 🎓 Graduation cap (mortarboard) ---
+        // Board (diamond shape)
+        svg += '<path d="M50 30 L100 18 L150 30 L100 42 Z" fill="' + eyeColor2 + '"/>';
+        svg += '<path d="M50 30 L100 18 L150 30 L100 28 Z" fill="' + eyeColor1 + '" opacity="0.4"/>';
+        // Cap base
+        svg += '<rect x="70" y="30" width="60" height="10" rx="2" fill="' + eyeColor2 + '"/>';
 
-        // --- Status LEDs (3 dots top-right inside face) ---
-        svg += '<circle cx="133" cy="53" r="2.5" fill="#4CAF50" opacity="0.8">';
-        svg += '<animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>';
+        // Pulsing gold button on top
+        svg += '<circle cx="100" cy="28" r="3" fill="url(#' + uid + 'gold)">';
+        svg += '<animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>';
         svg += '</circle>';
-        svg += '<circle cx="140" cy="53" r="2.5" fill="#2196F3" opacity="0.7"/>';
-        svg += '<circle cx="126" cy="53" r="2.5" fill="#FF9800" opacity="0.6">';
-        svg += '<animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>';
+        // Gold glow on button
+        svg += '<circle cx="100" cy="28" r="6" fill="#FFC107" opacity="0.15">';
+        svg += '<animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0.15;0.05;0.15" dur="2s" repeatCount="indefinite"/>';
         svg += '</circle>';
+
+        // Swinging tassel (animated with transform origin at attachment point)
+        svg += '<g>';
+        svg += '<animateTransform attributeName="transform" type="rotate" values="-5 100 28;5 100 28;-5 100 28" dur="3s" repeatCount="indefinite"/>';
+        // Tassel string
+        svg += '<path d="M100 28 Q115 30 130 32 Q135 36 135 42" fill="none" stroke="url(#' + uid + 'gold)" stroke-width="2" stroke-linecap="round"/>';
+        // Tassel end (hanging part)
+        svg += '<rect x="132" y="42" width="6" height="10" rx="2" fill="url(#' + uid + 'gold)"/>';
+        // Tassel fringe
+        svg += '<line x1="133" y1="52" x2="132" y2="57" stroke="#FFC107" stroke-width="1" opacity="0.7"/>';
+        svg += '<line x1="135" y1="52" x2="135" y2="58" stroke="#FFD54F" stroke-width="1" opacity="0.7"/>';
+        svg += '<line x1="137" y1="52" x2="138" y2="56" stroke="#FFC107" stroke-width="1" opacity="0.7"/>';
+        svg += '</g>';
     }
 
     // === "PLUS" STAR BADGE ===
