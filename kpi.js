@@ -15,14 +15,48 @@ const QUARTER_MONTHS = {
     4: ['ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'],
 };
 
-const KPI_DEMO = {
-    2026: {
-        1: { months: [{ overall: 100, speed: 100, er: 85, test: 55 }, { overall: 100, speed: 100, er: 85, test: 55 }, { overall: 100, speed: 100, er: 85, test: 55 }], total: 63 },
-        2: { months: [{ overall: 90, speed: 95, er: 80, test: 60 }, { overall: 85, speed: 90, er: 75, test: 50 }, { overall: 88, speed: 92, er: 78, test: 55 }], total: 55 },
-        3: { months: [{ overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }], total: 0 },
-        4: { months: [{ overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }, { overall: 0, speed: 0, er: 0, test: 0 }], total: 0 },
-    }
-};
+let kpiData = {};
+
+// Empty quarter template
+function emptyQuarter() {
+    return {
+        months: [
+            { overall: 0, speed: 0, er: 0, test: 0 },
+            { overall: 0, speed: 0, er: 0, test: 0 },
+            { overall: 0, speed: 0, er: 0, test: 0 }
+        ],
+        total: 0
+    };
+}
+
+// Auto-calculate overall & total
+function recalcQuarter(qData) {
+    if (!qData || !qData.months) return;
+    var sum = 0;
+    qData.months.forEach(function (m) {
+        m.overall = Math.round((m.speed + m.er + m.test) / 3);
+        sum += m.overall;
+    });
+    qData.total = Math.round(sum / 3);
+}
+
+// Ensure year/quarter structure exists
+function ensureKpiStructure(year, quarter) {
+    if (!kpiData[year]) kpiData[year] = {};
+    if (!kpiData[year][quarter]) kpiData[year][quarter] = emptyQuarter();
+    return kpiData[year][quarter];
+}
+
+// Load saved KPI data from localStorage
+(function loadSavedKpiData() {
+    try {
+        var saved = localStorage.getItem('okk_kpi_data');
+        if (saved) {
+            kpiData = JSON.parse(saved);
+            console.log('✅ KPI Data loaded from localStorage');
+        }
+    } catch (e) { console.error('Failed to load kpiData from localStorage', e); }
+})();
 
 const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
 
@@ -51,12 +85,12 @@ function renderKpiView() {
     if (yearSelect) yearSelect.value = kpiState.year;
     var qSel = document.getElementById('kpiQuarterSelect');
     if (qSel) qSel.value = kpiState.quarter;
-    var yearData = KPI_DEMO[kpiState.year];
-    var qData = yearData ? yearData[kpiState.quarter] : null;
+    var qData = ensureKpiStructure(kpiState.year, kpiState.quarter);
     renderTriangleChart(qData);
     renderGradeCard();
     renderContributionCard();
     renderTransitionsCard();
+    initKpiDataModal();
 }
 
 
@@ -389,7 +423,136 @@ function renderGradeCard() {
     initGradeModal();
 }
 
-// =================== GRADE MODAL ===================
+// =================== KPI DATA MODAL ===================
+
+var _kpiDataModalInited = false;
+
+function initKpiDataModal() {
+    if (_kpiDataModalInited) return;
+    _kpiDataModalInited = true;
+
+    var modal = document.getElementById('kpiDataModal');
+    var editBtn = document.getElementById('kpiDataEditBtn');
+    var applyBtn = document.getElementById('kpiDataApply');
+    var cancelBtn = document.getElementById('kpiDataCancel');
+    var yearSel = document.getElementById('kpiDataYear');
+    var quarterSel = document.getElementById('kpiDataQuarter');
+    var table = document.getElementById('kpiDataTable');
+
+    if (!modal || !editBtn) return;
+
+    // Sync year options from the main kpiYearSelect
+    function syncYearOptions() {
+        var mainYearSel = document.getElementById('kpiYearSelect');
+        if (mainYearSel && yearSel) {
+            yearSel.innerHTML = mainYearSel.innerHTML;
+        }
+    }
+
+    // Populate the inputs table for the given year/quarter
+    function populateTable(year, quarter) {
+        var monthNames = QUARTER_MONTHS[quarter] || ['—', '—', '—'];
+        var qData = ensureKpiStructure(year, quarter);
+        var html = '';
+
+        for (var i = 0; i < 3; i++) {
+            var m = qData.months[i];
+            html += '<div class="kpi-data-month-row">';
+            html += '<div class="kpi-data-month-label">' + monthNames[i] + '</div>';
+            html += '<div class="kpi-data-inputs">';
+            html += '<div class="kpi-data-input-group">';
+            html += '<label>Скорость</label>';
+            html += '<input type="number" class="kpi-data-input" data-month="' + i + '" data-metric="speed" min="0" max="100" value="' + (m.speed || 0) + '" placeholder="0">';
+            html += '</div>';
+            html += '<div class="kpi-data-input-group">';
+            html += '<label>ER</label>';
+            html += '<input type="number" class="kpi-data-input" data-month="' + i + '" data-metric="er" min="0" max="100" value="' + (m.er || 0) + '" placeholder="0">';
+            html += '</div>';
+            html += '<div class="kpi-data-input-group">';
+            html += '<label>Тест</label>';
+            html += '<input type="number" class="kpi-data-input" data-month="' + i + '" data-metric="test" min="0" max="100" value="' + (m.test || 0) + '" placeholder="0">';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        }
+
+        table.innerHTML = html;
+    }
+
+    // Open modal
+    editBtn.addEventListener('click', function () {
+        syncYearOptions();
+        yearSel.value = kpiState.year;
+        quarterSel.value = kpiState.quarter;
+        populateTable(kpiState.year, kpiState.quarter);
+        modal.classList.add('active');
+    });
+
+    // Year/Quarter change → repopulate
+    yearSel.addEventListener('change', function () {
+        populateTable(parseInt(yearSel.value), parseInt(quarterSel.value));
+    });
+    quarterSel.addEventListener('change', function () {
+        populateTable(parseInt(yearSel.value), parseInt(quarterSel.value));
+    });
+
+    // Cancel
+    cancelBtn.addEventListener('click', function () {
+        modal.classList.remove('active');
+    });
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Apply
+    applyBtn.addEventListener('click', function () {
+        var year = parseInt(yearSel.value);
+        var quarter = parseInt(quarterSel.value);
+        var qData = ensureKpiStructure(year, quarter);
+
+        // Collect input values
+        var inputs = table.querySelectorAll('.kpi-data-input');
+        inputs.forEach(function (inp) {
+            var mi = parseInt(inp.getAttribute('data-month'));
+            var metric = inp.getAttribute('data-metric');
+            var val = parseInt(inp.value) || 0;
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            qData.months[mi][metric] = val;
+        });
+
+        // Recalculate overall & total
+        recalcQuarter(qData);
+
+        // Save to localStorage
+        try {
+            localStorage.setItem('okk_kpi_data', JSON.stringify(kpiData));
+            console.log('✅ KPI Data saved to localStorage');
+        } catch (e) { console.error('Failed to save kpiData', e); }
+
+        // Save to Grist
+        if (typeof grist !== 'undefined' && grist.setOption) {
+            grist.setOption('kpiData', kpiData)
+                .then(function () { console.log('✅ KPI Data staged in Grist'); })
+                .catch(function (err) { console.error('❌ Failed to stage kpiData in Grist:', err); });
+        }
+
+        // Close modal
+        modal.classList.remove('active');
+
+        // Sync main selectors if year/quarter changed
+        kpiState.year = year;
+        kpiState.quarter = quarter;
+
+        // Re-render triangle
+        renderKpiView();
+
+        // Show save reminder
+        if (typeof showSaveReminder === 'function') showSaveReminder();
+    });
+}
+
+// =================== GRADE ===================
 
 var _gradeModalInited = false;
 

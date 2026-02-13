@@ -504,6 +504,218 @@
     transform: translateX(-50%) translateY(0);
 }
 
+/* --- KPI Data Edit Button (Triangle area) --- */
+.kpi-data-edit-btn {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    box-shadow: 2px 2px 5px var(--shadow-dark),
+        -2px -2px 5px var(--shadow-light);
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.kpi-data-edit-btn:hover {
+    color: var(--accent-text);
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+        -3px -3px 6px var(--shadow-light);
+}
+
+.kpi-data-edit-btn:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+/* --- KPI Data Modal --- */
+.kpi-data-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.kpi-data-modal-overlay.active {
+    display: flex;
+}
+
+.kpi-data-modal {
+    background: var(--block-bg, #f0f0f3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.15),
+        -6px -6px 12px rgba(255, 255, 255, 0.8);
+    max-width: 480px;
+    width: 92%;
+    animation: modalSlideUp 0.3s ease;
+}
+
+.kpi-data-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+}
+
+.kpi-data-selectors {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.kpi-data-sel-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-data-sel-group label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.kpi-data-select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        inset -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* Monthly metrics table */
+.kpi-data-table {
+    margin-bottom: 16px;
+}
+
+.kpi-data-month-row {
+    margin-bottom: 12px;
+}
+
+.kpi-data-month-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.kpi-data-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.kpi-data-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-data-input-group label {
+    font-size: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.kpi-data-input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        inset -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: box-shadow 0.2s ease;
+}
+
+.kpi-data-input:focus {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        inset -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7)),
+        0 0 0 2px var(--accent-text, #7a8f0f);
+}
+
+.kpi-data-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.kpi-data-modal-apply {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-gradient, linear-gradient(135deg, #c4d916, #8fb300));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.kpi-data-modal-apply:hover {
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 8px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -4px -4px 8px var(--shadow-light, rgba(255, 255, 255, 0.7));
+}
+
+.kpi-data-modal-cancel {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: 3px 3px 6px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -3px -3px 6px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.kpi-data-modal-cancel:hover {
+    color: #e53935;
+}
+
 /* --- Transitions Card --- */
 .kpi-transition-block {
     background: var(--bg-color);

@@ -7,9 +7,50 @@
     <div class="kpi-layout">
 
         <!-- Left: Triangle Chart -->
-        <div class="kpi-triangle-area">
+        <div class="kpi-triangle-area" style="position: relative;">
+            <button class="kpi-data-edit-btn" id="kpiDataEditBtn" title="Редактировать KPI данные">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                </svg>
+            </button>
             <div id="kpiTriangleContainer" class="triangle-chart-container">
                 <!-- Rendered by kpi.js -->
+            </div>
+        </div>
+
+        <!-- KPI Data Editor Modal -->
+        <div class="kpi-data-modal-overlay" id="kpiDataModal">
+            <div class="kpi-data-modal">
+                <div class="kpi-data-modal-title">Редактирование KPI</div>
+
+                <!-- Year + Quarter selectors -->
+                <div class="kpi-data-selectors">
+                    <div class="kpi-data-sel-group">
+                        <label>Год</label>
+                        <select id="kpiDataYear" class="kpi-data-select"></select>
+                    </div>
+                    <div class="kpi-data-sel-group">
+                        <label>Квартал</label>
+                        <select id="kpiDataQuarter" class="kpi-data-select">
+                            <option value="1">Q1</option>
+                            <option value="2">Q2</option>
+                            <option value="3">Q3</option>
+                            <option value="4">Q4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Monthly metrics table -->
+                <div class="kpi-data-table" id="kpiDataTable">
+                    <!-- Filled by JS -->
+                </div>
+
+                <div class="kpi-data-modal-actions">
+                    <button class="kpi-data-modal-apply" id="kpiDataApply">Применить</button>
+                    <button class="kpi-data-modal-cancel" id="kpiDataCancel">Отмена</button>
+                </div>
             </div>
         </div>
 

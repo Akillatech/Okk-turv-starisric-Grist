@@ -262,6 +262,19 @@ function initGrist() {
             }
         }
 
+        // Load KPI Data from Grist options (if not already in localStorage)
+        if (options && options.kpiData) {
+            var localKpiData = localStorage.getItem('okk_kpi_data');
+            if (!localKpiData) {
+                if (typeof kpiData !== 'undefined') {
+                    Object.assign(kpiData, options.kpiData);
+                    localStorage.setItem('okk_kpi_data', JSON.stringify(kpiData));
+                    console.log('✅ KPI Data loaded from Grist options');
+                    if (typeof renderKpiView === 'function') renderKpiView();
+                }
+            }
+        }
+
         // If both failed, use defaults
         if (!currentSettings || Object.keys(currentSettings).length === 0) {
             currentSettings = {
