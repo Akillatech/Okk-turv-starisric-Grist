@@ -248,6 +248,20 @@ function initGrist() {
             console.log('✅ Settings loaded from Grist options:', currentSettings);
         }
 
+        // Load KPI Grade from Grist options (if not already in localStorage)
+        if (options && options.kpiGrade) {
+            var localGrade = localStorage.getItem('okk_kpi_grade');
+            if (!localGrade) {
+                if (typeof KPI_GRADE_DEMO !== 'undefined') {
+                    KPI_GRADE_DEMO.current = options.kpiGrade;
+                    localStorage.setItem('okk_kpi_grade', options.kpiGrade);
+                    console.log('✅ KPI Grade loaded from Grist options:', options.kpiGrade);
+                    // Re-render if KPI view is active
+                    if (typeof renderGradeCard === 'function') renderGradeCard();
+                }
+            }
+        }
+
         // If both failed, use defaults
         if (!currentSettings || Object.keys(currentSettings).length === 0) {
             currentSettings = {

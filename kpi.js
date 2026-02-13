@@ -25,6 +25,17 @@ const KPI_DEMO = {
 };
 
 const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
+
+// Load saved grade from localStorage on init
+(function loadSavedGrade() {
+    try {
+        var saved = localStorage.getItem('okk_kpi_grade');
+        if (saved) {
+            KPI_GRADE_DEMO.current = saved;
+            console.log('✅ KPI Grade loaded from localStorage:', saved);
+        }
+    } catch (e) { /* ignore */ }
+})();
 const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', date: '01.02.2026', description: 'Описание последнего вклада' };
 const KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
@@ -411,11 +422,24 @@ function initGradeModal() {
             // Update current grade
             KPI_GRADE_DEMO.current = grade;
 
+            // Save to localStorage
+            try {
+                localStorage.setItem('okk_kpi_grade', grade);
+                console.log('✅ KPI Grade saved to localStorage:', grade);
+            } catch (e) { console.error('Failed to save grade to localStorage', e); }
+
+            // Save to Grist options (requires manual save in Grist UI)
+            if (typeof grist !== 'undefined' && grist.setOption) {
+                grist.setOption('kpiGrade', grade)
+                    .then(function () { console.log('✅ KPI Grade staged in Grist'); })
+                    .catch(function (err) { console.error('❌ Failed to stage grade in Grist:', err); });
+            }
+
             // Close modal
             modal.classList.remove('active');
 
             // Re-render card
-            _gradeModalInited = false; // allow re-init for selection update
+            _gradeModalInited = false;
             renderGradeCard();
 
             // Show save toast
