@@ -507,8 +507,8 @@
 /* --- KPI Data Edit Button (Triangle area) --- */
 .kpi-data-edit-btn {
     position: absolute;
-    top: 0;
-    right: 10px;
+    top: 120px;
+    right: 320px;
     width: 30px;
     height: 30px;
     border: none;
