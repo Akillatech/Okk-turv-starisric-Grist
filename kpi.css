@@ -1002,3 +1002,512 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- Contributions View Styles --- */
+
+#contributionsView {
+    padding: 20px;
+    height: 100%;
+    box-sizing: border-box;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.contributions-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+/* Back Button */
+.nav-btn-back {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color, #e6e7ee);
+    box-shadow: 4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+.nav-btn-back:hover {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+}
+
+.nav-btn-back:active {
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+/* Stats Bar */
+.contributions-stats-bar {
+    display: flex;
+    align-items: center;
+    background: var(--bg-color);
+    padding: 10px 24px;
+    border-radius: 16px;
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    gap: 24px;
+}
+
+.stats-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding-right: 16px;
+}
+
+.stats-group {
+    display: flex;
+    gap: 24px;
+}
+
+.stats-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.stats-item strong {
+    color: var(--text-primary);
+    font-size: 14px;
+    margin-left: 4px;
+}
+
+/* Add Button */
+.btn-add-contribution {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    box-shadow: 4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.btn-add-contribution:hover {
+    color: var(--accent-text);
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+}
+
+.btn-add-contribution:active {
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+/* Grid */
+.contributions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding-bottom: 40px;
+}
+
+/* Card */
+.contribution-card {
+    background: var(--bg-color);
+    border-radius: 20px;
+    padding: 24px;
+    min-height: 200px;
+    box-shadow: 8px 8px 16px var(--shadow-dark),
+        -8px -8px 16px var(--shadow-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+
+.contribution-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 12px 12px 24px var(--shadow-dark),
+        -12px -12px 24px var(--shadow-light);
+}
+
+.contribution-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- Header Controls for Contributions --- */
+.nav-btn-back-header {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    border-radius: 8px;
+    /* Slightly squarer for header */
+    padding: 6px 14px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+
+.nav-btn-back-header:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.header-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    /* border-right: 1px solid rgba(0,0,0,0.1); Optional */
+    height: 32px;
+}
+
+.header-stats-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.header-stats-item {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.header-stats-item strong {
+    color: var(--text-primary);
+    font-size: 13px;
+    margin-left: 4px;
+}
+
+.btn-add-contribution-header {
+    background: var(--accent-gradient, linear-gradient(135deg, #c4d916, #8fb300));
+    border: none;
+    border-radius: 8px;
+    padding: 0 18px;
+    height: 32px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(196, 217, 22, 0.3);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.btn-add-contribution-header:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(196, 217, 22, 0.5);
+    color: #fff;
+}
+
+.btn-add-contribution-header:active {
+    transform: translateY(0);
+}
+
+
+
+.btn-send-comment:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(196, 217, 22, 0.4);
+}
+
+.view-row {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.view-block {
+    margin-bottom: 20px;
+}
+
+.view-block label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.view-value {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.text-wrap {
+    white-space: pre-wrap;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+[data-status="pending"] {
+    background: #fff3cd;
+    color: #856404;
+}
+
+[data-status="approved"] {
+    background: #d4edda;
+    color: #155724;
+}
+
+[data-status="rejected"] {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.header-badges {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- Fixed Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 16px;
+
+    width: 90%;
+    /* max-width set inline or by specific class in HTML */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    display: block !important;
+    /* Force block layout to fix flex issues */
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease;
+    flex-direction: column;
+    /* Just in case display:flex leaks */
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 15px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+
+
+.modal-body {
+    display: block !important;
+    /* Force block to stack form groups */
+    width: 100%;
+}
+
+/* --- Premium Aesthetic Overrides --- */
+.modal-header .icon {
+    color: var(--accent-text, #7a8f0f);
+    background: rgba(196, 217, 22, 0.15);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.modal-header h2 {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    color: #333;
+    letter-spacing: -0.5px;
+}
+
+/* Enhanced Inputs */
+.form-input {
+    background: #f9fbfd;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    background: #fff;
+    border-color: var(--accent-color, #c4d916);
+    box-shadow: 0 4px 15px rgba(196, 217, 22, 0.15);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.form-input::placeholder {
+    color: #adb5bd;
+    font-weight: 500;
+}
+
+/* Enhanced Buttons */
+.btn-save {
+    background: var(--accent-gradient, linear-gradient(135deg, #c4d916, #8fb300));
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(196, 217, 22, 0.4);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(196, 217, 22, 0.5);
+    background: linear-gradient(135deg, #d4e926, #9fc700);
+}
+
+.btn-save:active {
+    transform: translateY(0);
+}
+
+.btn-cancel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f8f9fa;
+    color: #333;
+    border-color: #ccc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Modal Icon Tweaks (Remove Circle Backgrounds) --- */
+.modal-header .icon,
+.modal-body .form-group .icon {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    /* Maintain color but remove boxiness */
+}
+
+/* Adjust header icon specifically */
+.modal-header .icon {
+    color: var(--accent-text, #7a8f0f);
+    margin-right: 8px;
+}
+
+/* Adjust label icons */
+.modal-body .form-group .icon {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+
+/* Contribution View Styles have been moved to contribution.css */

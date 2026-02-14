@@ -1076,7 +1076,18 @@ function calculateTransitionProgress(lastDateStr, nextDateStr) {
     return Math.min(100, Math.max(0, pct));
 }
 
-// =================== NAVIGATION ===================
+// =================== CONTRIBUTIONS VIEW ===================
+
+
+// =================== CONTRIBUTIONS LOADED EXTERNALLY ===================
+// Logic moved to contribution.js
+
+
+function showKpiFromContributions() {
+    if (window.logic && window.logic.showKpi) {
+        window.logic.showKpi();
+    }
+}
 
 function kpiQuarterChanged() {
     var sel = document.getElementById('kpiQuarterSelect');

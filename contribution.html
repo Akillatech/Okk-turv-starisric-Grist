@@ -1,0 +1,162 @@
+<div class="kpi-view">
+    <div class="header-actions" id="contributionsControls" style="display: none; gap: 10px;">
+        <button class="action-btn" onclick="window.logic.openContributionCreateModal()">
+            <span class="icon icon-plus" style="font-size: 16px; margin-right: 5px;">+</span> Новый вклад
+        </button>
+    </div>
+
+    <div class="contributions-grid" id="contributionsGrid">
+        <!-- Cards will be populated here -->
+    </div>
+</div>
+
+<!-- Contribution Create Modal -->
+<div id="contributionCreateModal" class="modal-overlay">
+    <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2><span class="icon icon-doc"
+                    style="vertical-align: middle; margin-right: 8px; width: 24px; height: 24px;"></span>Новый
+                Вклад</h2>
+            <button class="modal-close" onclick="window.logic.closeContributionCreateModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label><span class="icon icon-calendar"
+                        style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;"></span>Период
+                    вклада</label>
+                <input type="text" id="createPeriod" placeholder="Например: Q1 2024" class="form-input">
+            </div>
+            <div class="form-group">
+                <label><span class="icon icon-tag"
+                        style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;"></span>Кодовое
+                    обозначение</label>
+                <input type="text" id="createCode" placeholder="Например: FEAT-123" class="form-input">
+            </div>
+            <div class="form-group">
+                <label><span class="icon icon-list"
+                        style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;"></span>Описание
+                    вклада</label>
+                <textarea id="createDescription" rows="3" placeholder="Краткое описание" class="form-input"></textarea>
+            </div>
+            <div class="form-group">
+                <label><span class="icon icon-check"
+                        style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;"></span>Результат
+                    вклада</label>
+                <textarea id="createResult" rows="3" placeholder="Чего удалось достичь" class="form-input"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="window.logic.closeContributionCreateModal()">Отмена</button>
+                <button class="btn-save" onclick="window.logic.createContribution()">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contribution View Modal -->
+<div id="contributionViewModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="viewCode">CODE</h2>
+            <div class="header-badges">
+                <div class="status-select-wrapper">
+                    <div id="statusDropdown" class="custom-select">
+                        <div class="selected-option" onclick="window.logic.toggleStatusDropdown()">
+                            <span id="currentStatusText">НА ПРОВЕРКЕ</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div id="statusOptions" class="options-list">
+                            <div class="option-item" onclick="window.logic.selectStatus('pending')">НА ПРОВЕРКЕ
+                            </div>
+                            <div class="option-item" onclick="window.logic.selectStatus('approved')">ОДОБРЕНО
+                            </div>
+                            <div class="option-item" onclick="window.logic.selectStatus('rejected')">ОТКЛОНЕНО
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions" style="display:flex; gap:8px;">
+                    <button class="action-btn edit-btn" onclick="window.logic.openEditContributionModal()"
+                        title="Редактировать"
+                        style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:4px; display:flex; align-items:center;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="window.logic.deleteContribution()" title="Удалить"
+                        style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:4px; display:flex; align-items:center;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
+                <button class="modal-close" onclick="window.logic.closeContributionViewModal()">×</button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-layout-grid">
+                <!-- Left Column: Details -->
+                <div class="view-details-col">
+                    <div class="view-row">
+                        <div class="view-block">
+                            <label><span class="icon icon-calendar"
+                                    style="width: 14px; height: 14px; margin-right: 6px; vertical-align: text-bottom; opacity: 0.6;"></span>Период</label>
+                            <div id="viewPeriod" class="view-value"></div>
+                        </div>
+                        <div class="view-block">
+                            <label><span class="icon icon-clock"
+                                    style="width: 14px; height: 14px; margin-right: 6px; vertical-align: text-bottom; opacity: 0.6;"></span>Дата</label>
+                            <div id="viewDate" class="view-value"></div>
+                        </div>
+                    </div>
+
+                    <div class="view-content-row">
+                        <div class="view-description-wrapper">
+                            <label><span class="icon icon-list"
+                                    style="width: 14px; height: 14px; margin-right: 6px; vertical-align: text-bottom; opacity: 0.6;"></span>Описание</label>
+                            <div id="viewDescription" class="view-value text-wrap"></div>
+                        </div>
+
+                        <div class="view-result-wrapper">
+                            <label><span class="icon icon-check"
+                                    style="width: 14px; height: 14px; margin-right: 6px; vertical-align: text-bottom; opacity: 0.6;"></span>Результат</label>
+                            <div id="viewResult" class="view-value text-wrap"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <h3>История изменений</h3>
+                        <div id="historyList" class="history-list">
+                            <!-- History items populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Comments -->
+                <div class="view-comments-col">
+                    <div class="comments-section">
+                        <h3><span class="icon icon-comment"
+                                style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle; opacity: 0.7;"></span>Комментарии
+                        </h3>
+                        <div id="commentsList" class="comments-list">
+                            <!-- Comments will be populated here -->
+                        </div>
+                        <div class="comment-input-area">
+                            <textarea id="newCommentText" rows="2" placeholder="Написать комментарий..."
+                                class="comment-input"></textarea>
+                            <button class="btn-send-comment" onclick="window.logic.addComment()">
+                                <span class="icon icon-send" style="width: auto; height: auto;">➤</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

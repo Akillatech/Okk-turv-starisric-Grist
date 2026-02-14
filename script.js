@@ -97,10 +97,15 @@ function autoSaveSettings() {
     grist.setOption('settings', currentSettings)
         .then(() => {
             console.log('✅ Settings staged in Grist (remember to save document!)');
-            showSaveReminder();
+            if (window.logic && window.logic.showNotification) {
+                window.logic.showNotification("Настройки сохранены");
+            }
         })
         .catch(err => {
-            console.error('❌ Failed to stage Grist settings:', err);
+            console.error('❌ Failed to save settings to Grist:', err);
+            if (window.logic && window.logic.showNotification) {
+                window.logic.showNotification("Ошибка сохранения настроек!", true);
+            }
         });
 }
 
@@ -444,15 +449,42 @@ window.logic = {
     },
 
     showHome: function () {
+        document.getElementById('contributionsView').style.display = 'none';
+
+        // Header controls
+        document.getElementById('mainSelectors').style.display = 'flex';
+        const kpiSel = document.getElementById('kpiSelectors');
+        if (kpiSel) kpiSel.style.display = 'none';
+        const contribCtrl = document.getElementById('contributionsControls');
+        if (contribCtrl) contribCtrl.style.display = 'none';
+
         showView('content');
     },
 
     showCalendar: function () {
+        document.getElementById('contributionsView').style.display = 'none';
+
+        // Header controls
+        document.getElementById('mainSelectors').style.display = 'flex';
+        const kpiSel = document.getElementById('kpiSelectors');
+        if (kpiSel) kpiSel.style.display = 'none';
+        const contribCtrl = document.getElementById('contributionsControls');
+        if (contribCtrl) contribCtrl.style.display = 'none';
+
         showView('calendarView');
         this.updateCalendarView(); // Trigger render
     },
 
     showKpi: function () {
+        document.getElementById('contributionsView').style.display = 'none';
+
+        // Header controls
+        document.getElementById('mainSelectors').style.display = 'none';
+        const kpiSel = document.getElementById('kpiSelectors');
+        if (kpiSel) kpiSel.style.display = 'flex';
+        const contribCtrl = document.getElementById('contributionsControls');
+        if (contribCtrl) contribCtrl.style.display = 'none';
+
         showView('kpiView');
         const container = document.getElementById('kpiView');
         // Load kpi.html dynamically on first open
@@ -496,6 +528,45 @@ window.logic = {
 
     updateCalendarView: function () {
         renderCalendar();
+    },
+
+    showContributions: function () {
+        ['content', 'calendarView', 'kpiView'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const cv = document.getElementById('contributionsView');
+        if (cv) {
+            cv.style.display = 'block';
+
+            // Load contribution.html dynamically if not loaded
+            if (!cv.dataset.loaded) {
+                fetch('contribution.html')
+                    .then(r => r.text())
+                    .then(html => {
+                        cv.innerHTML = html;
+                        cv.dataset.loaded = 'true';
+
+                        // Initialize if function exists
+                        if (window.logic.initContributions) window.logic.initContributions();
+                        else if (window.logic.renderContributions) window.logic.renderContributions();
+                    })
+                    .catch(err => {
+                        cv.innerHTML = '<p style="padding:40px;text-align:center;color:#999;">Не удалось загрузить раздел вкладов</p>';
+                        console.error('Failed to load contribution.html:', err);
+                    });
+            } else {
+                // If already loaded, just render/refresh
+                if (window.logic.renderContributions) window.logic.renderContributions();
+            }
+        }
+
+        // Header controls
+        document.getElementById('mainSelectors').style.display = 'none';
+        const kpiSel = document.getElementById('kpiSelectors');
+        if (kpiSel) kpiSel.style.display = 'none';
+        const contribCtrl = document.getElementById('contributionsControls');
+        if (contribCtrl) contribCtrl.style.display = 'flex';
     },
 
     prevMonth: function () {
@@ -560,15 +631,13 @@ window.logic = {
     switchSettingsTab: function (tabName) {
         // Toggle tabs
         document.querySelectorAll('.settings-tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.settings-tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-        if (tabName === 'user') {
-            document.getElementById('userTab').classList.add('active');
-            document.getElementById('tabBtnUser').classList.add('active');
-        } else {
-            document.getElementById('calendarTab').classList.add('active');
-            document.getElementById('tabBtnCalendar').classList.add('active');
-        }
+        const content = document.getElementById(`tab-${tabName}`);
+        const btn = document.getElementById(`tab-btn-${tabName}`);
+
+        if (content) content.classList.add('active');
+        if (btn) btn.classList.add('active');
     },
 
     saveUserName: function () {
@@ -579,7 +648,7 @@ window.logic = {
     },
 
     addHoliday: function () {
-        const input = document.getElementById('newHoliday');
+        const input = document.getElementById('newHolidayInput');
         const val = input.value.trim();
         if (val) {
             const yearSelect = document.getElementById('calendarYear');
@@ -598,7 +667,7 @@ window.logic = {
     },
 
     addShortDay: function () {
-        const input = document.getElementById('newShortDay');
+        const input = document.getElementById('newShortDayInput');
         const val = input.value.trim();
         if (val) {
             const yearSelect = document.getElementById('calendarYear');
@@ -613,6 +682,40 @@ window.logic = {
                 renderSettingsUI();
                 autoSaveSettings(); // Auto-save
             }
+        }
+    },
+
+    addYear: function () {
+        if (!currentSettings.years) currentSettings.years = [new Date().getFullYear()];
+        // Find max year
+        const maxYear = Math.max(...currentSettings.years.map(y => parseInt(y)));
+        const nextYear = (maxYear + 1);
+
+        currentSettings.years.push(nextYear);
+        currentSettings.years.sort((a, b) => a - b);
+
+        // Render and select new year
+        renderSettingsUI();
+        setTimeout(() => {
+            const yearSelect = document.getElementById('calendarYear');
+            if (yearSelect) yearSelect.value = nextYear;
+        }, 50);
+
+        autoSaveSettings();
+    },
+
+    removeYear: function () {
+        const yearSelect = document.getElementById('calendarYear');
+        if (!yearSelect) return;
+        const yearToRemove = parseInt(yearSelect.value);
+
+        if (confirm(`Удалить год ${yearToRemove}?`)) {
+            currentSettings.years = currentSettings.years.filter(y => y !== yearToRemove);
+            if (currentSettings.holidays && currentSettings.holidays[yearToRemove]) delete currentSettings.holidays[yearToRemove];
+            if (currentSettings.shortDays && currentSettings.shortDays[yearToRemove]) delete currentSettings.shortDays[yearToRemove];
+
+            renderSettingsUI();
+            autoSaveSettings();
         }
     },
 
