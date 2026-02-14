@@ -94,23 +94,22 @@ function autoSaveSettings() {
 
     // Also save to Grist options for document-level sharing
     // NOTE: This requires manual "Save" in Grist UI to persist!
+    if (window.showSaveReminder) window.showSaveReminder(); // Optimistic UI: Show immediately
+
     grist.setOption('settings', currentSettings)
         .then(() => {
             console.log('✅ Settings staged in Grist (remember to save document!)');
-            if (window.showSaveReminder) window.showSaveReminder();
         })
         .catch(err => {
             console.error('❌ Failed to save settings to Grist:', err);
-            if (window.logic && window.logic.showNotification) {
-                window.logic.showNotification("Ошибка сохранения настроек!", true);
-            }
+            // Error notification removed as per user request
         });
 }
 
 // Show save reminder notification
 let saveReminderTimeout;
 window.showSaveReminder = function () {
-    const reminder = document.getElementById('saveReminder');
+    let reminder = document.getElementById('saveReminder');
 
     // Clear existing timeout
     if (saveReminderTimeout) clearTimeout(saveReminderTimeout);
