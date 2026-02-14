@@ -41,8 +41,6 @@ if (window.logic) {
     };
 
     window.logic.saveContributionToGrist = async function (contribution, isNew = false) {
-        window.logic.showNotification("Сохранение...");
-
         // We are already working with window.logic.contributions array in create/update functions
         // So we just need to save the current state of the array to options
 
@@ -50,9 +48,9 @@ if (window.logic) {
         const dataToSave = window.logic.contributions;
 
         try {
+            if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification immediately
+
             await grist.setOption('contributions', dataToSave);
-            window.logic.showNotification("Все изменения сохранены");
-            if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification
 
             // Re-open view if editing?
             if (window.logic.currentContributionId && !isNew) {
@@ -60,25 +58,21 @@ if (window.logic) {
             }
         } catch (e) {
             console.error("Save failed:", e);
-            window.logic.showNotification("Ошибка сохранения!", true);
+            // Error notification suppressed as per user request
         }
     };
 
     window.logic.deleteContributionFromGrist = async function (id) {
-        window.logic.showNotification("Удаление...");
-
         // Remove from local array
         window.logic.contributions = window.logic.contributions.filter(c => c.id != id);
         window.logic.renderContributions();
 
         try {
-            await grist.setOption('contributions', window.logic.contributions);
-            window.logic.showNotification("Вклад удален");
             if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification
+            await grist.setOption('contributions', window.logic.contributions);
         } catch (e) {
             console.error("Delete failed:", e);
-            window.logic.showNotification("Ошибка удаления!", true);
-            // Revert? Complex to revert local state here without reload
+            // window.logic.showNotification("Ошибка удаления!", true); // Suppressed
         }
     };
 

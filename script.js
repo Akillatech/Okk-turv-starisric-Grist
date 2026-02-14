@@ -97,9 +97,7 @@ function autoSaveSettings() {
     grist.setOption('settings', currentSettings)
         .then(() => {
             console.log('✅ Settings staged in Grist (remember to save document!)');
-            if (window.logic && window.logic.showNotification) {
-                window.logic.showNotification("Настройки сохранены");
-            }
+            if (window.showSaveReminder) window.showSaveReminder();
         })
         .catch(err => {
             console.error('❌ Failed to save settings to Grist:', err);
@@ -754,6 +752,7 @@ window.logic = {
     saveSettings: async function () {
         // Save to Grist Options
         await grist.setOption('settings', currentSettings);
+        if (window.showSaveReminder) window.showSaveReminder(); // Standard notification
         this.closeSettings();
         refreshDashboard(); // Refresh to apply changes (formatted holidays etc)
     },

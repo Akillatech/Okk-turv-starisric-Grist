@@ -545,7 +545,10 @@ function initKpiDataModal() {
         // Save to Grist
         if (typeof grist !== 'undefined' && grist.setOption) {
             grist.setOption('kpiData', kpiData)
-                .then(function () { console.log('✅ KPI Data staged in Grist'); })
+                .then(function () {
+                    console.log('✅ KPI Data staged in Grist');
+                    if (typeof showSaveReminder === 'function') showSaveReminder();
+                })
                 .catch(function (err) { console.error('❌ Failed to stage kpiData in Grist:', err); });
         }
 
@@ -606,7 +609,10 @@ function initGradeModal() {
             // Save to Grist options (requires manual save in Grist UI)
             if (typeof grist !== 'undefined' && grist.setOption) {
                 grist.setOption('kpiGrade', grade)
-                    .then(function () { console.log('✅ KPI Grade staged in Grist'); })
+                    .then(function () {
+                        console.log('✅ KPI Grade staged in Grist');
+                        if (typeof showSaveReminder === 'function') showSaveReminder();
+                    })
                     .catch(function (err) { console.error('❌ Failed to stage grade in Grist:', err); });
             }
 
@@ -1042,7 +1048,10 @@ function initTransitionsModal() {
         // Save to Grist
         if (typeof grist !== 'undefined' && grist.setOption) {
             grist.setOption('kpiTransitions', KPI_TRANSITIONS_DEMO)
-                .then(function () { console.log('✅ KPI Transitions staged in Grist'); })
+                .then(function () {
+                    console.log('✅ KPI Transitions staged in Grist');
+                    if (typeof showSaveReminder === 'function') showSaveReminder();
+                })
                 .catch(function (err) { console.error('❌ Failed to stage transitions in Grist:', err); });
         }
 
