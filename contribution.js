@@ -29,9 +29,35 @@ if (window.logic) {
         try {
             await window.logic.fetchContributions();
         } catch (e) {
-            console.error("Failed to fetch contributions:", e);
-            window.logic.showNotification("Ошибка загрузки данных", true);
+            console.warn("Failed to fetch contributions (Table might be missing):", e);
+            // Try to create the table if it's missing
+            try {
+                await window.logic.createContributionsTable();
+                // Retry fetch
+                await window.logic.fetchContributions();
+            } catch (createError) {
+                console.error("Failed to create table:", createError);
+                window.logic.showNotification("Ошибка: Таблица Contributions не найдена и не может быть создана", true);
+            }
         }
+    };
+
+    window.logic.createContributionsTable = async function () {
+        console.log("Attempting to create 'Contributions' table...");
+        window.logic.showNotification("Создание таблицы данных...");
+        await grist.docApi.applyUserActions([
+            ['AddTable', 'Contributions', [
+                { id: 'Code', type: 'Text' },
+                { id: 'Period', type: 'Text' },
+                { id: 'Date', type: 'Date' },
+                { id: 'Description', type: 'Text' },
+                { id: 'Result', type: 'Text' },
+                { id: 'Status', type: 'Text' }, // Could be Choice
+                { id: 'Comments', type: 'Text' },
+                { id: 'History', type: 'Text' }
+            ]]
+        ]);
+        window.logic.showNotification("Таблица Contributions создана");
     };
 
     window.logic.fetchContributions = async function () {
