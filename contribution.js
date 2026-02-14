@@ -157,9 +157,17 @@ if (window.logic) {
     window.logic.closeContributionCreateModal = function () {
         var modal = document.getElementById('contributionCreateModal');
         if (modal) {
+            const editId = modal.getAttribute('data-edit-id');
+            const wasEditing = modal.getAttribute('data-mode') === 'edit';
+
             modal.classList.remove('active');
             modal.removeAttribute('data-mode');
             modal.removeAttribute('data-edit-id');
+
+            // If we were editing, reopen the view modal
+            if (wasEditing && editId) {
+                window.logic.openContributionViewModal(editId);
+            }
         }
     };
 
@@ -294,6 +302,8 @@ if (window.logic) {
             selectedOption.classList.remove('status-pending', 'status-approved', 'status-rejected');
             selectedOption.classList.add(`status-${newStatus}`);
         }
+
+        window.logic.renderHistory(c.history); // Update History UI immediately
 
         window.logic.saveContributionToGrist(c, false);
     };
