@@ -508,7 +508,7 @@
 .kpi-data-edit-btn {
     position: absolute;
     top: 120px;
-    right: 320px;
+    left: calc(50% + 120px);
     width: 30px;
     height: 30px;
     border: none;
