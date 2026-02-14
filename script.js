@@ -275,6 +275,19 @@ function initGrist() {
             }
         }
 
+        // Load KPI Transitions from Grist options (if not already in localStorage)
+        if (options && options.kpiTransitions) {
+            var localTransitions = localStorage.getItem('okk_kpi_transitions');
+            if (!localTransitions) {
+                if (typeof KPI_TRANSITIONS_DEMO !== 'undefined') {
+                    KPI_TRANSITIONS_DEMO = options.kpiTransitions;
+                    localStorage.setItem('okk_kpi_transitions', JSON.stringify(KPI_TRANSITIONS_DEMO));
+                    console.log('✅ KPI Transitions loaded from Grist options');
+                    if (typeof renderTransitionsCard === 'function') renderTransitionsCard();
+                }
+            }
+        }
+
         // If both failed, use defaults
         if (!currentSettings || Object.keys(currentSettings).length === 0) {
             currentSettings = {

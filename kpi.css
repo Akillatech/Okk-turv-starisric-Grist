@@ -809,6 +809,183 @@
     white-space: nowrap;
 }
 
+/* --- Transitions Edit Button (Pencil) --- */
+.kpi-transitions-edit-btn {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    box-shadow: 2px 2px 5px var(--shadow-dark),
+        -2px -2px 5px var(--shadow-light);
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.kpi-transitions-edit-btn:hover {
+    color: var(--accent-text);
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+        -3px -3px 6px var(--shadow-light);
+}
+
+.kpi-transitions-edit-btn:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+/* --- Transitions Settings Modal --- */
+.kpi-transitions-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.kpi-transitions-modal-overlay.active {
+    display: flex;
+}
+
+.kpi-transitions-modal {
+    background: var(--block-bg, #f0f0f3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.15),
+        -6px -6px 12px rgba(255, 255, 255, 0.8);
+    max-width: 420px;
+    width: 92%;
+    animation: modalSlideUp 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.kpi-transitions-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+}
+
+.kpi-transitions-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+/* --- Settings blocks --- */
+.kpi-trans-settings-block {
+    background: var(--bg-color, #e6e7ee);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: inset 3px 3px 6px rgba(209, 217, 230, 0.5),
+        inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+}
+
+.kpi-trans-settings-block:last-child {
+    margin-bottom: 0;
+}
+
+.kpi-trans-settings-type {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.kpi-trans-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.kpi-trans-settings-row:last-child {
+    margin-bottom: 0;
+}
+
+.kpi-trans-settings-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* --- Toggle Switch (ДА / НЕТ) --- */
+.kpi-toggle-switch {
+    display: flex;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        inset -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7));
+}
+
+.kpi-toggle-btn {
+    padding: 6px 14px;
+    border: none;
+    background: var(--bg-color, #e6e7ee);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.kpi-toggle-btn.active {
+    background: var(--accent-gradient, linear-gradient(135deg, #c4d916, #8fb300));
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(196, 217, 22, 0.4);
+}
+
+.kpi-toggle-btn:not(.active):hover {
+    color: var(--accent-text, #7a8f0f);
+}
+
+/* --- Date Input --- */
+.kpi-trans-date-input {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--block-bg, #f0f0f3);
+    box-shadow: 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7));
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    transition: box-shadow 0.2s ease;
+}
+
+.kpi-trans-date-input:focus {
+    box-shadow: 2px 2px 4px var(--shadow-dark, rgba(174, 174, 192, 0.4)),
+        -2px -2px 4px var(--shadow-light, rgba(255, 255, 255, 0.7)),
+        0 0 0 2px var(--accent-text, #7a8f0f);
+}
+
 /* --- Icon for KPI nav button --- */
 .icon-kpi::before {
     mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H4a1 1 0 0 1-1-1V3"/><path d="m7 14 4-4 4 4 6-6"/></svg>');

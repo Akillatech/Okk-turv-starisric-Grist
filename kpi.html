@@ -116,8 +116,29 @@
 
             <!-- Transitions Card -->
             <div class="kpi-card kpi-transitions-card">
+                <button class="kpi-transitions-edit-btn" id="kpiTransitionsEditBtn" title="Настройки переводов">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                        <path d="m15 5 4 4" />
+                    </svg>
+                </button>
                 <div class="kpi-card-title">ПЕРЕВОДЫ ПО ГРЕЙДУ</div>
                 <div id="kpiTransitionsBody"></div>
+            </div>
+
+            <!-- Transitions Settings Modal -->
+            <div class="kpi-transitions-modal-overlay" id="kpiTransitionsModal">
+                <div class="kpi-transitions-modal">
+                    <div class="kpi-transitions-modal-title">Настройки переводов</div>
+                    <div id="kpiTransitionsSettings">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="kpi-transitions-modal-actions">
+                        <button class="kpi-data-modal-apply" id="kpiTransitionsApply">Применить</button>
+                        <button class="kpi-data-modal-cancel" id="kpiTransitionsCancel">Отмена</button>
+                    </div>
+                </div>
             </div>
 
         </div>

@@ -71,10 +71,21 @@ const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
     } catch (e) { /* ignore */ }
 })();
 const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', date: '01.02.2026', description: 'Описание последнего вклада' };
-const KPI_TRANSITIONS_DEMO = [
+let KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
     { type: 'ТАРГЕТ + ВКЛАД', available: true, lastDate: '01.01.2026', nextDate: '01.07.2026', progress: 40, variant: 'orange' },
 ];
+
+// Load saved transitions from localStorage
+(function loadSavedTransitions() {
+    try {
+        var saved = localStorage.getItem('okk_kpi_transitions');
+        if (saved) {
+            KPI_TRANSITIONS_DEMO = JSON.parse(saved);
+            console.log('✅ KPI Transitions loaded from localStorage');
+        }
+    } catch (e) { console.error('Failed to load transitions from localStorage', e); }
+})();
 
 // =================== RENDER ===================
 
@@ -91,6 +102,7 @@ function renderKpiView() {
     renderContributionCard();
     renderTransitionsCard();
     initKpiDataModal();
+    initTransitionsModal();
 }
 
 
@@ -907,6 +919,161 @@ function renderTransitionsCard() {
             '<div class="kpi-progress-bar"><div class="kpi-progress-fill ' + (t.variant === 'orange' ? 'orange' : '') + '" style="width:' + t.progress + '%"></div></div>' +
             '<span class="kpi-progress-date">' + t.nextDate + '</span></div></div>';
     }).join('');
+}
+
+// =================== TRANSITIONS SETTINGS MODAL ===================
+
+var _transitionsModalInited = false;
+
+function initTransitionsModal() {
+    if (_transitionsModalInited) return;
+    _transitionsModalInited = true;
+
+    var modal = document.getElementById('kpiTransitionsModal');
+    var editBtn = document.getElementById('kpiTransitionsEditBtn');
+    var applyBtn = document.getElementById('kpiTransitionsApply');
+    var cancelBtn = document.getElementById('kpiTransitionsCancel');
+    var settingsDiv = document.getElementById('kpiTransitionsSettings');
+
+    if (!modal || !editBtn) return;
+
+    function formatDateForInput(ddmmyyyy) {
+        // Convert DD.MM.YYYY -> YYYY-MM-DD for input[type=date]
+        if (!ddmmyyyy) return '';
+        var parts = ddmmyyyy.split('.');
+        if (parts.length !== 3) return '';
+        return parts[2] + '-' + parts[1] + '-' + parts[0];
+    }
+
+    function formatDateFromInput(isoDate) {
+        // Convert YYYY-MM-DD -> DD.MM.YYYY for display
+        if (!isoDate) return '';
+        var parts = isoDate.split('-');
+        if (parts.length !== 3) return '';
+        return parts[2] + '.' + parts[1] + '.' + parts[0];
+    }
+
+    function populateSettings() {
+        var html = '';
+        KPI_TRANSITIONS_DEMO.forEach(function (t, idx) {
+            html += '<div class="kpi-trans-settings-block">';
+            html += '<div class="kpi-trans-settings-type">' + t.type + '</div>';
+
+            // Available toggle
+            html += '<div class="kpi-trans-settings-row">';
+            html += '<span class="kpi-trans-settings-label">Доступен ли перевод</span>';
+            html += '<div class="kpi-toggle-switch">';
+            html += '<button class="kpi-toggle-btn ' + (t.available ? 'active' : '') + '" data-idx="' + idx + '" data-val="true">ДА</button>';
+            html += '<button class="kpi-toggle-btn ' + (!t.available ? 'active' : '') + '" data-idx="' + idx + '" data-val="false">НЕТ</button>';
+            html += '</div>';
+            html += '</div>';
+
+            // Last date
+            html += '<div class="kpi-trans-settings-row">';
+            html += '<span class="kpi-trans-settings-label">Последний перевод</span>';
+            html += '<input type="date" class="kpi-trans-date-input" data-idx="' + idx + '" data-field="lastDate" value="' + formatDateForInput(t.lastDate) + '">';
+            html += '</div>';
+
+            // Next date
+            html += '<div class="kpi-trans-settings-row">';
+            html += '<span class="kpi-trans-settings-label">Следующий перевод</span>';
+            html += '<input type="date" class="kpi-trans-date-input" data-idx="' + idx + '" data-field="nextDate" value="' + formatDateForInput(t.nextDate) + '">';
+            html += '</div>';
+
+            html += '</div>';
+        });
+        settingsDiv.innerHTML = html;
+
+        // Bind toggle clicks
+        settingsDiv.querySelectorAll('.kpi-toggle-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var row = btn.parentElement;
+                row.querySelectorAll('.kpi-toggle-btn').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    // Open modal
+    editBtn.addEventListener('click', function () {
+        populateSettings();
+        modal.classList.add('active');
+    });
+
+    // Cancel
+    cancelBtn.addEventListener('click', function () {
+        modal.classList.remove('active');
+    });
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Apply
+    applyBtn.addEventListener('click', function () {
+        // Collect values
+        KPI_TRANSITIONS_DEMO.forEach(function (t, idx) {
+            // Available toggle
+            var activeBtn = settingsDiv.querySelector('.kpi-toggle-btn.active[data-idx="' + idx + '"]');
+            if (activeBtn) {
+                t.available = activeBtn.getAttribute('data-val') === 'true';
+            }
+
+            // Dates
+            var lastInput = settingsDiv.querySelector('.kpi-trans-date-input[data-idx="' + idx + '"][data-field="lastDate"]');
+            var nextInput = settingsDiv.querySelector('.kpi-trans-date-input[data-idx="' + idx + '"][data-field="nextDate"]');
+
+            if (lastInput && lastInput.value) {
+                t.lastDate = formatDateFromInput(lastInput.value);
+            }
+            if (nextInput && nextInput.value) {
+                t.nextDate = formatDateFromInput(nextInput.value);
+            }
+
+            // Recalculate progress based on dates
+            t.progress = calculateTransitionProgress(t.lastDate, t.nextDate);
+        });
+
+        // Save to localStorage
+        try {
+            localStorage.setItem('okk_kpi_transitions', JSON.stringify(KPI_TRANSITIONS_DEMO));
+            console.log('✅ KPI Transitions saved to localStorage');
+        } catch (e) { console.error('Failed to save transitions', e); }
+
+        // Save to Grist
+        if (typeof grist !== 'undefined' && grist.setOption) {
+            grist.setOption('kpiTransitions', KPI_TRANSITIONS_DEMO)
+                .then(function () { console.log('✅ KPI Transitions staged in Grist'); })
+                .catch(function (err) { console.error('❌ Failed to stage transitions in Grist:', err); });
+        }
+
+        // Close modal
+        modal.classList.remove('active');
+
+        // Re-render
+        renderTransitionsCard();
+
+        // Show save reminder
+        if (typeof showSaveReminder === 'function') showSaveReminder();
+    });
+}
+
+// Calculate progress percentage based on lastDate and nextDate
+function calculateTransitionProgress(lastDateStr, nextDateStr) {
+    if (!lastDateStr || !nextDateStr) return 0;
+    var parts1 = lastDateStr.split('.');
+    var parts2 = nextDateStr.split('.');
+    if (parts1.length !== 3 || parts2.length !== 3) return 0;
+
+    var start = new Date(parts1[2], parts1[1] - 1, parts1[0]);
+    var end = new Date(parts2[2], parts2[1] - 1, parts2[0]);
+    var now = new Date();
+
+    var total = end.getTime() - start.getTime();
+    if (total <= 0) return 100;
+    var elapsed = now.getTime() - start.getTime();
+    if (elapsed <= 0) return 0;
+    var pct = Math.round((elapsed / total) * 100);
+    return Math.min(100, Math.max(0, pct));
 }
 
 // =================== NAVIGATION ===================
