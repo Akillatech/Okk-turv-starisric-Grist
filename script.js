@@ -230,6 +230,11 @@ function initGrist() {
 
         // Initial Render
         refreshDashboard();
+
+        // Initialize Contributions
+        if (window.logic && window.logic.initContributions) {
+            window.logic.initContributions();
+        }
     });
 
     grist.onOptions(function (options) {
