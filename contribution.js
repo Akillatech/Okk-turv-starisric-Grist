@@ -23,115 +23,37 @@ if (window.logic) {
     };
 
 
-    // --- GRIST API INTEGRATION ---
-    window.logic.initContributions = async function () {
-        console.log("Initializing Contributions with Grist...");
-        try {
-            await window.logic.fetchContributions();
-        } catch (e) {
-            console.warn("Failed to fetch contributions (Table might be missing):", e);
-            // Try to create the table if it's missing
-            try {
-                await window.logic.createContributionsTable();
-                // Retry fetch
-                await window.logic.fetchContributions();
-            } catch (createError) {
-                console.error("Failed to create table:", createError);
-                window.logic.showNotification("Ошибка: Таблица Contributions не найдена и не может быть создана", true);
-            }
-        }
-    };
+    // --- GRIST OPTIONS INTEGRATION ---
 
-    window.logic.createContributionsTable = async function () {
-        console.log("Attempting to create 'Contributions' table...");
-        window.logic.showNotification("Создание таблицы данных...");
-        await grist.docApi.applyUserActions([
-            ['AddTable', 'Contributions', [
-                { id: 'Code', type: 'Text' },
-                { id: 'Period', type: 'Text' },
-                { id: 'Date', type: 'Date' },
-                { id: 'Description', type: 'Text' },
-                { id: 'Result', type: 'Text' },
-                { id: 'Status', type: 'Text' }, // Could be Choice
-                { id: 'Comments', type: 'Text' },
-                { id: 'History', type: 'Text' }
-            ]]
-        ]);
-        window.logic.showNotification("Таблица Contributions создана");
-    };
-
-    window.logic.fetchContributions = async function () {
-        if (!window.grist) return;
-        try {
-            // Fetch from Grist table 'Contributions'
-            const tableData = await grist.docApi.fetchTable('Contributions');
-
-            // Map Grist rows to internal structure
-            window.logic.contributions = tableData.id.map((id, index) => {
-                return {
-                    id: id, // Grist Row ID
-                    code: tableData.Code[index] || '',
-                    period: tableData.Period[index] || '',
-                    date: parseGristDate(tableData.Date[index])?.toLocaleDateString('ru-RU') || '', // Format for display
-                    description: tableData.Description[index] || '',
-                    result: tableData.Result[index] || '',
-                    status: tableData.Status[index] || 'pending',
-                    comments: safeJSONParse(tableData.Comments[index], []),
-                    history: safeJSONParse(tableData.History[index], [])
-                };
-            });
-
+    // Called by script.js when options are loaded
+    window.logic.loadContributionsFromOptions = function (data) {
+        console.log("Loading Contributions from Options...", data);
+        if (Array.isArray(data)) {
+            // Map generic object back to internal structure if needed, or just use as is
+            // Assuming data matches our structure since we save it that way
+            window.logic.contributions = data.map(c => ({
+                ...c,
+                // Ensure dates are strings or handled consistently
+                // Re-instantiate generic objects if needed
+            }));
             window.logic.renderContributions();
-        } catch (e) {
-            console.error("Error fetching contributions:", e);
         }
     };
-
-    // Helper for JSON parsing
-    function safeJSONParse(str, fallback) {
-        try {
-            return str ? JSON.parse(str) : fallback;
-        } catch (e) {
-            return fallback;
-        }
-    }
-
-    // Helper: Convert Date string back to Grist format (if needed, usually mapped automatically if column is Date)
-    // For now assuming Grist handles strings or Date objects. 
-    // Best practice: Send Date object or timestamp for Date columns, String for Text. 
 
     window.logic.saveContributionToGrist = async function (contribution, isNew = false) {
         window.logic.showNotification("Сохранение...");
 
-        const rowData = {
-            Code: contribution.code,
-            Period: contribution.period,
-            Date: new Date(), // Update Date to now? Or keep original? Let's keep create date for new, update date for edits if needed. 
-            // Actually, usually 'Date' is creation date.
-            Description: contribution.description,
-            Result: contribution.result,
-            Status: contribution.status,
-            Comments: JSON.stringify(contribution.comments),
-            History: JSON.stringify(contribution.history)
-        };
+        // We are already working with window.logic.contributions array in create/update functions
+        // So we just need to save the current state of the array to options
 
-        if (isNew) {
-            // For new records, we might want to set the Date explicitly
-            rowData.Date = new Date(); // Unix timestamp or JS Date usually works
-        }
+        // deep copy to avoid reference issues? JSON stringify/parse is enough for options
+        const dataToSave = window.logic.contributions;
 
         try {
-            if (isNew) {
-                await grist.docApi.applyUserActions([
-                    ['AddRecord', 'Contributions', null, rowData]
-                ]);
-            } else {
-                await grist.docApi.applyUserActions([
-                    ['UpdateRecord', 'Contributions', contribution.id, rowData]
-                ]);
-            }
+            await grist.setOption('contributions', dataToSave);
             window.logic.showNotification("Все изменения сохранены");
-            await window.logic.fetchContributions(); // Refresh to get IDs etc
+            if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification
+
             // Re-open view if editing?
             if (window.logic.currentContributionId && !isNew) {
                 window.logic.openContributionViewModal(window.logic.currentContributionId);
@@ -144,15 +66,19 @@ if (window.logic) {
 
     window.logic.deleteContributionFromGrist = async function (id) {
         window.logic.showNotification("Удаление...");
+
+        // Remove from local array
+        window.logic.contributions = window.logic.contributions.filter(c => c.id != id);
+        window.logic.renderContributions();
+
         try {
-            await grist.docApi.applyUserActions([
-                ['RemoveRecord', 'Contributions', id]
-            ]);
+            await grist.setOption('contributions', window.logic.contributions);
             window.logic.showNotification("Вклад удален");
-            await window.logic.fetchContributions();
+            if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification
         } catch (e) {
             console.error("Delete failed:", e);
             window.logic.showNotification("Ошибка удаления!", true);
+            // Revert? Complex to revert local state here without reload
         }
     };
 
@@ -282,10 +208,10 @@ if (window.logic) {
             }
         } else {
             const newContribution = {
-                // id will be assigned by Grist
+                id: Date.now().toString(), // Generate simplified ID for Options storage
                 code: code,
                 period: period,
-                // date specific logic handled in save
+                date: new Date().toLocaleDateString('ru-RU'),
                 description: desc,
                 result: res,
                 status: 'pending',
@@ -298,6 +224,10 @@ if (window.logic) {
                     }
                 ]
             };
+            // Add to local array immediately
+            window.logic.contributions.unshift(newContribution);
+            window.logic.renderContributions();
+
             window.logic.saveContributionToGrist(newContribution, true).then(() => {
                 window.logic.closeContributionCreateModal();
             });

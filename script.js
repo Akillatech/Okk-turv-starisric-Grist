@@ -111,12 +111,13 @@ function autoSaveSettings() {
 
 // Show save reminder notification
 let saveReminderTimeout;
-function showSaveReminder() {
-    // Clear previous timeout
+window.showSaveReminder = function () {
+    const reminder = document.getElementById('saveReminder');
+
+    // Clear existing timeout
     if (saveReminderTimeout) clearTimeout(saveReminderTimeout);
 
     // Show reminder in UI
-    let reminder = document.getElementById('saveReminder');
     if (!reminder) {
         reminder = document.createElement('div');
         reminder.id = 'saveReminder';
@@ -230,11 +231,6 @@ function initGrist() {
 
         // Initial Render
         refreshDashboard();
-
-        // Initialize Contributions
-        if (window.logic && window.logic.initContributions) {
-            window.logic.initContributions();
-        }
     });
 
     grist.onOptions(function (options) {
@@ -303,9 +299,15 @@ function initGrist() {
             currentSettings = {
                 holidays: {},
                 shortDays: {},
-                years: []
+                years: [new Date().getFullYear()],
+                userName: 'User'
             };
             console.log('Using default settings');
+        }
+
+        // Load Contributions from Grist options
+        if (options && options.contributions && window.logic && window.logic.loadContributionsFromOptions) {
+            window.logic.loadContributionsFromOptions(options.contributions);
         }
 
         // MIGRATION: Convert old format (array) to new format (object by year)
