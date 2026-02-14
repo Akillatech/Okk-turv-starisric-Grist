@@ -98,7 +98,13 @@ function renderLastContribution() {
     // The previous structure had a title with the button inside. 
     // Let's rebuild the specific "Last Contribution" header and then the card.
 
-    if (contribs.length === 0) {
+    // Sort by ID descending to get the true latest (assuming ID is timestamp or sequential)
+    // Create a copy to avoid mutating the original array
+    const sortedContribs = [...contribs].sort((a, b) => {
+        return Number(b.id) - Number(a.id);
+    });
+
+    if (sortedContribs.length === 0) {
         container.innerHTML = `
             <div class="kpi-card-title">
                 Последний вклад
@@ -113,7 +119,7 @@ function renderLastContribution() {
         return;
     }
 
-    const c = contribs[contribs.length - 1];
+    const c = sortedContribs[0];
     var statusText = c.status === 'approved' ? 'ОДОБРЕНО' : (c.status === 'pending' ? 'НА ПРОВЕРКЕ' : 'ОТКЛОНЕНО');
 
     // Last comment logic (copied from contribution.js)
