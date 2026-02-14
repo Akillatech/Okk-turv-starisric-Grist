@@ -70,7 +70,7 @@ const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
         }
     } catch (e) { /* ignore */ }
 })();
-const KPI_CONTRIBUTION_DEMO = { code: 'OK-2026-001', date: '01.02.2026', description: 'Описание последнего вклада' };
+const KPI_CONTRIBUTION_DEMO = null; // Deprecated, using window.logic.contributions
 let KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
     { type: 'ТАРГЕТ + ВКЛАД', available: true, lastDate: '01.01.2026', nextDate: '01.07.2026', progress: 40, variant: 'orange' },
@@ -87,6 +87,100 @@ let KPI_TRANSITIONS_DEMO = [
     } catch (e) { console.error('Failed to load transitions from localStorage', e); }
 })();
 
+// Last Contribution Logic
+function renderLastContribution() {
+    const container = document.querySelector('.kpi-contribution-card');
+    if (!container) return;
+
+    const contribs = window.logic && window.logic.contributions ? window.logic.contributions : [];
+
+    // Clear container but keep the title/header if we can, OR just rebuild everything.
+    // The previous structure had a title with the button inside. 
+    // Let's rebuild the specific "Last Contribution" header and then the card.
+
+    if (contribs.length === 0) {
+        container.innerHTML = `
+            <div class="kpi-card-title">
+                Последний вклад
+                <button class="kpi-open-all-btn" onclick="window.logic.showContributions()">
+                    Все вклады (${contribs.length}) <span class="icon icon-chevron-right" style="margin-left:4px;"></span>
+                </button>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                Вкладов пока нет
+            </div>
+        `;
+        return;
+    }
+
+    const c = contribs[contribs.length - 1];
+    var statusText = c.status === 'approved' ? 'ОДОБРЕНО' : (c.status === 'pending' ? 'НА ПРОВЕРКЕ' : 'ОТКЛОНЕНО');
+
+    // Last comment logic (copied from contribution.js)
+    let lastCommentHtml = '';
+    /*  
+        // Omitted comment for KPI card to keep it compact? 
+        // User said "look the same", so I should probably include it if it fits. 
+        // But KPI cards are usually summary. Let's include it for exact match.
+    */
+    if (c.comments && c.comments.length > 0) {
+        const last = c.comments[c.comments.length - 1];
+        lastCommentHtml = `
+            <div class="card-last-comment" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);">
+                <div class="last-comment-meta" style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="opacity:0.7;">
+                        <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg>
+                    <span class="last-comment-author" style="font-size:11px; font-weight:700; color:var(--text-primary);">${last.author}</span>
+                    <span style="font-size:10px; opacity:0.5; margin-left:auto;">${last.date.split(' ')[0]}</span>
+                </div>
+                <div class="last-comment-text" style="font-size:12px; color:var(--text-secondary); line-height:1.4;">${last.text}</div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="kpi-card-title">
+            Последний вклад
+            <button class="kpi-open-all-btn" onclick="window.logic.showContributions()">
+                Все вклады (${contribs.length}) <span class="icon icon-chevron-right" style="margin-left:4px;"></span>
+            </button>
+        </div>
+        
+        <div class="contribution-card status-${c.status || 'pending'}" style="margin: 0; width: 100%; box-shadow: none; border: 1px solid rgba(0,0,0,0.05); background: transparent; min-height: auto; padding: 0;">
+            <div class="card-status-indicator"></div>
+            <div class="card-main" style="width: 100%;">
+                <div class="card-header">
+                    <span class="card-code">${c.code || 'NO CODE'}</span>
+                    <span class="card-date">${c.date}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-description">${c.description || 'Нет описания'}</p>
+                </div>
+                ${lastCommentHtml}
+                <div class="card-footer">
+                    <span class="card-period-badge">
+                        <span class="icon icon-calendar"></span> ${c.period || '-'}
+                    </span>
+                    <span class="card-status-badge status-${c.status || 'pending'}">${statusText}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add click handler to the inner card
+    const innerCard = container.querySelector('.contribution-card');
+    if (innerCard) {
+        innerCard.style.cursor = 'pointer';
+        innerCard.onclick = function () {
+            window.logic.showContributions();
+            setTimeout(() => {
+                if (window.logic.openContributionViewModal) window.logic.openContributionViewModal(c.id);
+            }, 100);
+        };
+    }
+}
+
 // =================== RENDER ===================
 
 function renderKpiView() {
@@ -98,13 +192,19 @@ function renderKpiView() {
     if (qSel) qSel.value = kpiState.quarter;
     var qData = ensureKpiStructure(kpiState.year, kpiState.quarter);
     renderTriangleChart(qData);
-    renderGradeCard();
-    renderContributionCard();
-    renderTransitionsCard();
+
+    // Render Cards
+    renderLastContribution();
+    if (typeof renderGradeCard === 'function') renderGradeCard();
+    if (typeof renderTransitionsCard === 'function') renderTransitionsCard();
+
+    // Initialize Modals (idempotent)
     initKpiDataModal();
     initTransitionsModal();
 }
 
+// initKpiDataModal and initTransitionsModal are defined below this block in the file
+// We removed the global calls that were here.
 
 
 function getBadgeColor(v) { return v >= 80 ? '#4CAF50' : v >= 60 ? '#FFC107' : '#f44336'; }
@@ -192,6 +292,7 @@ function renderTriangleChart(qData) {
     var mAC_br = lerp(mAC, vBotR, gapFactor);
 
     // Build section paths with QUADRATIC bezier for rounding
+    // Build section paths with QUADRATIC bezier for rounding
     function sectionPath(arcStart, midStart, vertex, midEnd, arcEnd) {
         var d1 = unitVec(vertex, midStart);
         var d2 = unitVec(vertex, midEnd);
@@ -207,6 +308,7 @@ function renderTriangleChart(qData) {
             ' A ' + R + ' ' + R + ' 0 0 1 ' + p(arcStart) + ' Z';
     }
 
+    // Using classes for fills instead of hardcoded colors to support themes
     var pathTop = sectionPath(topArcE, mAB_t, vTop, mAC_t, topArcS);
     var pathBL = sectionPath(blArcS, mAB_bl, vBotL, mBC_bl, blArcE);
     var pathBR = sectionPath(brArcS, mBC_br, vBotR, mAC_br, brArcE);
@@ -228,10 +330,10 @@ function renderTriangleChart(qData) {
         var cY = by + oH + 42 + (circleYShift || 0);
 
         function circleBadge(cx, cy, val, label) {
-            return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (subR + 2) + '" fill="#dde1e7" filter="url(#badgeNeuOuter)" />' +
+            return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (subR + 2) + '" class="kpi-badge-outer" filter="url(#badgeNeuOuter)" />' +
                 '<circle cx="' + cx + '" cy="' + cy + '" r="' + subR + '" fill="' + getBadgeGradient(val) + '" filter="url(#badgeGlow)" />' +
                 '<text x="' + cx + '" y="' + (cy + 1) + '" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif">' + val + '%</text>' +
-                '<text x="' + cx + '" y="' + (cy + subR + 13) + '" text-anchor="middle" font-size="7" font-weight="700" fill="#8a8f99" font-family="Segoe UI,sans-serif" letter-spacing="0.5">' + label + '</text>';
+                '<text x="' + cx + '" y="' + (cy + subR + 13) + '" text-anchor="middle" font-size="7" font-weight="700" class="kpi-badge-label" font-family="Segoe UI,sans-serif" letter-spacing="0.5">' + label + '</text>';
         }
 
         return '' +
@@ -239,7 +341,7 @@ function renderTriangleChart(qData) {
             '<rect x="' + (bx - oW / 2) + '" y="' + by + '" width="' + oW + '" height="' + oH + '" rx="12" fill="url(#gradOverall)" filter="url(#badgePillShadow)" />' +
             '<text x="' + bx + '" y="' + (by + 21) + '" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-family="Segoe UI,sans-serif" letter-spacing="0.5">' + m.overall + '%</text>' +
             // ОБЩИЕ label
-            '<text x="' + bx + '" y="' + (by + oH + 14) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#8a8f99" font-family="Segoe UI,sans-serif" letter-spacing="2">ОБЩИЕ</text>' +
+            '<text x="' + bx + '" y="' + (by + oH + 14) + '" text-anchor="middle" font-size="9" font-weight="800" class="kpi-badge-label" font-family="Segoe UI,sans-serif" letter-spacing="2">ОБЩИЕ</text>' +
             // Sub-circles
             circleBadge(bx - sg, cY, m.speed, 'СКОРОСТЬ') +
             circleBadge(bx, cY, m.er, 'ER') +
@@ -255,20 +357,20 @@ function renderTriangleChart(qData) {
         '<defs>' +
         // Neumorphic raised shadow for sections
         '<filter id="neuShadow" x="-18%" y="-18%" width="136%" height="136%">' +
-        '<feDropShadow dx="8" dy="8" stdDeviation="12" flood-color="#b0b8c4" flood-opacity="0.55"/>' +
-        '<feDropShadow dx="-6" dy="-6" stdDeviation="10" flood-color="#ffffff" flood-opacity="0.85"/>' +
+        '<feDropShadow dx="8" dy="8" stdDeviation="12" flood-color="var(--shadow-dark)" flood-opacity="0.55"/>' +
+        '<feDropShadow dx="-6" dy="-6" stdDeviation="10" flood-color="var(--shadow-light)" flood-opacity="0.85"/>' +
         '</filter>' +
         // Inset shadow for center circle — simple approach
         '<filter id="cInsetDark" x="-10%" y="-10%" width="120%" height="120%">' +
-        '<feDropShadow dx="4" dy="4" stdDeviation="8" flood-color="#a0a8b8" flood-opacity="0.6"/>' +
+        '<feDropShadow dx="4" dy="4" stdDeviation="8" flood-color="var(--shadow-dark)" flood-opacity="0.6"/>' +
         '</filter>' +
         '<filter id="cInsetLight" x="-10%" y="-10%" width="120%" height="120%">' +
-        '<feDropShadow dx="-3" dy="-3" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.8"/>' +
+        '<feDropShadow dx="-3" dy="-3" stdDeviation="6" flood-color="var(--shadow-light)" flood-opacity="0.8"/>' +
         '</filter>' +
         // Badge neumorphic outer ring
         '<filter id="badgeNeuOuter" x="-30%" y="-30%" width="160%" height="160%">' +
-        '<feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#b0b5be" flood-opacity="0.5"/>' +
-        '<feDropShadow dx="-1" dy="-1" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.7"/>' +
+        '<feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="var(--shadow-dark)" flood-opacity="0.5"/>' +
+        '<feDropShadow dx="-1" dy="-1" stdDeviation="2" flood-color="var(--shadow-light)" flood-opacity="0.7"/>' +
         '</filter>' +
         // Badge inner glow
         '<filter id="badgeGlow" x="-20%" y="-20%" width="140%" height="140%">' +
@@ -293,10 +395,9 @@ function renderTriangleChart(qData) {
         '</linearGradient>' +
         // Liquid fill
         '<clipPath id="kpiCC"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" /></clipPath>' +
-        '<linearGradient id="kpiLiq" x1="0%" y1="0%" x2="0%" y2="100%">' +
-        '<stop offset="0%" style="stop-color:#E3FB1E;stop-opacity:0.9"/>' +
-        '<stop offset="100%" style="stop-color:#9ab012;stop-opacity:1"/>' +
-        '</linearGradient>' +
+        // Liquid fill gradient - moved to CSS via class, but SVG requires defs for complex fills
+        // We will use a class on the elements themselves to set fill: var(--accent-color) etc
+
         // Inner shadow gradient for petal edges
         '<linearGradient id="innerShadowGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
         '<stop offset="0%" stop-color="#b0b8c4" stop-opacity="0.4"/>' +
@@ -332,39 +433,39 @@ function renderTriangleChart(qData) {
         '</linearGradient>' +
         '</defs>' +
 
-        // 3 SECTIONS — raised neumorphism with depth gradient
-        '<path d="' + pathTop + '" fill="url(#petalDepthTop)" filter="url(#neuShadow)" />' +
-        '<path d="' + pathBL + '" fill="url(#petalDepthBL)" filter="url(#neuShadow)" />' +
-        '<path d="' + pathBR + '" fill="url(#petalDepthBR)" filter="url(#neuShadow)" />' +
+        // 3 SECTIONS — class-based fill for theming
+        '<path d="' + pathTop + '" class="kpi-tri-section" filter="url(#neuShadow)" />' +
+        '<path d="' + pathBL + '" class="kpi-tri-section" filter="url(#neuShadow)" />' +
+        '<path d="' + pathBR + '" class="kpi-tri-section" filter="url(#neuShadow)" />' +
         // Subtle inner shadow for depth (dark top-left edge)
         '<path d="' + pathTop + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
         '<path d="' + pathBL + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
         '<path d="' + pathBR + '" fill="none" stroke="url(#innerShadowGrad)" stroke-width="4" />' +
 
-        // MONTH LABELS inside sections — Lighter and Thinner (SemiBold)
-        '<text x="350" y="160" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
-        '<text x="170" y="475" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
-        '<text x="530" y="475" text-anchor="middle" font-size="18" font-weight="700" fill="#889099" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
+        // MONTH LABELS inside sections
+        '<text x="350" y="160" text-anchor="middle" font-size="18" font-weight="700" class="kpi-month-label" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[0] + '</text>' +
+        '<text x="170" y="475" text-anchor="middle" font-size="18" font-weight="700" class="kpi-month-label" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[1] + '</text>' +
+        '<text x="530" y="475" text-anchor="middle" font-size="18" font-weight="700" class="kpi-month-label" font-family="Segoe UI,sans-serif" letter-spacing="3">' + monthNames[2] + '</text>' +
 
         // BADGES inside sections
         badgeSVG(months[0], 350, topBadgeY, 0) +
         badgeSVG(months[1], 170, blBadgeY, 0) +
         badgeSVG(months[2], 530, brBadgeY, 0) +
 
-        // CENTER CIRCLE — inset neumorphic via layered circles
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 12) + '" fill="#dce0e8" filter="url(#cInsetDark)" />' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 10) + '" fill="#d4d9e2" />' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 5) + '" fill="#dce0e8" filter="url(#cInsetLight)" />' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" fill="url(#circleDepth)" />' +
+        // CENTER CIRCLE — inset neumorphic via layered circles using classes
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 12) + '" class="kpi-circle-ring-1" filter="url(#cInsetDark)" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 10) + '" class="kpi-circle-ring-2" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 5) + '" class="kpi-circle-ring-1" filter="url(#cInsetLight)" />' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" class="kpi-circle-inner" />' +
 
         // LIQUID FILL
         '<g clip-path="url(#kpiCC)">' +
-        '<rect x="' + (cx - R) + '" y="' + liqTop + '" width="' + (R * 2) + '" height="' + (R * 2) + '" fill="url(#kpiLiq)">' +
+        '<rect x="' + (cx - R) + '" y="' + liqTop + '" width="' + (R * 2) + '" height="' + (R * 2) + '" class="kpi-liquid-fill">' +
         '<animate attributeName="y" values="' + (liqTop + 4) + ';' + (liqTop - 4) + ';' + (liqTop + 4) + '" dur="3s" repeatCount="indefinite" />' +
         '</rect>' +
 
         // Wave 1 - Morphing (Phase 0 -> 360)
-        '<path class="wave-path" d="' + createWavePath(cx, liqTop, R, 20, 0) + '" fill="#c4d916">' +
+        '<path class="wave-path kpi-wave-1" d="' + createWavePath(cx, liqTop, R, 20, 0) + '">' +
         '<animate attributeName="d" values="' +
         createWavePath(cx, liqTop, R, 20, 0) + ';' +
         createWavePath(cx, liqTop, R, 20, 90) + ';' +
@@ -375,7 +476,7 @@ function renderTriangleChart(qData) {
         '</path>' +
 
         // Wave 2 - Morphing (Phase 60 -> 420)
-        '<path class="wave-path wave-path-2" d="' + createWavePath(cx, liqTop, R, 15, 60) + '" fill="rgba(227,251,30,0.5)">' +
+        '<path class="wave-path wave-path-2 kpi-wave-2" d="' + createWavePath(cx, liqTop, R, 15, 60) + '">' +
         '<animate attributeName="d" values="' +
         createWavePath(cx, liqTop, R, 15, 60) + ';' +
         createWavePath(cx, liqTop, R, 15, 150) + ';' +
@@ -393,8 +494,8 @@ function renderTriangleChart(qData) {
         '</g>' +
 
         // ИТОГ text
-        '<text x="' + cx + '" y="' + (cy - 16) + '" text-anchor="middle" font-size="26" font-weight="800" fill="#333" font-family="Segoe UI,sans-serif">ИТОГ</text>' +
-        '<text x="' + cx + '" y="' + (cy + 34) + '" text-anchor="middle" font-size="54" font-weight="900" fill="#7a8f0f" font-family="Segoe UI,sans-serif" font-style="italic">' + total + '%</text>' +
+        '<text x="' + cx + '" y="' + (cy - 16) + '" text-anchor="middle" font-size="26" font-weight="800" class="kpi-total-label" font-family="Segoe UI,sans-serif">ИТОГ</text>' +
+        '<text x="' + cx + '" y="' + (cy + 34) + '" text-anchor="middle" font-size="54" font-weight="900" class="kpi-total-value" font-family="Segoe UI,sans-serif" font-style="italic">' + total + '%</text>' +
 
         '</svg>';
 }
@@ -922,7 +1023,7 @@ function renderTransitionsCard() {
             '</div></div>' +
             '<div class="kpi-progress-bar-container">' +
             '<span class="kpi-progress-date">' + t.lastDate + '</span>' +
-            '<div class="kpi-progress-bar"><div class="kpi-progress-fill ' + (t.variant === 'orange' ? 'orange' : '') + '" style="width:' + t.progress + '%"></div></div>' +
+            '<div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:' + t.progress + '%"></div></div>' +
             '<span class="kpi-progress-date">' + t.nextDate + '</span></div></div>';
     }).join('');
 }

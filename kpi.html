@@ -61,24 +61,12 @@
             <div class="kpi-cards-top-row">
 
                 <!-- Contributions Card -->
-                <div class="kpi-card kpi-contribution-card">
-                    <div class="kpi-card-title">
-                        ПОСЛЕДНИЙ ВКЛАД
-                        <button class="kpi-open-all-btn" onclick="window.logic.showContributions()">ВСЕ ВКЛАДЫ</button>
+                <div class="kpi-card kpi-contribution-card" style="padding: 16px;">
+                    <!-- Content rendered by kpi.js (renderLastContribution) -->
+                    <div
+                        style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-secondary);">
+                        Загрузка...
                     </div>
-                    <div class="kpi-contrib-row">
-                        <div class="kpi-contrib-col" style="flex: 2;">
-                            <div class="kpi-contrib-field-label">Кодовое обозначение</div>
-                            <div class="kpi-contrib-field" id="kpiContribCode">КОДОВОЕ ОБОЗНАЧЕНИЕ</div>
-                        </div>
-                        <div class="kpi-contrib-col" style="flex: 1;">
-                            <div class="kpi-contrib-field-label">Дата</div>
-                            <div class="kpi-contrib-field" id="kpiContribDate" style="text-align: center;">--.--.----
-                            </div>
-                        </div>
-                    </div>
-                    <div class="kpi-contrib-field-label">Описание</div>
-                    <div class="kpi-contrib-field" id="kpiContribDesc">ОПИСАНИЕ</div>
                 </div>
 
                 <!-- Grade Card -->

@@ -297,7 +297,9 @@ function initGrist() {
                 holidays: {},
                 shortDays: {},
                 years: [new Date().getFullYear()],
-                userName: 'User'
+                userName: 'User',
+                theme: 'light',
+                accent: 'lime'
             };
             console.log('Using default settings');
         }
@@ -335,6 +337,7 @@ function initGrist() {
         }
 
         refreshDashboard(); // Settings might change stats (holidays etc)
+        applyTheme(currentSettings.theme, currentSettings.accent);
     });
 }
 
@@ -649,6 +652,19 @@ window.logic = {
         currentSettings.userName = input.value.trim();
         autoSaveSettings();
         updateGreeting();
+    },
+
+    saveTheme: function () {
+        const theme = document.getElementById('themeSelect').value;
+        currentSettings.theme = theme;
+        applyTheme(theme, currentSettings.accent);
+        autoSaveSettings();
+    },
+
+    saveAccent: function (accent) {
+        currentSettings.accent = accent;
+        applyTheme(currentSettings.theme, accent);
+        autoSaveSettings();
     },
 
     addHoliday: function () {
@@ -1329,6 +1345,12 @@ function renderSettingsUI() {
         userNameInput.value = currentSettings.userName;
     }
 
+    // Set Theme Select
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+        themeSelect.value = currentSettings.theme || 'light';
+    }
+
     // Get currently selected year
     const yearSelect = document.getElementById('calendarYear');
     const selectedYear = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
@@ -1552,8 +1574,8 @@ function calculateFullDayStats(date) {
     date.setHours(0, 0, 0, 0);
     const time = date.getTime();
     const projectsMap = {};
-    let totalHours = 0;
-    let totalTasks = 0;
+    let totalHours = 0; // Derived from sum of projects? Or cumulative?
+    // Let's rely on summing project totals at the end to be safe and consistent
 
     allRecords.forEach(row => {
         const d = parseGristDate(getRecVal(row, 'date'));
@@ -1582,38 +1604,48 @@ function calculateFullDayStats(date) {
             }
 
             projectsMap[projectName].checkHours += checkHours;
-            projectsMap[projectName].checked += checked; // Is checked tasks dependent on checkbox? GAS: "var checked = (isProjectChecked && checkedIndex !== -1) ? val : 0;" YES.
+            projectsMap[projectName].checked += checked;
             projectsMap[projectName].markupHours += markup;
             projectsMap[projectName].marked += marked;
 
-            // Other Hours logic: if additional > 0, adds to "Иные задачи" project?
-            // GAS: "if (additionalHours > 0) { var otherProjectName = 'Иные задачи'; ... }"
+            // Other Hours logic
             if (additional > 0) {
                 const otherName = 'Иные задачи';
                 if (!projectsMap[otherName]) projectsMap[otherName] = { name: otherName, totalHours: 0, otherHours: 0, checkHours: 0, markupHours: 0, checked: 0, marked: 0 };
                 projectsMap[otherName].otherHours += additional;
                 projectsMap[otherName].totalHours += additional;
-                totalHours += additional;
             }
 
-            // Add to project total
-            projectsMap[projectName].totalHours += checkHours + markup;
-            totalHours += checkHours + markup;
-            totalTasks += checked + marked;
-
-            // Calculate metrics (tasks per hour)
-            projectsMap[projectName].avgCheck = projectsMap[projectName].checkHours > 0
-                ? (projectsMap[projectName].checked / projectsMap[projectName].checkHours) : 0;
-            projectsMap[projectName].avgMarkup = projectsMap[projectName].markupHours > 0
-                ? (projectsMap[projectName].marked / projectsMap[projectName].markupHours) : 0;
+            projectsMap[projectName].totalHours += pure + additional + markup;
         }
     });
 
-    return {
-        totalHours,
-        totalTasks,
-        projects: Object.values(projectsMap).sort((a, b) => b.totalHours - a.totalHours)
-    };
+    // Convert map to array and calculate averages
+    const projects = Object.values(projectsMap);
+
+    let totalTasks = 0;
+    totalHours = 0;
+
+    projects.forEach(p => {
+        // Calculate metrics
+        p.avgCheck = p.checkHours > 0 ? (p.checked / p.checkHours) : 0;
+        p.avgMarkup = p.markupHours > 0 ? (p.marked / p.markupHours) : 0;
+
+        totalHours += p.totalHours;
+        totalTasks += p.checked + p.marked;
+    });
+
+    projects.sort((a, b) => b.totalHours - a.totalHours);
+
+    return { totalHours, totalTasks, projects };
+}
+
+function applyTheme(theme, accent) {
+    if (!theme) theme = 'light';
+    if (!accent) accent = 'lime'; // Default
+
+    document.body.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-accent', accent);
 }
 
 // --- Main Dashboard Renderer ---

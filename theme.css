@@ -1,0 +1,882 @@
+/* ============================================================
+   THEME SYSTEM — Dark Mode & Accent Colors
+   Comprehensive overrides for all hardcoded colors in style.css
+   ============================================================ */
+
+/* ============ EXTENDED LIGHT THEME VARIABLES ============ */
+:root {
+    --card-bg: #f8f9fc;
+    --border-color: rgba(0, 0, 0, 0.06);
+    --input-bg: #f0f2f5;
+    --hover-bg: rgba(0, 0, 0, 0.03);
+    --modal-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.3);
+    --table-border: #f0f0f0;
+    --table-stripe: #f9f9f9;
+    --table-hover: #f0f4ff;
+    --badge-bg: #f0f2f5;
+}
+
+/* ============ DARK THEME ============ */
+[data-theme="dark"] {
+    /* Core palette — neutral gray, NOT blue */
+    --bg-color: #1e1e1e;
+    --block-bg: #252525;
+    --shadow-light: rgba(255, 255, 255, 0.04);
+    --shadow-dark: rgba(0, 0, 0, 0.5);
+    --text-primary: #e0e0e0;
+    --text-secondary: #999;
+    --card-bg: #2a2a2a;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --input-bg: #1a1a1a;
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --modal-bg: #1e1e1e;
+    --modal-overlay: rgba(0, 0, 0, 0.6);
+    --table-border: #333;
+    --table-stripe: rgba(255, 255, 255, 0.02);
+    --table-hover: rgba(255, 255, 255, 0.05);
+    --badge-bg: #333;
+
+    /* Keep accent the same */
+    --accent-text: #c4d916;
+}
+
+/* =============================================
+   BODY & GENERAL TEXT
+   ============================================= */
+[data-theme="dark"] body {
+    color: var(--text-primary);
+}
+
+/* =============================================
+   ALL #333 TEXT — headings, labels, names
+   ============================================= */
+[data-theme="dark"] .column-card h3,
+[data-theme="dark"] .stats-row .value,
+[data-theme="dark"] .project-name,
+[data-theme="dark"] .projects-section h2,
+[data-theme="dark"] .projects-table th,
+[data-theme="dark"] .weekly-table thead,
+[data-theme="dark"] .workload-sidebar h3,
+[data-theme="dark"] .workload-sidebar .big-percentage,
+[data-theme="dark"] .stat-card .stat-value,
+[data-theme="dark"] .emergency-item .item-name,
+[data-theme="dark"] .btn-add,
+[data-theme="dark"] .btn-add-year,
+[data-theme="dark"] .btn-export,
+[data-theme="dark"] .btn-import,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4 {
+    color: var(--text-primary);
+}
+
+/* =============================================
+   ALL #666 TEXT — secondary labels
+   ============================================= */
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .stats-row .label,
+[data-theme="dark"] .info-card label,
+[data-theme="dark"] .project-loading,
+[data-theme="dark"] .stat-card .stat-label,
+[data-theme="dark"] .date-chip .remove-date,
+[data-theme="dark"] .period-selector select,
+[data-theme="dark"] .icon-arrow::before {
+    color: var(--text-secondary);
+}
+
+/* =============================================
+   EMPTY STATE (#999)
+   ============================================= */
+[data-theme="dark"] .empty-state {
+    color: var(--text-secondary);
+}
+
+/* =============================================
+   WHITE BACKGROUNDS → dark card
+   ============================================= */
+[data-theme="dark"] .column-card,
+[data-theme="dark"] .loading,
+[data-theme="dark"] .today-stat-card,
+[data-theme="dark"] .date-chip {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* =============================================
+   #f8f9fa / #f0f0f0 BACKGROUNDS
+   ============================================= */
+[data-theme="dark"] .dates-container,
+[data-theme="dark"] .emergency-item {
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+/* =============================================
+   INFO CARD gradient → dark card
+   ============================================= */
+[data-theme="dark"] .info-card {
+    background: var(--card-bg);
+}
+
+/* =============================================
+   BORDERS — all #f0f0f0, #eee, #ddd, #e0e0e0
+   ============================================= */
+[data-theme="dark"] .stats-row,
+[data-theme="dark"] .top-values {
+    border-color: var(--table-border);
+}
+
+[data-theme="dark"] .period-selector {
+    border-top-color: var(--table-border);
+}
+
+[data-theme="dark"] .date-chip {
+    border-color: var(--table-border);
+}
+
+[data-theme="dark"] .add-date-row input {
+    border-color: var(--table-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .export-import-group {
+    border-top-color: var(--table-border);
+}
+
+[data-theme="dark"] .emergency-stat {
+    background: rgba(214, 48, 49, 0.1);
+    border-color: rgba(214, 48, 49, 0.3);
+}
+
+/* =============================================
+   TABLES
+   ============================================= */
+[data-theme="dark"] .projects-table td,
+[data-theme="dark"] .weekly-table td {
+    border-bottom-color: var(--table-border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .projects-table tbody tr:hover,
+[data-theme="dark"] .weekly-table tbody tr:hover {
+    background: var(--table-hover);
+}
+
+[data-theme="dark"] .weekly-table tbody tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+/* Table headers gradient → accent-aware */
+[data-theme="dark"] .projects-table thead,
+[data-theme="dark"] .weekly-table thead {
+    background: var(--accent-gradient);
+}
+
+[data-theme="dark"] .projects-table th,
+[data-theme="dark"] .weekly-table th {
+    color: #1e1e1e;
+}
+
+/* =============================================
+   PERIOD SELECTOR
+   ============================================= */
+[data-theme="dark"] .period-selector select {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--table-border);
+}
+
+[data-theme="dark"] .period-selector select:hover,
+[data-theme="dark"] .period-selector select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(227, 251, 30, 0.1);
+}
+
+/* =============================================
+   PROGRESS BARS
+   ============================================= */
+[data-theme="dark"] .progress-bar {
+    background: #333;
+}
+
+[data-theme="dark"] .workload-bar {
+    background: #333;
+}
+
+[data-theme="dark"] .spinner {
+    border-color: #333;
+    border-top-color: var(--accent-color);
+}
+
+[data-theme="dark"] .loading-spinner {
+    border-color: #444;
+    border-top-color: var(--accent-color);
+}
+
+/* =============================================
+   NEUMORPHIC ICONS — fix box-shadow
+   ============================================= */
+/* Global icon style removed to prevent conflicts with buttons */
+
+
+/* FIX: Navigation buttons which are also .icon classes */
+[data-theme="dark"] .nav-btn.icon,
+[data-theme="dark"] .settings-btn.icon {
+    background-color: var(--block-bg);
+    /* Use block bg instead of card-bg */
+    box-shadow:
+        5px 5px 10px rgba(0, 0, 0, 0.5),
+        -5px -5px 10px rgba(255, 255, 255, 0.05);
+    /* External shadow only */
+    background-image: none;
+    /* Ensure no conflicting bg image */
+}
+
+[data-theme="dark"] .nav-btn.icon:hover,
+[data-theme="dark"] .settings-btn.icon:hover {
+    color: var(--accent-text);
+    /* Ensure icon color changes on hover */
+    background-color: #333;
+    box-shadow:
+        6px 6px 12px rgba(0, 0, 0, 0.5),
+        -6px -6px 12px rgba(255, 255, 255, 0.05),
+        0 0 8px rgba(227, 251, 30, 0.1);
+}
+
+/* Ensure the MASKED icon inside has the right color */
+[data-theme="dark"] .nav-btn.icon::before,
+[data-theme="dark"] .settings-btn.icon::before {
+    background-color: currentColor;
+    /* Use text color for the mask */
+}
+
+/* Manual Fix for specific icons if they use mask on themselves */
+[data-theme="dark"] .icon-calendar,
+[data-theme="dark"] .icon-settings,
+[data-theme="dark"] .icon-home,
+[data-theme="dark"] .icon-kpi {
+    /* If these are used on the button directly, background-color controls the icon color */
+    background-color: currentColor;
+}
+
+/* BUT for .nav-btn.icon, the button itself has the mask? 
+   Let's check style.css lines 2431+. 
+   Actually style.css uses .icon-settings { mask-image: ... } 
+   So if the element IS the icon (button.icon), background-color sets the icon color.
+   BUT we just set background-color to var(--block-bg) for the BUTTON.
+   Conflict! 
+   The button needs a background color for the SHAPE, but mask-image uses background-color for CONTENT.
+   
+   Wait, style.css line 851 defines .nav-btn. 
+   Line 2419 defines .header-icon-container .icon { background-color: #a0aec0 }
+   
+   If <button class="nav-btn icon icon-home"> is used:
+   1. .nav-btn sets width/height/border-radius/bg-color(shape)
+   2. .icon sets mask-size/repeat/position
+   3. .icon-home sets mask-image
+   
+   IF styles apply mask to the button itself, the background-color of the button BECOMES the icon color.
+   And the Shape background is lost (it becomes the icon color).
+   
+   Let's look at index.html again.
+   <button class="nav-btn icon icon-home" ...></button>
+   
+   If I set background-color on this button, I am setting the color of the ICON (because of mask).
+   BUT .nav-btn usually looks like a circle button.
+   
+   If the icon is implemented as a mask directly on the button, then the button CANNOT have a background shape color distinct from the icon color.
+   
+   Let's check if .nav-btn in style.css has a mask?
+   No, .nav-btn has background: var(--bg-color).
+   
+   But .icon has mask attributes?
+   style.css line 2419: .header-icon-container .icon {...}
+   It does NOT say .icon { ... } globally.
+   
+   Let's check GLOBAL .icon style in style.css.
+*/
+
+[data-theme="dark"] .tile-icon.icon {
+    box-shadow:
+        2px 2px 4px rgba(0, 0, 0, 0.4),
+        -2px -2px 4px rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] h3 .icon {
+    box-shadow:
+        3px 3px 6px rgba(0, 0, 0, 0.4),
+        -3px -3px 6px rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] h2 .icon {
+    box-shadow:
+        4px 4px 8px rgba(0, 0, 0, 0.4),
+        -4px -4px 8px rgba(255, 255, 255, 0.03);
+}
+
+/* =============================================
+   TYPE BADGES — soften for dark
+   ============================================= */
+[data-theme="dark"] .type-number {
+    background: rgba(25, 118, 210, 0.15);
+}
+
+[data-theme="dark"] .type-text {
+    background: rgba(123, 31, 162, 0.15);
+}
+
+[data-theme="dark"] .type-boolean {
+    background: rgba(56, 142, 60, 0.15);
+}
+
+[data-theme="dark"] .type-date {
+    background: rgba(245, 124, 0, 0.15);
+}
+
+[data-theme="dark"] .type-empty {
+    background: rgba(158, 158, 158, 0.15);
+}
+
+[data-theme="dark"] .badge-tasks {
+    background: rgba(25, 118, 210, 0.15);
+}
+
+[data-theme="dark"] .badge-hours {
+    background: rgba(245, 124, 0, 0.15);
+}
+
+[data-theme="dark"] .badge-count {
+    background: rgba(123, 31, 162, 0.15);
+}
+
+/* =============================================
+   COLUMN CARD accent stripe
+   ============================================= */
+[data-theme="dark"] .column-card::before {
+    background: var(--accent-gradient);
+}
+
+/* =============================================
+   MODALS & SETTINGS — comprehensive
+   ============================================= */
+[data-theme="dark"] .modal-overlay {
+    background: var(--modal-overlay);
+}
+
+[data-theme="dark"] .modal {
+    background: var(--modal-bg);
+}
+
+[data-theme="dark"] .modal-body {
+    background: #252525;
+}
+
+[data-theme="dark"] .modal.neu-raised {
+    background: #252525;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* Settings modal accent stripe (::before) */
+[data-theme="dark"] .modal::before,
+[data-theme="dark"] .projects-section::before {
+    opacity: 0.7;
+}
+
+/* HEADER ICON CONTAINER (Title Icon) */
+[data-theme="dark"] .header-icon-container {
+    background: #333;
+    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Close/icon buttons */
+[data-theme="dark"] .icon-btn,
+[data-theme="dark"] .close-modal {
+    color: var(--text-secondary);
+    background: #333 !important;
+    /* Force override style.css background: white */
+    border: 1px solid #444;
+    box-shadow: none;
+}
+
+[data-theme="dark"] .icon-btn:hover,
+[data-theme="dark"] .close-modal:hover {
+    color: var(--text-primary);
+    background: #444 !important;
+}
+
+/* Modal header */
+[data-theme="dark"] .modal-header {
+    background: #252525;
+    border-bottom-color: #333;
+}
+
+[data-theme="dark"] .modal-header h3 {
+    color: var(--text-primary);
+}
+
+/* Fix for white border set in style.css */
+[data-theme="dark"] .modal {
+    border-color: #333;
+}
+
+/* Settings tabs container */
+[data-theme="dark"] .settings-tabs-container {
+    background: #252525;
+    border: none;
+}
+
+[data-theme="dark"] .settings-tabs {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Settings tab buttons */
+[data-theme="dark"] .tab-btn {
+    color: var(--text-secondary);
+    background: transparent;
+    box-shadow: none;
+}
+
+[data-theme="dark"] .tab-btn.active {
+    color: var(--accent-text);
+    /* Use accent color for text */
+    background: #333;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+
+[data-theme="dark"] .tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* User tab icon now inherits accent color */
+
+/* Hardcoded color for calendar tab removed to support accent colors */
+
+
+/* Form inputs within settings */
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-input.dark-input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] input[type="text"] {
+    background: #1a1a1a;
+    color: var(--text-primary);
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] select:focus {
+    border-color: var(--accent-color);
+}
+
+[data-theme="dark"] .settings-tab-content label,
+[data-theme="dark"] .form-group label {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .section-block h4 {
+    color: var(--text-primary);
+}
+
+/* Date chips in settings */
+[data-theme="dark"] .date-chip {
+    background: #333;
+    border-color: #444;
+    color: var(--text-primary);
+}
+
+/* Tags list container */
+[data-theme="dark"] .tags-list {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/* Year selector */
+[data-theme="dark"] .year-select {
+    background: #1a1a1a;
+    color: var(--text-primary);
+}
+
+/* Action buttons in settings */
+[data-theme="dark"] .btn-white {
+    background: #333;
+    color: var(--text-primary);
+    border: 1px solid #444;
+}
+
+[data-theme="dark"] .btn-red {
+    color: #ff6b6b;
+}
+
+/* Accent button selection ring */
+[data-theme="dark"] .accent-btn {
+    border-color: #444 !important;
+}
+
+/* =============================================
+   WORKLOAD ACCENT SUMMARY → keep gradient okay
+   ============================================= */
+[data-theme="dark"] .workload-summary,
+[data-theme="dark"] .today-summary {
+    background: var(--accent-gradient);
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+[data-theme="dark"] .btn-lime,
+[data-theme="dark"] .btn-lime-block {
+    background: var(--accent-gradient);
+}
+
+/* Action buttons */
+[data-theme="dark"] .action-btn {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* =============================================
+   NOTIFICATION TOAST
+   ============================================= */
+[data-theme="dark"] .notification-toast {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* =============================================
+   CALENDAR — cells need border & contrast
+   ============================================= */
+[data-theme="dark"] .calendar-grid {
+    gap: 8px;
+}
+
+[data-theme="dark"] .day-cell {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: var(--text-primary);
+    box-shadow: none;
+}
+
+[data-theme="dark"] .day-cell:hover {
+    background: #333;
+    border-color: #4a4a4a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .day-cell.empty {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+[data-theme="dark"] .day-cell.today {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-color);
+    background: #2f2f2f;
+}
+
+[data-theme="dark"] .day-cell .day-number {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .day-cell.holiday .day-number {
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] .day-cell.short-day .day-number {
+    color: #ffa502;
+}
+
+[data-theme="dark"] .week-number-cell {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .calendar-header-cell {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .calendar-controls {
+    background: #252525;
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .calendar-select {
+    background: #1a1a1a;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .calendar-nav-btn {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: var(--text-secondary);
+    box-shadow: none;
+}
+
+[data-theme="dark"] .calendar-nav-btn:hover {
+    background: #333;
+    color: var(--accent-color);
+}
+
+/* Calendar legend */
+[data-theme="dark"] .calendar-legend {
+    background: #252525;
+    border: 1px solid #333;
+    color: var(--text-secondary);
+}
+
+/* =============================================
+   CONTRIBUTION CARDS
+   ============================================= */
+[data-theme="dark"] .contribution-card {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4),
+        -3px -3px 8px rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .contribution-card h4,
+[data-theme="dark"] .contribution-card p,
+[data-theme="dark"] .contribution-card span {
+    color: var(--text-primary);
+}
+
+/* =============================================
+   KPI CARDS
+   ============================================= */
+[data-theme="dark"] .kpi-card {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .kpi-card h3,
+[data-theme="dark"] .kpi-card h4,
+[data-theme="dark"] .kpi-card p,
+[data-theme="dark"] .kpi-card span {
+    color: var(--text-primary);
+}
+
+/* =============================================
+   STAT CARDS (today stats)
+   ============================================= */
+[data-theme="dark"] .today-stat-card {
+    background: var(--card-bg);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4),
+        -3px -3px 8px rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .today-stat-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* =============================================
+   DAY MODAL
+   ============================================= */
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--table-border);
+}
+
+[data-theme="dark"] .day-modal-stat {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .day-details-table td,
+[data-theme="dark"] .day-details-table th {
+    color: var(--text-primary);
+    border-color: var(--table-border);
+}
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #444;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* =============================================
+   CUSTOM DROPDOWN (contribution modal)
+   ============================================= */
+[data-theme="dark"] .custom-dropdown-trigger {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--table-border);
+}
+
+[data-theme="dark"] .custom-dropdown-list {
+    background: var(--card-bg);
+    border-color: var(--table-border);
+}
+
+[data-theme="dark"] .custom-dropdown-option {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .custom-dropdown-option:hover {
+    background: var(--hover-bg);
+}
+
+/* =============================================
+   PROJECT MODAL OVERRIDES
+   ============================================= */
+[data-theme="dark"] .project-modal .modal {
+    max-width: 800px;
+}
+
+/* ============ ACCENT COLORS ============ */
+
+/* Lime (Default) — uses :root values */
+
+/* Blue Accent */
+[data-accent="blue"] {
+    --accent-color: #0984e3;
+    --accent-dark: #0764ab;
+    --accent-text: #0984e3;
+    --accent-gradient: linear-gradient(135deg, #0984e3 0%, #0764ab 100%);
+}
+
+[data-accent="blue"][data-theme="dark"] {
+    --accent-text: #4da6f0;
+}
+
+/* Purple Accent */
+[data-accent="purple"] {
+    --accent-color: #6c5ce7;
+    --accent-dark: #5240c4;
+    --accent-text: #6c5ce7;
+    --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #5240c4 100%);
+}
+
+[data-accent="purple"][data-theme="dark"] {
+    --accent-text: #a29bfe;
+}
+
+/* Orange Accent */
+[data-accent="orange"] {
+    --accent-color: #e17055;
+    --accent-dark: #c4533a;
+    --accent-text: #e17055;
+    --accent-gradient: linear-gradient(135deg, #e17055 0%, #c4533a 100%);
+}
+
+[data-accent="orange"][data-theme="dark"] {
+    --accent-text: #fab1a0;
+}
+
+/* =============================================
+   BLACK THEME NAVIGATION BUTTONS & ICONS (FINAL FIX)
+   Redesigned to ensure round buttons with clean icons inside (::before)
+   This block overrides any previous icon definitions for nav buttons.
+   ============================================= */
+
+/* 1. Base styles for Navigation Buttons (Round Shape) */
+[data-theme="dark"] .nav-btn,
+[data-theme="dark"] .settings-btn {
+    background-color: #2b2b2b !important;
+    border-radius: 50% !important;
+    width: 45px !important;
+    height: 45px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    /* Clean outer shadows for depth */
+    box-shadow:
+        5px 5px 10px rgba(0, 0, 0, 0.5),
+        -5px -5px 10px rgba(255, 255, 255, 0.05) !important;
+
+    /* CRITICAL: Remove mask from the button container so it remains a circle */
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    background-image: none !important;
+    /* Ensure no bg image interferes */
+    transition: all 0.2s ease !important;
+}
+
+/* Hover state for buttons */
+[data-theme="dark"] .nav-btn:hover,
+[data-theme="dark"] .settings-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow:
+        6px 6px 12px rgba(0, 0, 0, 0.6),
+        -6px -6px 12px rgba(255, 255, 255, 0.08) !important;
+    background-color: #333 !important;
+}
+
+/* Active/Pressed state */
+[data-theme="dark"] .nav-btn:active,
+[data-theme="dark"] .settings-btn:active {
+    box-shadow:
+        inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+        inset -3px -3px 6px rgba(255, 255, 255, 0.05) !important;
+    transform: translateY(0) !important;
+}
+
+/* 2. Icon rendering via ::before (The actual icon) */
+[data-theme="dark"] .nav-btn::before,
+[data-theme="dark"] .settings-btn::before {
+    content: "";
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    background-color: #aaa !important;
+    /* Icon color - light gray */
+
+    /* Mask settings - Ensure defaults */
+    -webkit-mask-size: contain !important;
+    mask-size: contain !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-position: center !important;
+    mask-position: center !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Hover state for the icon itself */
+[data-theme="dark"] .nav-btn:hover::before,
+[data-theme="dark"] .settings-btn:hover::before {
+    background-color: var(--accent-text) !important;
+    /* Highlight icon on hover */
+}
+
+/* 3. Define specific icons masks (Lucide/Feather style to match User's request) */
+
+/* Settings Icon */
+[data-theme="dark"] .icon-settings::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'%3E%3C/path%3E%3C/svg%3E") !important;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'%3E%3C/path%3E%3C/svg%3E") !important;
+}
+
+/* Calendar Icon */
+[data-theme="dark"] .icon-calendar::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") !important;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") !important;
+}
+
+/* Home Icon (Ensure consistency) */
+[data-theme="dark"] .icon-home::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'%3E%3C/path%3E%3Cpolyline points='9 22 9 12 15 12 15 22'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'%3E%3C/path%3E%3Cpolyline points='9 22 9 12 15 12 15 22'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+/* KPI Icon (Chart) */
+[data-theme="dark"] .icon-kpi::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
+}

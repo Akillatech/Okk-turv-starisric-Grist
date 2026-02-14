@@ -37,6 +37,7 @@ if (window.logic) {
                 // Re-instantiate generic objects if needed
             }));
             window.logic.renderContributions();
+            if (typeof renderLastContribution === 'function') renderLastContribution();
         }
     };
 
@@ -46,6 +47,9 @@ if (window.logic) {
 
         // deep copy to avoid reference issues? JSON stringify/parse is enough for options
         const dataToSave = window.logic.contributions;
+
+        // Update KPI card immediately if visible/loaded
+        if (typeof renderLastContribution === 'function') renderLastContribution();
 
         try {
             if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification immediately
@@ -95,19 +99,48 @@ if (window.logic) {
         grid.innerHTML = '';
         window.logic.contributions.forEach(c => {
             const card = document.createElement('div');
-            card.className = 'contribution-card';
+            // Add status class for styling hook
+            card.className = `contribution-card status-${c.status || 'pending'}`;
             card.onclick = () => window.logic.openContributionViewModal(c.id);
 
-            var statusColor = c.status === 'approved' ? '#d4edda' : (c.status === 'pending' ? '#fff3cd' : '#f8d7da');
             var statusText = c.status === 'approved' ? 'ОДОБРЕНО' : (c.status === 'pending' ? 'НА ПРОВЕРКЕ' : 'ОТКЛОНЕНО');
 
+            // Last comment logic
+            let lastCommentHtml = '';
+            if (c.comments && c.comments.length > 0) {
+                const last = c.comments[c.comments.length - 1];
+                lastCommentHtml = `
+                    <div class="card-last-comment">
+                        <div class="last-comment-meta">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="opacity:0.7;">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            <span class="last-comment-author">${last.author}</span>
+                            <span style="font-size:10px; opacity:0.5; margin-left:auto;">${last.date.split(' ')[0]}</span>
+                        </div>
+                        <div class="last-comment-text">${last.text}</div>
+                    </div>
+                `;
+            }
+
+            // New Card Structure
             card.innerHTML = `
-                <div class="contribution-card-title">${c.code || 'NO CODE'}</div>
-                <div style="font-size:12px; color:var(--text-secondary); margin:4px 0;">${c.period || '-'}</div>
-                <div style="font-size:12px; margin-bottom:8px;">${c.description ? c.description.slice(0, 50) + '...' : 'Нет описания'}</div>
-                <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="background:${statusColor}; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">${statusText}</span>
-                    <span style="font-size:10px; color:var(--text-secondary);">${c.date}</span>
+                <div class="card-status-indicator"></div>
+                <div class="card-main">
+                    <div class="card-header">
+                        <span class="card-code">${c.code || 'NO CODE'}</span>
+                        <span class="card-date">${c.date}</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">${c.description || 'Нет описания'}</p>
+                    </div>
+                    ${lastCommentHtml}
+                    <div class="card-footer">
+                        <span class="card-period-badge">
+                            <span class="icon icon-calendar"></span> ${c.period || '-'}
+                        </span>
+                        <span class="card-status-badge status-${c.status || 'pending'}">${statusText}</span>
+                    </div>
                 </div>
             `;
             grid.appendChild(card);
@@ -203,6 +236,8 @@ if (window.logic) {
                 c.description = desc;
                 c.result = res;
                 window.logic.addHistoryEntry(c, 'Вклад отредактирован', 'You');
+
+                window.logic.renderContributions(); // Refresh list immediately with new data
 
                 window.logic.saveContributionToGrist(c, false).then(() => {
                     window.logic.closeContributionCreateModal();
@@ -304,6 +339,7 @@ if (window.logic) {
         }
 
         window.logic.renderHistory(c.history); // Update History UI immediately
+        window.logic.renderContributions(); // Refresh the list card immediately to reflect status change
 
         window.logic.saveContributionToGrist(c, false);
     };
@@ -386,6 +422,9 @@ if (window.logic) {
             window.logic.addHistoryEntry(c, 'Добавлен комментарий', author);
             window.logic.renderComments(c.comments);
             window.logic.renderHistory(c.history);
+
+            window.logic.renderContributions(); // Refresh list to show new comment immediately
+
             window.logic.saveContributionToGrist(c, false);
             textInput.value = '';
         }
