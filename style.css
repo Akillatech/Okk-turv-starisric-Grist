@@ -1619,8 +1619,19 @@ h3 .icon::before {
 
 .main-content {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 340px;
     gap: 20px;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .right-column {
+        position: static;
+    }
 }
 
 .left-column {

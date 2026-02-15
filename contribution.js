@@ -172,7 +172,8 @@ if (window.logic) {
             if (btn) btn.innerText = 'Создать';
 
             ['createPeriod', 'createCode', 'createDescription', 'createResult'].forEach(id => {
-                if (document.getElementById(id)) document.getElementById(id).value = '';
+                const el = document.getElementById(id);
+                if (el) el.value = '';
             });
         }
     };
@@ -194,10 +195,10 @@ if (window.logic) {
             var btn = document.querySelector('#contributionCreateModal .btn-save');
             if (btn) btn.innerText = 'Сохранить';
 
-            if (document.getElementById('createPeriod')) document.getElementById('createPeriod').value = c.period;
-            if (document.getElementById('createCode')) document.getElementById('createCode').value = c.code;
-            if (document.getElementById('createDescription')) document.getElementById('createDescription').value = c.description;
-            if (document.getElementById('createResult')) document.getElementById('createResult').value = c.result;
+            if (document.getElementById('createPeriod')) document.getElementById('createPeriod').value = c.period || '';
+            if (document.getElementById('createCode')) document.getElementById('createCode').value = c.code || '';
+            if (document.getElementById('createDescription')) document.getElementById('createDescription').value = c.description || '';
+            if (document.getElementById('createResult')) document.getElementById('createResult').value = c.result || '';
         }
     };
 
