@@ -1823,20 +1823,27 @@ function analyzeProjects(records) {
                         }
 
                         if (apiBase) {
+                            console.log('Attempting to fetch profile from:', `${apiBase}/api/profile/user`);
                             const response = await fetch(`${apiBase}/api/profile/user`, {
                                 headers: {
                                     'Authorization': `Bearer ${token}`,
                                     'Content-Type': 'application/json'
                                 }
                             });
+                            console.log('API Response Status:', response.status);
                             if (response.ok) {
                                 const data = await response.json();
-                                console.log('API User Profile:', data);
+                                console.log('API User Profile Data:', data);
                                 if (data.name) foundName = data.name;
+                                else console.warn('API returned user data but no "name" field found.');
+                            } else {
+                                console.warn('API Request failed:', response.statusText);
                             }
+                        } else {
+                            console.warn('Could not determine API base URL.');
                         }
                     } catch (err) {
-                        console.warn('API Profile fetch failed, falling back to token decode', err);
+                        console.warn('API Profile fetch error:', err);
                     }
 
                     // Method 2: JWT Decode (Fallback)
