@@ -46,7 +46,8 @@ let tableColumns = []; // Store column list
 const defaultGlobalSettings = {
     holidays: {},
     shortDays: {},
-    years: [new Date().getFullYear()]
+    years: [new Date().getFullYear()],
+    grade: 'JUNIOR'
 };
 
 const defaultPersonalSettings = {
@@ -62,7 +63,7 @@ let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 // Persistence Lock to prevent Grist from reverting local changes during save sync
 let lastSaveTime = 0;
 let lastSavedSettingsHash = ""; // Guard for infinite loop
-const SAVE_LOCK_DURATION = 3000; // ms (increased for Grist)
+const SAVE_LOCK_DURATION = 1500; // ms (Increased to handle slower Grist syncs)
 
 // Helper to access record field using multiple potential names
 function getRecVal(record, keyName) {
@@ -152,6 +153,7 @@ function autoSaveSettings() {
             console.error('❌ Failed to save settings to Grist:', err);
         });
 }
+window.autoSaveSettings = autoSaveSettings; // Expose to global scope for kpi.js
 
 // Show save reminder notification
 let saveReminderTimeout;
@@ -376,26 +378,6 @@ function initGrist() {
         // This fixes the "default lime flash" and ensures runtime state matches storage
         applyTheme(currentSettings.theme, currentSettings.accentColor);
 
-        // 4. Force Load Global KPI Settings (Source of Truth = Grist)
-        if (options) {
-            // Grade
-            if (options.kpiGrade && typeof KPI_GRADE_DEMO !== 'undefined') {
-                KPI_GRADE_DEMO.current = options.kpiGrade;
-                if (typeof renderGradeCard === 'function') renderGradeCard();
-            }
-
-            // Data
-            if (options.kpiData && typeof kpiData !== 'undefined') {
-                kpiData = options.kpiData; // Direct assignment OK as kpiData is object
-                if (typeof renderKpiView === 'function') renderKpiView();
-            }
-
-            // Transitions
-            if (options.kpiTransitions && typeof KPI_TRANSITIONS_DEMO !== 'undefined') {
-                KPI_TRANSITIONS_DEMO = options.kpiTransitions;
-                // if (typeof renderTransitionsCard === 'function') renderTransitionsCard(); // Optional re-render
-            }
-        }
         // Apply Theme & Render
         applyTheme(currentSettings.theme, currentSettings.accentColor);
         renderSettingsUI();

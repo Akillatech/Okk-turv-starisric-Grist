@@ -195,17 +195,12 @@ function renderKpiView() {
 }
 
 function renderGradeCard() {
-    // defaults
+    // Sync back to internal state for character rendering
+    if (window.currentSettings && window.currentSettings.grade) {
+        KPI_GRADE_DEMO.current = window.currentSettings.grade;
+    }
     let grade = KPI_GRADE_DEMO.current;
     let nextGrade = 'JUNIOR+';
-
-    // Use global grade
-    if (window.currentSettings && window.currentSettings.grade) {
-        grade = window.currentSettings.grade;
-    }
-
-    // Sync back to internal state for character rendering
-    KPI_GRADE_DEMO.current = grade;
 
     // Determine next grade
     const idx = ALL_GRADES.indexOf(grade);
@@ -682,14 +677,12 @@ var _gradeModalInited = false;
 
 function initGradeModal() {
     if (_gradeModalInited) return;
-    _gradeModalInited = true;
 
     var ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
     var modal = document.getElementById('kpiGradeModal');
     var grid = document.getElementById('kpiGradeModalGrid');
     var editBtn = document.getElementById('kpiGradeEditBtn');
     var cancelBtn = document.getElementById('kpiGradeModalCancel');
-    var toast = document.getElementById('kpiSaveToast');
 
     if (!modal || !grid || !editBtn) return;
 
@@ -715,6 +708,7 @@ function initGradeModal() {
             // Sync via global helper
             if (typeof window.autoSaveSettings === 'function') {
                 window.autoSaveSettings();
+                if (typeof window.showSaveReminder === 'function') window.showSaveReminder();
             }
 
             // Close modal
@@ -748,6 +742,8 @@ function initGradeModal() {
             modal.classList.remove('active');
         }
     });
+
+    _gradeModalInited = true;
 }
 
 // Save reminder uses the global showSaveReminder() from script.js
