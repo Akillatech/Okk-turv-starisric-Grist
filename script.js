@@ -41,12 +41,22 @@ const CONFIG = {
 // Global State
 let allRecords = [];
 let tableColumns = []; // Store column list
-let currentSettings = {
-    holidays: [],
-    shortDays: [],
-    years: [],
-    userName: ''
+
+// Default Settings
+const defaultGlobalSettings = {
+    holidays: {},
+    shortDays: {},
+    years: [new Date().getFullYear()]
 };
+
+const defaultPersonalSettings = {
+    theme: 'light',
+    accentColor: 'lime',
+    userName: '',
+    dashboardCheckStatus: false
+};
+
+let currentSettings = { ...defaultGlobalSettings, ...defaultPersonalSettings };
 let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 
 // Helper to access record field using multiple potential names
@@ -81,28 +91,55 @@ function parseGristDate(val) {
 }
 
 // Helper to auto-save settings to Grist
+// Helper to auto-save settings to Grist
+// Helper to auto-save settings to Grist
 function autoSaveSettings() {
     console.log('Auto-saving settings...', currentSettings);
 
-    // Save to localStorage for immediate persistence (user-specific)
+    // 1. Save Personal Settings to localStorage
+    const personalSettings = {
+        theme: currentSettings.theme,
+        accentColor: currentSettings.accentColor,
+        userName: currentSettings.userName,
+        dashboardCheckStatus: currentSettings.dashboardCheckStatus
+    };
+
     try {
-        localStorage.setItem('okk_stats_settings', JSON.stringify(currentSettings));
-        console.log('✅ Settings saved to localStorage');
+        localStorage.setItem('okk_personal_settings', JSON.stringify(personalSettings));
+        console.log('✅ Personal settings saved to localStorage');
     } catch (err) {
         console.error('❌ Failed to save to localStorage:', err);
     }
 
-    // Also save to Grist options for document-level sharing
+    // 2. Save Global Settings to Grist Options
     // NOTE: This requires manual "Save" in Grist UI to persist!
-    if (window.showSaveReminder) window.showSaveReminder(); // Optimistic UI: Show immediately
 
-    grist.setOption('settings', currentSettings)
+    // Ensure userProfiles exists
+    if (!currentSettings.userProfiles) currentSettings.userProfiles = {};
+
+    // Update current user's profile
+    if (currentSettings.userName) {
+        currentSettings.userProfiles[currentSettings.userName] = {
+            theme: currentSettings.theme,
+            accentColor: currentSettings.accentColor
+        };
+    }
+
+    const globalSettings = {
+        holidays: currentSettings.holidays,
+        shortDays: currentSettings.shortDays,
+        years: currentSettings.years,
+        userProfiles: currentSettings.userProfiles
+    };
+
+    if (window.showSaveReminder) window.showSaveReminder(); // Optimistic UI
+
+    grist.setOption('settings', globalSettings)
         .then(() => {
-            console.log('✅ Settings staged in Grist (remember to save document!)');
+            console.log('✅ Global settings staged in Grist (remember to save document!)');
         })
         .catch(err => {
             console.error('❌ Failed to save settings to Grist:', err);
-            // Error notification removed as per user request
         });
 }
 
@@ -232,78 +269,74 @@ function initGrist() {
     });
 
     grist.onOptions(function (options) {
-        // Try to load from localStorage first (most recent, immediate persistence)
-        const localSettings = localStorage.getItem('okk_stats_settings');
-        let loadedFromLocal = false;
+        // 1. Load Personal Settings from localStorage
+        let personal = {};
+        try {
+            const local = localStorage.getItem('okk_personal_settings');
+            if (local) personal = JSON.parse(local);
+        } catch (e) {
+            console.error('Failed to parse local personal settings', e);
+        }
 
-        if (localSettings) {
-            try {
-                currentSettings = JSON.parse(localSettings);
-                console.log('✅ Settings loaded from localStorage:', currentSettings);
-                loadedFromLocal = true;
-            } catch (e) {
-                console.error('Failed to parse localStorage settings', e);
+        // 2. Load Global Settings from Grist options
+        let global = {};
+        if (options && options.settings) {
+            global = options.settings;
+            // Load userProfiles
+            if (global.userProfiles) {
+                currentSettings.userProfiles = global.userProfiles;
             }
         }
 
-        // If localStorage failed or empty, try Grist options
-        if (!loadedFromLocal && options && options.settings) {
-            currentSettings = options.settings;
-            console.log('✅ Settings loaded from Grist options:', currentSettings);
+        // 3. Merge: Defaults -> Global -> Personal 
+        // Logic: 
+        // - Load defaults
+        // - Apply Global (holidays lines)
+        // - Determine User:
+        //   - If localStorage has user, use that. 
+        //   - If global.userProfiles has entry for that user, OVERRIDE local theme/accent with cloud version.
+
+        currentSettings = {
+            ...defaultGlobalSettings,
+            ...defaultPersonalSettings,
+            ...global,
+            ...personal // This loads userName from local
+        };
+
+        // CHECK CLOUD PROFILE FOR THIS USER
+        if (currentSettings.userName && currentSettings.userProfiles && currentSettings.userProfiles[currentSettings.userName]) {
+            const cloudProfile = currentSettings.userProfiles[currentSettings.userName];
+            console.log('🔄 Found Cloud Profile for', currentSettings.userName, cloudProfile);
+            if (cloudProfile.theme) currentSettings.theme = cloudProfile.theme;
+            if (cloudProfile.accentColor) currentSettings.accentColor = cloudProfile.accentColor;
         }
 
-        // Load KPI Grade from Grist options (if not already in localStorage)
-        if (options && options.kpiGrade) {
-            var localGrade = localStorage.getItem('okk_kpi_grade');
-            if (!localGrade) {
-                if (typeof KPI_GRADE_DEMO !== 'undefined') {
-                    KPI_GRADE_DEMO.current = options.kpiGrade;
-                    localStorage.setItem('okk_kpi_grade', options.kpiGrade);
-                    console.log('✅ KPI Grade loaded from Grist options:', options.kpiGrade);
-                    // Re-render if KPI view is active
-                    if (typeof renderGradeCard === 'function') renderGradeCard();
-                }
+        console.log('✅ Settings Loaded:', currentSettings);
+
+        // 4. Force Load Global KPI Settings (Source of Truth = Grist)
+        if (options) {
+            // Grade
+            if (options.kpiGrade && typeof KPI_GRADE_DEMO !== 'undefined') {
+                KPI_GRADE_DEMO.current = options.kpiGrade;
+                if (typeof renderGradeCard === 'function') renderGradeCard();
+            }
+
+            // Data
+            if (options.kpiData && typeof kpiData !== 'undefined') {
+                kpiData = options.kpiData; // Direct assignment OK as kpiData is object
+                if (typeof renderKpiView === 'function') renderKpiView();
+            }
+
+            // Transitions
+            if (options.kpiTransitions && typeof KPI_TRANSITIONS_DEMO !== 'undefined') {
+                KPI_TRANSITIONS_DEMO = options.kpiTransitions;
+                // if (typeof renderTransitionsCard === 'function') renderTransitionsCard(); // Optional re-render
             }
         }
-
-        // Load KPI Data from Grist options (if not already in localStorage)
-        if (options && options.kpiData) {
-            var localKpiData = localStorage.getItem('okk_kpi_data');
-            if (!localKpiData) {
-                if (typeof kpiData !== 'undefined') {
-                    Object.assign(kpiData, options.kpiData);
-                    localStorage.setItem('okk_kpi_data', JSON.stringify(kpiData));
-                    console.log('✅ KPI Data loaded from Grist options');
-                    if (typeof renderKpiView === 'function') renderKpiView();
-                }
-            }
-        }
-
-        // Load KPI Transitions from Grist options (if not already in localStorage)
-        if (options && options.kpiTransitions) {
-            var localTransitions = localStorage.getItem('okk_kpi_transitions');
-            if (!localTransitions) {
-                if (typeof KPI_TRANSITIONS_DEMO !== 'undefined') {
-                    KPI_TRANSITIONS_DEMO = options.kpiTransitions;
-                    localStorage.setItem('okk_kpi_transitions', JSON.stringify(KPI_TRANSITIONS_DEMO));
-                    console.log('✅ KPI Transitions loaded from Grist options');
-                    if (typeof renderTransitionsCard === 'function') renderTransitionsCard();
-                }
-            }
-        }
-
-        // If both failed, use defaults
-        if (!currentSettings || Object.keys(currentSettings).length === 0) {
-            currentSettings = {
-                holidays: {},
-                shortDays: {},
-                years: [new Date().getFullYear()],
-                userName: 'User',
-                theme: 'light',
-                accent: 'lime'
-            };
-            console.log('Using default settings');
-        }
+        // Apply Theme & Render
+        applyTheme(currentSettings.theme, currentSettings.accentColor);
+        renderSettingsUI();
+        refreshDashboard();
 
         // Load Contributions from Grist options
         if (options && options.contributions && window.logic && window.logic.loadContributionsFromOptions) {
@@ -650,7 +683,25 @@ window.logic = {
 
     saveUserName: function () {
         const input = document.getElementById('userName');
-        currentSettings.userName = input.value.trim();
+        const newName = input.value.trim();
+
+        // Check for existing cloud profile before saving
+        if (newName && currentSettings.userProfiles && currentSettings.userProfiles[newName]) {
+            const profile = currentSettings.userProfiles[newName];
+            console.log('🔄 Switching user to', newName, 'Found profile:', profile);
+
+            if (profile.theme) currentSettings.theme = profile.theme;
+            if (profile.accentColor) currentSettings.accentColor = profile.accentColor;
+
+            // Apply loaded theme immediately
+            applyTheme(currentSettings.theme, currentSettings.accentColor);
+
+            // Update inputs
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) themeSelect.value = currentSettings.theme;
+        }
+
+        currentSettings.userName = newName;
         autoSaveSettings();
         updateGreeting();
     },
@@ -658,12 +709,12 @@ window.logic = {
     saveTheme: function () {
         const theme = document.getElementById('themeSelect').value;
         currentSettings.theme = theme;
-        applyTheme(theme, currentSettings.accent);
+        applyTheme(theme, currentSettings.accentColor);
         autoSaveSettings();
     },
 
     saveAccent: function (accent) {
-        currentSettings.accent = accent;
+        currentSettings.accentColor = accent;
         applyTheme(currentSettings.theme, accent);
         autoSaveSettings();
     },

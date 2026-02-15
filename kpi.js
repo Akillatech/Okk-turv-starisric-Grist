@@ -48,28 +48,14 @@ function ensureKpiStructure(year, quarter) {
 }
 
 // Load saved KPI data from localStorage
-(function loadSavedKpiData() {
-    try {
-        var saved = localStorage.getItem('okk_kpi_data');
-        if (saved) {
-            kpiData = JSON.parse(saved);
-            console.log('✅ KPI Data loaded from localStorage');
-        }
-    } catch (e) { console.error('Failed to load kpiData from localStorage', e); }
-})();
+// Load saved KPI data from localStorage -> REMOVED (Handled by script.js via Grist Options)
+// (function loadSavedKpiData() { ... })();
 
 const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
 
 // Load saved grade from localStorage on init
-(function loadSavedGrade() {
-    try {
-        var saved = localStorage.getItem('okk_kpi_grade');
-        if (saved) {
-            KPI_GRADE_DEMO.current = saved;
-            console.log('✅ KPI Grade loaded from localStorage:', saved);
-        }
-    } catch (e) { /* ignore */ }
-})();
+// Load saved grade from localStorage -> REMOVED (Handled by script.js)
+// (function loadSavedGrade() { ... })();
 const KPI_CONTRIBUTION_DEMO = null; // Deprecated, using window.logic.contributions
 let KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
@@ -77,15 +63,8 @@ let KPI_TRANSITIONS_DEMO = [
 ];
 
 // Load saved transitions from localStorage
-(function loadSavedTransitions() {
-    try {
-        var saved = localStorage.getItem('okk_kpi_transitions');
-        if (saved) {
-            KPI_TRANSITIONS_DEMO = JSON.parse(saved);
-            console.log('✅ KPI Transitions loaded from localStorage');
-        }
-    } catch (e) { console.error('Failed to load transitions from localStorage', e); }
-})();
+// Load saved transitions from localStorage -> REMOVED (Handled by script.js)
+// (function loadSavedTransitions() { ... })();
 
 // Last Contribution Logic
 function renderLastContribution() {
@@ -644,10 +623,13 @@ function initKpiDataModal() {
         recalcQuarter(qData);
 
         // Save to localStorage
+        // Save to localStorage -> REMOVED (We rely on Grist Options for global sync)
+        /*
         try {
             localStorage.setItem('okk_kpi_data', JSON.stringify(kpiData));
             console.log('✅ KPI Data saved to localStorage');
         } catch (e) { console.error('Failed to save kpiData', e); }
+        */
 
         // Save to Grist
         if (typeof grist !== 'undefined' && grist.setOption) {
@@ -708,10 +690,13 @@ function initGradeModal() {
             KPI_GRADE_DEMO.current = grade;
 
             // Save to localStorage
+            // Save to localStorage -> REMOVED
+            /*
             try {
                 localStorage.setItem('okk_kpi_grade', grade);
                 console.log('✅ KPI Grade saved to localStorage:', grade);
             } catch (e) { console.error('Failed to save grade to localStorage', e); }
+            */
 
             // Save to Grist options (requires manual save in Grist UI)
             if (typeof grist !== 'undefined' && grist.setOption) {

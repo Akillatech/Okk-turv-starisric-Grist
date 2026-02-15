@@ -118,7 +118,7 @@ body {
 }
 
 .today-summary {
-    background: linear-gradient(135deg, #E3FB1E 0%, #b8d618 100%);
+    background: var(--accent-gradient);
     border-radius: 15px;
     padding: 25px;
     margin: 25px 0;
@@ -134,7 +134,7 @@ body {
 
 /* Workload Summary Styles */
 .workload-summary {
-    background: linear-gradient(135deg, #E3FB1E 0%, #b8d618 100%);
+    background: var(--accent-gradient);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 24px;
@@ -535,7 +535,7 @@ h3 .icon::before {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #E3FB1E, #b8d618);
+    background: var(--accent-gradient);
 }
 
 .column-type {
@@ -651,7 +651,7 @@ h3 .icon::before {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #E3FB1E, #b8d618);
+    background: var(--accent-gradient);
     border-radius: 4px;
     transition: width 0.5s ease;
 }
@@ -735,7 +735,7 @@ h3 .icon::before {
 }
 
 .projects-table thead {
-    background: linear-gradient(135deg, #E3FB1E 0%, #b8d618 100%);
+    background: var(--accent-gradient);
     border-bottom: none;
 }
 
@@ -1176,7 +1176,7 @@ h3 .icon::before {
     width: 24px;
     height: 24px;
     border: 3px solid #e0e0e0;
-    border-top-color: #E3FB1E;
+    border-top-color: var(--accent-color);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -1281,7 +1281,7 @@ h3 .icon::before {
 }
 
 .weekly-table thead {
-    background: linear-gradient(135deg, #E3FB1E 0%, #b8d618 100%);
+    background: var(--accent-gradient);
     color: #333;
 }
 
@@ -1460,7 +1460,7 @@ h3 .icon::before {
 
 .btn-add {
     padding: 8px 16px;
-    background: linear-gradient(135deg, #E3FB1E 0%, #b8d618 100%);
+    background: var(--accent-gradient);
     color: white;
     border: none;
     border-radius: 6px;
