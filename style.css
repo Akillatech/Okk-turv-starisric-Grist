@@ -5197,7 +5197,7 @@ h3 .icon::before {
     color: var(--text-secondary);
     padding: 10px 8px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    white-space: nowrap;
+    white-space: normal !important;
 }
 
 .projects-table td {
