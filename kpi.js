@@ -195,6 +195,7 @@ function renderKpiView() {
 }
 
 function renderGradeCard() {
+    console.log('🔄 renderGradeCard triggered. Current Settings Grade:', window.currentSettings ? window.currentSettings.grade : 'undefined');
     // Sync back to internal state for character rendering
     if (window.currentSettings && window.currentSettings.grade) {
         KPI_GRADE_DEMO.current = window.currentSettings.grade;
@@ -204,6 +205,7 @@ function renderGradeCard() {
 
     // Determine next grade
     const idx = ALL_GRADES.indexOf(grade);
+    console.log('📊 Grade:', grade, 'Index in ALL_GRADES:', idx);
     if (idx >= 0 && idx < ALL_GRADES.length - 1) {
         nextGrade = ALL_GRADES[idx + 1];
     } else {
@@ -212,25 +214,32 @@ function renderGradeCard() {
     KPI_GRADE_DEMO.next = nextGrade;
 
     const nameEl = document.getElementById('kpiGradeName');
-    const nextEl = document.getElementById('kpiGradeNext'); // Fixed ID
+    const nextEl = document.getElementById('kpiGradeNext');
     const imgEl = document.getElementById('kpiGradeImage');
+
+    console.log('DOM Check:', { nameEl: !!nameEl, nextEl: !!nextEl, imgEl: !!imgEl });
 
     if (nameEl) nameEl.textContent = grade;
     if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + nextGrade + '</span>';
 
     // Render dynamic character
     if (imgEl) {
-        imgEl.innerHTML = getGradeCharacterSVG(grade);
-        imgEl.style.fontSize = '1rem';
-        imgEl.style.background = 'none';
-        imgEl.style.boxShadow = 'none';
-        imgEl.style.width = '100%';
-        imgEl.style.maxWidth = '220px';
-        imgEl.style.height = 'auto';
-        imgEl.style.margin = '8px auto';
-        imgEl.style.display = 'flex';
-        imgEl.style.justifyContent = 'center';
-        imgEl.style.alignItems = 'center';
+        try {
+            imgEl.innerHTML = getGradeCharacterSVG(grade);
+            imgEl.style.fontSize = '1rem';
+            imgEl.style.background = 'none';
+            imgEl.style.boxShadow = 'none';
+            imgEl.style.width = '100%';
+            imgEl.style.maxWidth = '220px';
+            imgEl.style.height = 'auto';
+            imgEl.style.margin = '8px auto';
+            imgEl.style.display = 'flex';
+            imgEl.style.justifyContent = 'center';
+            imgEl.style.alignItems = 'center';
+            console.log('✅ SVG Character rendered for grade:', grade);
+        } catch (e) {
+            console.error('❌ Error rendering SVG character:', e);
+        }
     }
 }
 
@@ -678,7 +687,6 @@ var _gradeModalInited = false;
 function initGradeModal() {
     if (_gradeModalInited) return;
 
-    var ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
     var modal = document.getElementById('kpiGradeModal');
     var grid = document.getElementById('kpiGradeModalGrid');
     var editBtn = document.getElementById('kpiGradeEditBtn');
@@ -699,14 +707,16 @@ function initGradeModal() {
         }
 
         btn.addEventListener('click', function () {
+            console.log('🖱️ Grade selected in modal:', grade);
             // Update current grade in settings
             if (window.currentSettings) {
                 window.currentSettings.grade = grade;
-                // Grade is now global, no longer saving to userProfiles
+                console.log('✅ window.currentSettings.grade updated to:', window.currentSettings.grade);
             }
 
             // Sync via global helper
             if (typeof window.autoSaveSettings === 'function') {
+                console.log('💾 Triggering autoSaveSettings...');
                 window.autoSaveSettings();
                 if (typeof window.showSaveReminder === 'function') window.showSaveReminder();
             }

@@ -57,7 +57,8 @@ const defaultPersonalSettings = {
     dashboardCheckStatus: false
 };
 
-let currentSettings = { ...defaultGlobalSettings, ...defaultPersonalSettings };
+window.currentSettings = { ...defaultGlobalSettings, ...defaultPersonalSettings };
+let currentSettings = window.currentSettings; // Keep local name as alias for convenience
 let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 
 // Persistence Lock to prevent Grist from reverting local changes during save sync
@@ -104,12 +105,12 @@ function autoSaveSettings() {
 
     // 1. Save Personal Settings to localStorage
     const personalSettings = {
-        theme: currentSettings.theme,
-        accentColor: currentSettings.accentColor,
-        userName: currentSettings.userName,
-        firstName: currentSettings.firstName,
-        lastName: currentSettings.lastName,
-        dashboardCheckStatus: currentSettings.dashboardCheckStatus
+        theme: window.currentSettings.theme,
+        accentColor: window.currentSettings.accentColor,
+        userName: window.currentSettings.userName,
+        firstName: window.currentSettings.firstName,
+        lastName: window.currentSettings.lastName,
+        dashboardCheckStatus: window.currentSettings.dashboardCheckStatus
     };
 
     try {
@@ -133,11 +134,11 @@ function autoSaveSettings() {
     // Explicitly define what goes into Global 'settings' blob
     // This prevents polluting global config with the current user's local state
     const globalSettingsToSave = {
-        holidays: currentSettings.holidays,
-        shortDays: currentSettings.shortDays,
-        years: currentSettings.years,
-        userProfiles: currentSettings.userProfiles,
-        grade: currentSettings.grade // Global fallback if needed
+        holidays: window.currentSettings.holidays,
+        shortDays: window.currentSettings.shortDays,
+        years: window.currentSettings.years,
+        userProfiles: window.currentSettings.userProfiles,
+        grade: window.currentSettings.grade // Global fallback if needed
     };
 
     if (window.showSaveReminder) window.showSaveReminder();
@@ -371,6 +372,7 @@ function initGrist() {
 
         // Update global state
         currentSettings = merged;
+        window.currentSettings = merged; // Ensure window sync
 
         console.log('✅ Settings Finalized:', currentSettings);
 
