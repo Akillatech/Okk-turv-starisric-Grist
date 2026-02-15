@@ -199,15 +199,8 @@ function renderGradeCard() {
     let grade = KPI_GRADE_DEMO.current;
     let nextGrade = 'JUNIOR+';
 
-    // Check user profile
-    if (window.currentSettings && window.currentSettings.userName &&
-        window.currentSettings.userProfiles &&
-        window.currentSettings.userProfiles[window.currentSettings.userName]) {
-
-        const profile = window.currentSettings.userProfiles[window.currentSettings.userName];
-        if (profile.grade) grade = profile.grade;
-    } else if (window.currentSettings && window.currentSettings.grade) {
-        // Fallback global
+    // Use global grade
+    if (window.currentSettings && window.currentSettings.grade) {
         grade = window.currentSettings.grade;
     }
 
@@ -1250,77 +1243,4 @@ function createWavePath(cx, topY, R, amp, phaseDeg) {
     d += ' L ' + (startX + width) + ',' + bottomY + ' L ' + startX + ',' + bottomY + ' Z';
 
     return d;
-}
-// =================== GRADE SETTINGS MODAL ===================
-
-var _gradeModalInited = false;
-
-function initGradeModal() {
-    if (_gradeModalInited) return;
-    _gradeModalInited = true;
-
-    var modal = document.getElementById('kpiGradeModal');
-    var editBtn = document.getElementById('kpiGradeEditBtn');
-    var grid = document.getElementById('kpiGradeModalGrid');
-    var cancelBtn = document.getElementById('kpiGradeModalCancel');
-
-    if (!modal || !editBtn || !grid) return;
-
-    var grades = ['JUNIOR', 'JUNIOR+', 'MIDDLE', 'MIDDLE+', 'SENIOR', 'SENIOR+'];
-
-    // Populate grid
-    var html = '';
-    grades.forEach(function (g) {
-        html += '<div class="kpi-grade-option" data-grade="' + g + '">' + g + '</div>';
-    });
-    grid.innerHTML = html;
-
-    // Handle grade selection
-    grid.querySelectorAll('.kpi-grade-option').forEach(function (opt) {
-        opt.onclick = function () {
-            var selectedGrade = opt.getAttribute('data-grade');
-
-            // 1. Update Current Settings (Local State)
-            if (!window.currentSettings.userProfiles) window.currentSettings.userProfiles = {};
-
-            // Ensure we have a username to key off
-            var user = window.currentSettings.userName || 'Default';
-
-            if (!window.currentSettings.userProfiles[user]) {
-                window.currentSettings.userProfiles[user] = {};
-            }
-
-            // Save grade to profile
-            window.currentSettings.userProfiles[user].grade = selectedGrade;
-
-            // Also update root prop for immediate fallback access
-            window.currentSettings.grade = selectedGrade;
-
-            // 2. Save Logic (Use standardized autoSaveSettings from script.js)
-            if (typeof autoSaveSettings === 'function') {
-                autoSaveSettings();
-            }
-
-            // 3. Update UI
-            renderGradeCard();
-
-            // Close
-            modal.classList.remove('active');
-        };
-    });
-
-    // Open logic
-    editBtn.onclick = function () {
-        modal.classList.add('active');
-    };
-
-    // Close logic
-    if (cancelBtn) {
-        cancelBtn.onclick = function () { modal.classList.remove('active'); };
-    }
-
-    // Click outside
-    modal.onclick = function (e) {
-        if (e.target === modal) modal.classList.remove('active');
-    };
 }
