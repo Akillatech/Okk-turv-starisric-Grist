@@ -228,6 +228,9 @@ function initGrist() {
 
         // Initial Render
         refreshDashboard();
+
+        // Try to auto-detect user if not set
+        setTimeout(tryAutoDetectUser, 1000); // Small delay to ensure options loaded
     });
 
     grist.onOptions(function (options) {
@@ -1798,6 +1801,71 @@ function analyzeProjects(records) {
                 rawKeys: Object.keys(row),
                 E: row['E'], L: row['L'], C: row['C']
             });
+        }
+
+        // --- User Auto-Detection ---
+        async function tryAutoDetectUser() {
+            try {
+                const token = await grist.docApi.getAccessToken();
+                if (token) {
+                    let foundName = null;
+
+                    // Method 1: Try Grist API /api/profile/user
+                    try {
+                        // Infer API base URL from referrer or current location
+                        const referrer = document.referrer;
+                        let apiBase = '';
+                        if (referrer) {
+                            const url = new URL(referrer);
+                            apiBase = url.origin;
+                        } else {
+                            apiBase = window.location.origin; // Fallback
+                        }
+
+                        if (apiBase) {
+                            const response = await fetch(`${apiBase}/api/profile/user`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('API User Profile:', data);
+                                if (data.name) foundName = data.name;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('API Profile fetch failed, falling back to token decode', err);
+                    }
+
+                    // Method 2: JWT Decode (Fallback)
+                    if (!foundName) {
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            // Determine if base64url or base64
+                            let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                            // Pad if necessary
+                            while (base64.length % 4) { base64 += '='; }
+
+                            const payload = JSON.parse(atob(base64));
+                            console.log('Detected Token Payload:', payload);
+                            foundName = payload.name || payload.email || payload.u; // Common claims
+                        }
+                    }
+
+                    // Apply found name
+                    if (foundName && (!currentSettings.userName || currentSettings.userName === 'User')) {
+                        console.log('Auto-detected user:', foundName);
+                        currentSettings.userName = foundName;
+                        updateGreeting();
+                        // Save detected name to settings
+                        grist.setOption('settings', currentSettings);
+                    }
+                }
+            } catch (e) {
+                console.warn('Auto-detect user failed:', e);
+            }
         }
 
         // Case 1: Only "Другое" checked (no "Проект") → goes to "Иные задачи" row
