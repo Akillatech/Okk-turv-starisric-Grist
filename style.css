@@ -747,6 +747,10 @@ h3 .icon::before {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
+    white-space: normal !important;
+    line-height: 1.2;
+    vertical-align: middle;
+    min-width: 80px;
 }
 
 .projects-table td {
@@ -1290,6 +1294,10 @@ h3 .icon::before {
     text-align: center;
     font-weight: 600;
     font-size: 14px;
+    white-space: normal !important;
+    line-height: 1.2;
+    vertical-align: middle;
+    min-width: 80px;
 }
 
 .weekly-table td {
