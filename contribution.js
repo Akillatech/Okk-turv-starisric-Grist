@@ -1,8 +1,8 @@
 // =================== CONTRIBUTIONS LOGIC ===================
 
 if (window.logic) {
-    // Data Store
-    window.logic.contributions = [];
+    // Data Store synchronized with global settings
+    window.logic.contributions = (window.currentSettings && window.currentSettings.contributions) ? window.currentSettings.contributions : [];
     window.logic.currentContributionId = null;
 
     // --- NOTIFICATION SYSTEM ---
@@ -29,24 +29,21 @@ if (window.logic) {
     window.logic.loadContributionsFromOptions = function (data) {
         console.log("Loading Contributions from Options...", data);
         if (Array.isArray(data)) {
-            // Map generic object back to internal structure if needed, or just use as is
-            // Assuming data matches our structure since we save it that way
-            window.logic.contributions = data.map(c => ({
-                ...c,
-                // Ensure dates are strings or handled consistently
-                // Re-instantiate generic objects if needed
-            }));
+            window.logic.contributions = data;
+            // Sync to global settings if not already there
+            if (window.currentSettings) {
+                window.currentSettings.contributions = data;
+            }
             window.logic.renderContributions();
             if (typeof renderLastContribution === 'function') renderLastContribution();
         }
     };
 
     window.logic.saveContributionToGrist = async function (contribution, isNew = false) {
-        // We are already working with window.logic.contributions array in create/update functions
-        // So we just need to save the current state of the array to options
-
-        // deep copy to avoid reference issues? JSON stringify/parse is enough for options
-        const dataToSave = window.logic.contributions;
+        // Update global settings first to ensure absolute sync
+        if (window.currentSettings) {
+            window.currentSettings.contributions = window.logic.contributions;
+        }
 
         // Update KPI card immediately if visible/loaded
         if (typeof renderLastContribution === 'function') renderLastContribution();
@@ -54,7 +51,10 @@ if (window.logic) {
         try {
             if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification immediately
 
-            await grist.setOption('contributions', dataToSave);
+            // Call unified save helper
+            if (typeof window.autoSaveSettings === 'function') {
+                window.autoSaveSettings();
+            }
 
             // Re-open view if editing?
             if (window.logic.currentContributionId && !isNew) {
@@ -62,21 +62,29 @@ if (window.logic) {
             }
         } catch (e) {
             console.error("Save failed:", e);
-            // Error notification suppressed as per user request
         }
     };
 
     window.logic.deleteContributionFromGrist = async function (id) {
         // Remove from local array
         window.logic.contributions = window.logic.contributions.filter(c => c.id != id);
+
+        // Sync to global settings
+        if (window.currentSettings) {
+            window.currentSettings.contributions = window.logic.contributions;
+        }
+
         window.logic.renderContributions();
 
         try {
             if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification
-            await grist.setOption('contributions', window.logic.contributions);
+
+            // Call unified save helper
+            if (typeof window.autoSaveSettings === 'function') {
+                window.autoSaveSettings();
+            }
         } catch (e) {
             console.error("Delete failed:", e);
-            // window.logic.showNotification("Ошибка удаления!", true); // Suppressed
         }
     };
 
@@ -87,7 +95,10 @@ if (window.logic) {
         const grid = document.getElementById('contributionsGrid');
         if (!grid) return;
 
-        // Stats
+        // Force sync from global settings to ensure absolute consistency
+        if (window.currentSettings && window.currentSettings.contributions) {
+            window.logic.contributions = window.currentSettings.contributions;
+        }
         var total = window.logic.contributions.length;
         var approved = window.logic.contributions.filter(c => c.status === 'approved').length;
         var rejected = window.logic.contributions.filter(c => c.status !== 'approved' && c.status !== 'pending').length;

@@ -49,7 +49,8 @@ const defaultGlobalSettings = {
     years: [new Date().getFullYear()],
     grade: 'JUNIOR',
     kpiData: {},
-    kpiTransitions: []
+    kpiTransitions: [],
+    contributions: []
 };
 
 const defaultPersonalSettings = {
@@ -142,7 +143,8 @@ function autoSaveSettings() {
         userProfiles: window.currentSettings.userProfiles,
         grade: window.currentSettings.grade,
         kpiData: window.currentSettings.kpiData,
-        kpiTransitions: window.currentSettings.kpiTransitions
+        kpiTransitions: window.currentSettings.kpiTransitions,
+        contributions: window.currentSettings.contributions
     };
 
     if (window.showSaveReminder) window.showSaveReminder();
@@ -362,6 +364,7 @@ function initGrist() {
             if (global.userProfiles) merged.userProfiles = global.userProfiles;
             if (global.kpiData) merged.kpiData = global.kpiData;
             if (global.kpiTransitions) merged.kpiTransitions = global.kpiTransitions;
+            if (global.contributions) merged.contributions = global.contributions;
         }
 
         // Apply Cloud Profile overrides ONLY if we have a username
