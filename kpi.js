@@ -47,25 +47,23 @@ function ensureKpiStructure(year, quarter) {
     return kpiData[year][quarter];
 }
 
-// Load saved KPI data from localStorage
-// Load saved KPI data from localStorage -> REMOVED (Handled by script.js via Grist Options)
-// (function loadSavedKpiData() { ... })();
+// Load saved kpiData from window.currentSettings
+if (window.currentSettings && window.currentSettings.kpiData) {
+    kpiData = window.currentSettings.kpiData;
+}
 
 const ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
 const KPI_GRADE_DEMO = { current: 'JUNIOR', next: 'JUNIOR+', image: '🎖️' };
 
-// Load saved grade from localStorage on init
-// Load saved grade from localStorage -> REMOVED (Handled by script.js)
-// (function loadSavedGrade() { ... })();
 const KPI_CONTRIBUTION_DEMO = null; // Deprecated, using window.logic.contributions
 let KPI_TRANSITIONS_DEMO = [
     { type: 'ТОЛЬКО ТАРГЕТ', available: true, lastDate: '01.01.2026', nextDate: '01.04.2026', progress: 65, variant: 'accent' },
     { type: 'ТАРГЕТ + ВКЛАД', available: true, lastDate: '01.01.2026', nextDate: '01.07.2026', progress: 40, variant: 'orange' },
 ];
 
-// Load saved transitions from localStorage
-// Load saved transitions from localStorage -> REMOVED (Handled by script.js)
-// (function loadSavedTransitions() { ... })();
+if (window.currentSettings && window.currentSettings.kpiTransitions && window.currentSettings.kpiTransitions.length > 0) {
+    KPI_TRANSITIONS_DEMO = window.currentSettings.kpiTransitions;
+}
 
 // Last Contribution Logic
 function renderLastContribution() {
@@ -172,6 +170,12 @@ function renderLastContribution() {
 function renderKpiView() {
     var container = document.getElementById('kpiContent');
     if (!container) return;
+
+    // Sync from global settings
+    if (window.currentSettings && window.currentSettings.kpiData) {
+        kpiData = window.currentSettings.kpiData;
+    }
+
     var yearSelect = document.getElementById('kpiYearSelect');
     if (yearSelect) yearSelect.value = kpiState.year;
     var qSel = document.getElementById('kpiQuarterSelect');
@@ -646,23 +650,13 @@ function initKpiDataModal() {
         // Recalculate overall & total
         recalcQuarter(qData);
 
-        // Save to localStorage
-        // Save to localStorage -> REMOVED (We rely on Grist Options for global sync)
-        /*
-        try {
-            localStorage.setItem('okk_kpi_data', JSON.stringify(kpiData));
-            console.log('✅ KPI Data saved to localStorage');
-        } catch (e) { console.error('Failed to save kpiData', e); }
-        */
-
-        // Save to Grist
-        if (typeof grist !== 'undefined' && grist.setOption) {
-            grist.setOption('kpiData', kpiData)
-                .then(function () {
-                    console.log('✅ KPI Data staged in Grist');
-                    if (typeof showSaveReminder === 'function') showSaveReminder();
-                })
-                .catch(function (err) { console.error('❌ Failed to stage kpiData in Grist:', err); });
+        // Save to Grist via unified settings
+        if (window.currentSettings) {
+            window.currentSettings.kpiData = kpiData;
+            if (typeof window.autoSaveSettings === 'function') {
+                window.autoSaveSettings();
+                if (typeof window.showSaveReminder === 'function') window.showSaveReminder();
+            }
         }
 
         // Close modal
@@ -1142,20 +1136,13 @@ function initTransitionsModal() {
             t.progress = calculateTransitionProgress(t.lastDate, t.nextDate);
         });
 
-        // Save to localStorage
-        try {
-            localStorage.setItem('okk_kpi_transitions', JSON.stringify(KPI_TRANSITIONS_DEMO));
-            console.log('✅ KPI Transitions saved to localStorage');
-        } catch (e) { console.error('Failed to save transitions', e); }
-
-        // Save to Grist
-        if (typeof grist !== 'undefined' && grist.setOption) {
-            grist.setOption('kpiTransitions', KPI_TRANSITIONS_DEMO)
-                .then(function () {
-                    console.log('✅ KPI Transitions staged in Grist');
-                    if (typeof showSaveReminder === 'function') showSaveReminder();
-                })
-                .catch(function (err) { console.error('❌ Failed to stage transitions in Grist:', err); });
+        // Save to Grist via unified settings
+        if (window.currentSettings) {
+            window.currentSettings.kpiTransitions = KPI_TRANSITIONS_DEMO;
+            if (typeof window.autoSaveSettings === 'function') {
+                window.autoSaveSettings();
+                if (typeof window.showSaveReminder === 'function') window.showSaveReminder();
+            }
         }
 
         // Close modal

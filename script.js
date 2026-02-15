@@ -47,7 +47,9 @@ const defaultGlobalSettings = {
     holidays: {},
     shortDays: {},
     years: [new Date().getFullYear()],
-    grade: 'JUNIOR'
+    grade: 'JUNIOR',
+    kpiData: {},
+    kpiTransitions: []
 };
 
 const defaultPersonalSettings = {
@@ -138,7 +140,9 @@ function autoSaveSettings() {
         shortDays: window.currentSettings.shortDays,
         years: window.currentSettings.years,
         userProfiles: window.currentSettings.userProfiles,
-        grade: window.currentSettings.grade // Global fallback if needed
+        grade: window.currentSettings.grade,
+        kpiData: window.currentSettings.kpiData,
+        kpiTransitions: window.currentSettings.kpiTransitions
     };
 
     if (window.showSaveReminder) window.showSaveReminder();
@@ -356,6 +360,8 @@ function initGrist() {
             if (global.years) merged.years = global.years;
             if (global.grade) merged.grade = global.grade;
             if (global.userProfiles) merged.userProfiles = global.userProfiles;
+            if (global.kpiData) merged.kpiData = global.kpiData;
+            if (global.kpiTransitions) merged.kpiTransitions = global.kpiTransitions;
         }
 
         // Apply Cloud Profile overrides ONLY if we have a username
