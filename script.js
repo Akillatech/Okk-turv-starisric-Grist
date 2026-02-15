@@ -315,6 +315,10 @@ function initGrist() {
 
         console.log('✅ Settings Loaded:', currentSettings);
 
+        // IMMEDIATE ACCENT/THEME APPLY
+        // This fixes the "default lime flash" and ensures runtime state matches storage
+        applyTheme(currentSettings.theme, currentSettings.accentColor);
+
         // 4. Force Load Global KPI Settings (Source of Truth = Grist)
         if (options) {
             // Grade
@@ -828,6 +832,10 @@ window.logic = {
     },
 
     saveSettings: async function () {
+        // Ensure Accent Color is preserved before saving global blob
+        // (Sometimes UI state might desync, trust currentSettings which should be updated by saveAccent)
+        if (!currentSettings.accentColor) currentSettings.accentColor = 'lime';
+
         // Save to Grist Options
         await grist.setOption('settings', currentSettings);
         if (window.showSaveReminder) window.showSaveReminder(); // Standard notification
