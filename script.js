@@ -309,9 +309,15 @@ function initGrist() {
         if (currentSettings.userName && currentSettings.userProfiles && currentSettings.userProfiles[currentSettings.userName]) {
             const cloudProfile = currentSettings.userProfiles[currentSettings.userName];
             console.log('🔄 Found Cloud Profile for', currentSettings.userName, cloudProfile);
+
+            // Priority: Cloud profile overrides ONLY if it has valid values
             if (cloudProfile.theme) currentSettings.theme = cloudProfile.theme;
             if (cloudProfile.accentColor) currentSettings.accentColor = cloudProfile.accentColor;
+            if (cloudProfile.grade) currentSettings.grade = cloudProfile.grade;
         }
+
+        // Safety: Ensure accent is never empty
+        if (!currentSettings.accentColor) currentSettings.accentColor = 'lime';
 
         console.log('✅ Settings Loaded:', currentSettings);
 
@@ -726,12 +732,14 @@ window.logic = {
         currentSettings.theme = theme;
         applyTheme(theme, currentSettings.accentColor);
         autoSaveSettings();
+        renderSettingsUI(); // Immediate feedback for button highlight
     },
 
     saveAccent: function (accent) {
         currentSettings.accentColor = accent;
         applyTheme(currentSettings.theme, accent);
         autoSaveSettings();
+        renderSettingsUI(); // Immediate feedback for button highlight
     },
 
     addHoliday: function () {
