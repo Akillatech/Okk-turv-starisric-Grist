@@ -1323,15 +1323,9 @@ function initGradeModal() {
             // Also update root prop for immediate fallback access
             window.currentSettings.grade = selectedGrade;
 
-            // 2. Save Logic (Mirror saveSettings/autoSave)
-            // Save Global Settings to Grist Options
-            if (typeof grist !== 'undefined' && grist.setOption) {
-                grist.setOption('settings', window.currentSettings)
-                    .then(function () {
-                        console.log('✅ Grade saved to Grist settings');
-                        if (typeof showSaveReminder === 'function') showSaveReminder();
-                    })
-                    .catch(function (err) { console.error('❌ Failed to save grade:', err); });
+            // 2. Save Logic (Use standardized autoSaveSettings from script.js)
+            if (typeof autoSaveSettings === 'function') {
+                autoSaveSettings();
             }
 
             // 3. Update UI

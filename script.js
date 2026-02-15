@@ -100,7 +100,7 @@ function autoSaveSettings() {
     const personalSettings = {
         theme: currentSettings.theme,
         accentColor: currentSettings.accentColor,
-        userName: currentSettings.userName, // Kept for back-compat
+        userName: currentSettings.userName,
         firstName: currentSettings.firstName,
         lastName: currentSettings.lastName,
         dashboardCheckStatus: currentSettings.dashboardCheckStatus
@@ -114,31 +114,31 @@ function autoSaveSettings() {
     }
 
     // 2. Save Global Settings to Grist Options
-    // NOTE: This requires manual "Save" in Grist UI to persist!
-
-    // Ensure userProfiles exists
-    if (!currentSettings.userProfiles) currentSettings.userProfiles = {};
-
-    // Update current user's profile
+    // Update current user's profile in the cloud blob
     if (currentSettings.userName) {
+        if (!currentSettings.userProfiles) currentSettings.userProfiles = {};
         currentSettings.userProfiles[currentSettings.userName] = {
             theme: currentSettings.theme,
-            accentColor: currentSettings.accentColor
+            accentColor: currentSettings.accentColor,
+            grade: currentSettings.grade // Ensure grade persists in profile
         };
     }
 
-    const globalSettings = {
+    // Explicitly define what goes into Global 'settings' blob
+    // This prevents polluting global config with the current user's local state
+    const globalSettingsToSave = {
         holidays: currentSettings.holidays,
         shortDays: currentSettings.shortDays,
         years: currentSettings.years,
-        userProfiles: currentSettings.userProfiles
+        userProfiles: currentSettings.userProfiles,
+        grade: currentSettings.grade // Global fallback if needed
     };
 
-    if (window.showSaveReminder) window.showSaveReminder(); // Optimistic UI
+    if (window.showSaveReminder) window.showSaveReminder();
 
-    grist.setOption('settings', globalSettings)
+    grist.setOption('settings', globalSettingsToSave)
         .then(() => {
-            console.log('✅ Global settings staged in Grist (remember to save document!)');
+            console.log('✅ Global settings staged in Grist');
         })
         .catch(err => {
             console.error('❌ Failed to save settings to Grist:', err);
@@ -832,15 +832,12 @@ window.logic = {
     },
 
     saveSettings: async function () {
-        // Ensure Accent Color is preserved before saving global blob
-        // (Sometimes UI state might desync, trust currentSettings which should be updated by saveAccent)
-        if (!currentSettings.accentColor) currentSettings.accentColor = 'lime';
+        // Use the standardized autoSave logic to ensure consistency
+        // and avoid polluting global settings with personal root fields.
+        autoSaveSettings();
 
-        // Save to Grist Options
-        await grist.setOption('settings', currentSettings);
-        if (window.showSaveReminder) window.showSaveReminder(); // Standard notification
         this.closeSettings();
-        refreshDashboard(); // Refresh to apply changes (formatted holidays etc)
+        refreshDashboard(); // Refresh UI to apply potential date changes
     },
 
     exportSettings: function () {
@@ -1466,6 +1463,23 @@ function renderSettingsUI() {
             yearSelect.value = currentSettings.years[0];
         }
     }
+
+    // Highlight Active Accent Color
+    const accentValue = currentSettings.accentColor || 'lime';
+    document.querySelectorAll('.accent-btn').forEach(btn => {
+        // extract color from onclick call or style if possible, 
+        // but easier to check the onclick argument
+        const onClick = btn.getAttribute('onclick') || '';
+        if (onClick.includes(`'${accentValue}'`) || onClick.includes(`"${accentValue}"`)) {
+            btn.classList.add('active');
+            btn.style.boxShadow = '0 0 0 3px var(--accent-color), 0 0 10px rgba(0,0,0,0.2)';
+            btn.style.borderColor = '#fff';
+        } else {
+            btn.classList.remove('active');
+            btn.style.boxShadow = 'none';
+            btn.style.borderColor = '#ddd';
+        }
+    });
 }
 
 // Global scope function for onclick access
