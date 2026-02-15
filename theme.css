@@ -745,10 +745,10 @@
 
 /* Blue Accent */
 [data-accent="blue"] {
-    --accent-color: #0984e3;
-    --accent-dark: #0764ab;
-    --accent-text: #0984e3;
-    --accent-gradient: linear-gradient(135deg, #0984e3 0%, #0764ab 100%);
+    --accent-color: #0984e3 !important;
+    --accent-dark: #0764ab !important;
+    --accent-text: #0984e3 !important;
+    --accent-gradient: linear-gradient(135deg, #0984e3 0%, #0764ab 100%) !important;
 }
 
 [data-accent="blue"][data-theme="dark"] {
@@ -757,10 +757,10 @@
 
 /* Purple Accent */
 [data-accent="purple"] {
-    --accent-color: #6c5ce7;
-    --accent-dark: #5240c4;
-    --accent-text: #6c5ce7;
-    --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #5240c4 100%);
+    --accent-color: #6c5ce7 !important;
+    --accent-dark: #5240c4 !important;
+    --accent-text: #6c5ce7 !important;
+    --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #5240c4 100%) !important;
 }
 
 [data-accent="purple"][data-theme="dark"] {
@@ -769,10 +769,10 @@
 
 /* Orange Accent */
 [data-accent="orange"] {
-    --accent-color: #e17055;
-    --accent-dark: #c4533a;
-    --accent-text: #e17055;
-    --accent-gradient: linear-gradient(135deg, #e17055 0%, #c4533a 100%);
+    --accent-color: #e17055 !important;
+    --accent-dark: #c4533a !important;
+    --accent-text: #e17055 !important;
+    --accent-gradient: linear-gradient(135deg, #e17055 0%, #c4533a 100%) !important;
 }
 
 [data-accent="orange"][data-theme="dark"] {

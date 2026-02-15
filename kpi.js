@@ -51,7 +51,8 @@ function ensureKpiStructure(year, quarter) {
 // Load saved KPI data from localStorage -> REMOVED (Handled by script.js via Grist Options)
 // (function loadSavedKpiData() { ... })();
 
-const KPI_GRADE_DEMO = { current: 'SENIOR', next: 'JUNIOR+', image: '🎖️' };
+const ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
+const KPI_GRADE_DEMO = { current: 'JUNIOR', next: 'JUNIOR+', image: '🎖️' };
 
 // Load saved grade from localStorage on init
 // Load saved grade from localStorage -> REMOVED (Handled by script.js)
@@ -195,7 +196,7 @@ function renderKpiView() {
 
 function renderGradeCard() {
     // defaults
-    let grade = 'JUNIOR';
+    let grade = KPI_GRADE_DEMO.current;
     let nextGrade = 'JUNIOR+';
 
     // Check user profile
@@ -210,20 +211,39 @@ function renderGradeCard() {
         grade = window.currentSettings.grade;
     }
 
+    // Sync back to internal state for character rendering
+    KPI_GRADE_DEMO.current = grade;
+
     // Determine next grade
-    const grades = ['JUNIOR', 'JUNIOR+', 'MIDDLE', 'MIDDLE+', 'SENIOR', 'SENIOR+'];
-    const idx = grades.indexOf(grade);
-    if (idx >= 0 && idx < grades.length - 1) {
-        nextGrade = grades[idx + 1];
+    const idx = ALL_GRADES.indexOf(grade);
+    if (idx >= 0 && idx < ALL_GRADES.length - 1) {
+        nextGrade = ALL_GRADES[idx + 1];
     } else {
         nextGrade = 'MAX';
     }
+    KPI_GRADE_DEMO.next = nextGrade;
 
     const nameEl = document.getElementById('kpiGradeName');
-    const nextEl = document.querySelector('.kpi-grade-next-value');
+    const nextEl = document.getElementById('kpiGradeNext'); // Fixed ID
+    const imgEl = document.getElementById('kpiGradeImage');
 
     if (nameEl) nameEl.textContent = grade;
-    if (nextEl) nextEl.textContent = nextGrade;
+    if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + nextGrade + '</span>';
+
+    // Render dynamic character
+    if (imgEl) {
+        imgEl.innerHTML = getGradeCharacterSVG(grade);
+        imgEl.style.fontSize = '1rem';
+        imgEl.style.background = 'none';
+        imgEl.style.boxShadow = 'none';
+        imgEl.style.width = '100%';
+        imgEl.style.maxWidth = '220px';
+        imgEl.style.height = 'auto';
+        imgEl.style.margin = '8px auto';
+        imgEl.style.display = 'flex';
+        imgEl.style.justifyContent = 'center';
+        imgEl.style.alignItems = 'center';
+    }
 }
 
 
@@ -526,39 +546,7 @@ function renderTriangleChart(qData) {
 
 // =================== CARDS ===================
 
-function renderGradeCard() {
-    var el = document.getElementById('kpiGradeName');
-    var nextEl = document.getElementById('kpiGradeNext');
-    var imgEl = document.getElementById('kpiGradeImage');
-
-    if (el) el.textContent = KPI_GRADE_DEMO.current;
-
-    // Calculate next grade
-    var ALL_GRADES = ['JUNIOR-', 'JUNIOR', 'JUNIOR+', 'MIDDLE-', 'MIDDLE', 'MIDDLE+', 'SENIOR-', 'SENIOR', 'SENIOR+'];
-    var currentIdx = ALL_GRADES.indexOf(KPI_GRADE_DEMO.current);
-    var nextGrade = currentIdx < ALL_GRADES.length - 1 ? ALL_GRADES[currentIdx + 1] : '—';
-    KPI_GRADE_DEMO.next = nextGrade;
-
-    if (nextEl) nextEl.innerHTML = 'СЛЕД.ГРЕЙД: <span class="kpi-grade-next-value">' + nextGrade + '</span>';
-
-    // Render dynamic character
-    if (imgEl) {
-        imgEl.innerHTML = getGradeCharacterSVG(KPI_GRADE_DEMO.current);
-        imgEl.style.fontSize = '1rem';
-        imgEl.style.background = 'none';
-        imgEl.style.boxShadow = 'none';
-        imgEl.style.width = '100%';
-        imgEl.style.maxWidth = '220px';
-        imgEl.style.height = 'auto';
-        imgEl.style.margin = '8px auto';
-        imgEl.style.display = 'flex';
-        imgEl.style.justifyContent = 'center';
-        imgEl.style.alignItems = 'center';
-    }
-
-    // Init modal (once)
-    initGradeModal();
-}
+// function renderGradeCard() was duplicated here, removed.
 
 // =================== KPI DATA MODAL ===================
 
@@ -725,37 +713,22 @@ function initGradeModal() {
         }
 
         btn.addEventListener('click', function () {
-            // Update current grade
-            KPI_GRADE_DEMO.current = grade;
+            // Update current grade in settings
+            if (window.currentSettings) {
+                window.currentSettings.grade = grade;
+                // Grade is now global, no longer saving to userProfiles
+            }
 
-            // Save to localStorage
-            // Save to localStorage -> REMOVED
-            /*
-            try {
-                localStorage.setItem('okk_kpi_grade', grade);
-                console.log('✅ KPI Grade saved to localStorage:', grade);
-            } catch (e) { console.error('Failed to save grade to localStorage', e); }
-            */
-
-            // Save to Grist options (requires manual save in Grist UI)
-            if (typeof grist !== 'undefined' && grist.setOption) {
-                grist.setOption('kpiGrade', grade)
-                    .then(function () {
-                        console.log('✅ KPI Grade staged in Grist');
-                        if (typeof showSaveReminder === 'function') showSaveReminder();
-                    })
-                    .catch(function (err) { console.error('❌ Failed to stage grade in Grist:', err); });
+            // Sync via global helper
+            if (typeof window.autoSaveSettings === 'function') {
+                window.autoSaveSettings();
             }
 
             // Close modal
             modal.classList.remove('active');
 
-            // Re-render card
-            _gradeModalInited = false;
+            // Re-render
             renderGradeCard();
-
-            // Show save toast
-            if (typeof showSaveReminder === 'function') showSaveReminder();
         });
 
         grid.appendChild(btn);

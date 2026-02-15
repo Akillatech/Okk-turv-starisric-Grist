@@ -61,7 +61,8 @@ let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 
 // Persistence Lock to prevent Grist from reverting local changes during save sync
 let lastSaveTime = 0;
-const SAVE_LOCK_DURATION = 1500; // ms
+let lastSavedSettingsHash = ""; // Guard for infinite loop
+const SAVE_LOCK_DURATION = 3000; // ms (increased for Grist)
 
 // Helper to access record field using multiple potential names
 function getRecVal(record, keyName) {
@@ -123,8 +124,8 @@ function autoSaveSettings() {
         if (!currentSettings.userProfiles) currentSettings.userProfiles = {};
         currentSettings.userProfiles[currentSettings.userName] = {
             theme: currentSettings.theme,
-            accentColor: currentSettings.accentColor,
-            grade: currentSettings.grade // Ensure grade persists in profile
+            accentColor: currentSettings.accentColor
+            // grade is now global, not in profile
         };
     }
 
@@ -141,6 +142,7 @@ function autoSaveSettings() {
     if (window.showSaveReminder) window.showSaveReminder();
 
     lastSaveTime = Date.now(); // Update lock timestamp
+    lastSavedSettingsHash = JSON.stringify(globalSettingsToSave); // Store hash to check in onOptions
 
     grist.setOption('settings', globalSettingsToSave)
         .then(() => {
@@ -293,6 +295,13 @@ function initGrist() {
             return;
         }
 
+        // 0.1 Check Hash to prevent infinite loop
+        const currentHash = JSON.stringify(options.settings || {});
+        if (lastSavedSettingsHash && currentHash === lastSavedSettingsHash) {
+            console.log('🛑 Settings hash matches last saved state. Skipping redundant load/re-save.');
+            return;
+        }
+
         // Try to identify user from Grist if not already known
         let docUser = null;
         if (options && options.user) docUser = options.user.name || options.user.email;
@@ -352,7 +361,7 @@ function initGrist() {
             console.log('🔄 Applying Cloud Profile for', merged.userName, cloudProfile);
             if (cloudProfile.theme) merged.theme = cloudProfile.theme;
             if (cloudProfile.accentColor) merged.accentColor = cloudProfile.accentColor;
-            if (cloudProfile.grade) merged.grade = cloudProfile.grade;
+            // grade is global, do not override from profile
         }
 
         // Safety check for accent color
@@ -1775,6 +1784,22 @@ function calculateFullDayStats(date) {
 
     return { totalHours, totalTasks, projects };
 }
+
+// --- Immediate Theme Application (Stop Lime Flash) ---
+(function applyThemeImmediate() {
+    try {
+        const saved = localStorage.getItem('okk_personal_settings');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.theme || parsed.accentColor) {
+                document.body.setAttribute('data-theme', parsed.theme || 'light');
+                document.body.setAttribute('data-accent', parsed.accentColor || 'lime');
+            }
+        }
+    } catch (e) {
+        console.warn('Theme immediate apply failed', e);
+    }
+})();
 
 function applyTheme(theme, accent) {
     if (!theme) theme = 'light';
