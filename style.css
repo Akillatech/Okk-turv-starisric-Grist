@@ -5627,13 +5627,15 @@ path.kpi-wave-2 {
 .comment-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     font-size: 11px;
     color: var(--text-secondary);
+    position: relative;
+    /* Anchor for delete button */
 }
 
 .comment-author {
-    font-weight: 800;
+    font-weight: 600;
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.05);
     /* Ideally variable */
@@ -6965,4 +6967,23 @@ path.kpi-wave-2 {
     .kpi-cards-top-row {
         grid-template-columns: 1fr;
     }
+}
+
+/* Delete Comment Button */
+.delete-comment-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 10px;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.delete-comment-btn:hover {
+    opacity: 1;
+    color: #ff5e57;
 }

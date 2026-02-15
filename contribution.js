@@ -369,21 +369,48 @@ if (window.logic) {
         const list = document.getElementById('commentsList');
         if (!list) return;
         list.innerHTML = '';
-        comments.forEach(comment => {
+        comments.forEach((comment, index) => {
             const item = document.createElement('div');
             item.className = 'comment-item';
-            if (comment.author === 'You') item.classList.add('mine');
+
+            // Check if current user is author
+            const currentUser = (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User';
+            const isMine = comment.author === currentUser;
+
+            if (isMine) item.classList.add('mine');
+
+            const deleteBtn = `<button class="delete-comment-btn" onclick="window.logic.deleteComment(${index})" title="Удалить">×</button>`;
 
             item.innerHTML = `
                 <div class="comment-header">
                     <span class="comment-author">${comment.author}</span>
                     <span class="comment-date">${comment.date}</span>
+                    ${deleteBtn}
                 </div>
                 <div class="comment-text">${comment.text}</div>
             `;
             list.appendChild(item);
         });
         setTimeout(() => list.scrollTop = list.scrollHeight, 0);
+    };
+
+    window.logic.deleteComment = function (index) {
+        if (!confirm('Удалить этот комментарий?')) return;
+
+        const c = window.logic.contributions.find(x => x.id == window.logic.currentContributionId);
+        if (c && c.comments && c.comments[index]) {
+            const deletedComment = c.comments[index];
+            c.comments.splice(index, 1);
+
+            const author = (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User';
+            window.logic.addHistoryEntry(c, 'Комментарий удален', author);
+
+            window.logic.renderComments(c.comments);
+            window.logic.renderHistory(c.history);
+            window.logic.renderContributions(); // Refresh main list
+
+            window.logic.saveContributionToGrist(c, false);
+        }
     };
 
     window.logic.renderHistory = function (history) {
