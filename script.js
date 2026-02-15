@@ -59,6 +59,10 @@ const defaultPersonalSettings = {
 let currentSettings = { ...defaultGlobalSettings, ...defaultPersonalSettings };
 let currentPeriod = 'all'; // 'all', 'month:YYYY-M', 'year:YYYY'
 
+// Persistence Lock to prevent Grist from reverting local changes during save sync
+let lastSaveTime = 0;
+const SAVE_LOCK_DURATION = 1500; // ms
+
 // Helper to access record field using multiple potential names
 function getRecVal(record, keyName) {
     const potentialNames = CONFIG.COLUMNS[keyName];
@@ -135,6 +139,8 @@ function autoSaveSettings() {
     };
 
     if (window.showSaveReminder) window.showSaveReminder();
+
+    lastSaveTime = Date.now(); // Update lock timestamp
 
     grist.setOption('settings', globalSettingsToSave)
         .then(() => {
@@ -271,6 +277,13 @@ function initGrist() {
     });
 
     grist.onOptions(function (options) {
+        // 0. Check Persistence Lock
+        const now = Date.now();
+        if (now - lastSaveTime < SAVE_LOCK_DURATION) {
+            console.log('⏳ Ignoring onOptions due to recent local save (Persistence Lock)');
+            return;
+        }
+
         // 1. Load Personal Settings from localStorage
         let personal = {};
         try {
