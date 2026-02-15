@@ -1,8 +1,14 @@
 // =================== CONTRIBUTIONS LOGIC ===================
 
 if (window.logic) {
-    // Data Store synchronized with global settings
-    window.logic.contributions = (window.currentSettings && window.currentSettings.contributions) ? window.currentSettings.contributions : [];
+    // Use global settings as the single source of truth for contributions
+    Object.defineProperty(window.logic, 'contributions', {
+        get: () => (window.currentSettings && window.currentSettings.contributions) ? window.currentSettings.contributions : [],
+        set: (val) => {
+            if (window.currentSettings) window.currentSettings.contributions = val;
+        },
+        configurable: true
+    });
     window.logic.currentContributionId = null;
 
     // --- NOTIFICATION SYSTEM ---
@@ -40,21 +46,19 @@ if (window.logic) {
     };
 
     window.logic.saveContributionToGrist = async function (contribution, isNew = false) {
-        // Update global settings first to ensure absolute sync
-        if (window.currentSettings) {
-            window.currentSettings.contributions = window.logic.contributions;
-        }
+        // Data is already updated in window.currentSettings.contributions 
+        // because window.logic.contributions is a proxy to it.
 
         // Update KPI card immediately if visible/loaded
         if (typeof renderLastContribution === 'function') renderLastContribution();
 
         try {
-            console.log('[CONTRIB_SYNC] Triggering autoSaveSettings for contribution save. Local array size:', window.logic.contributions.length);
-            if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification immediately
+            console.log('[CONTRIB_SYNC] Triggering autoSaveSettings for contribution save. Items:', window.logic.contributions.length);
+            if (window.showSaveReminder) window.showSaveReminder();
 
             // Call unified save helper
             if (typeof window.autoSaveSettings === 'function') {
-                window.autoSaveSettings();
+                await window.autoSaveSettings();
             }
 
             // Re-open view if editing?
@@ -96,10 +100,8 @@ if (window.logic) {
         const grid = document.getElementById('contributionsGrid');
         if (!grid) return;
 
-        // Force sync from global settings to ensure absolute consistency
-        if (window.currentSettings && window.currentSettings.contributions) {
-            window.logic.contributions = window.currentSettings.contributions;
-        }
+        // No manual sync needed anymore, window.logic.contributions is a dynamic property
+
         var total = window.logic.contributions.length;
         var approved = window.logic.contributions.filter(c => c.status === 'approved').length;
         var rejected = window.logic.contributions.filter(c => c.status !== 'approved' && c.status !== 'pending').length;

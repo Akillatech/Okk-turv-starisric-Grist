@@ -154,7 +154,7 @@ function autoSaveSettings() {
 
     console.log('[CONTRIB_SYNC] Staging global settings to Grist. Contributions count:', globalSettingsToSave.contributions ? globalSettingsToSave.contributions.length : 0);
 
-    grist.setOption('settings', globalSettingsToSave)
+    return grist.setOption('settings', globalSettingsToSave)
         .then(() => {
             console.log('✅ [CONTRIB_SYNC] Global settings staged in Grist');
         })
@@ -369,6 +369,10 @@ function initGrist() {
             if (global.contributions) {
                 merged.contributions = global.contributions;
                 console.log('[CONTRIB_SYNC] Found contributions in unified settings:', global.contributions.length);
+            } else if (options && options.contributions && Array.isArray(options.contributions)) {
+                // MIGRATION: Pull from legacy if unified is empty
+                merged.contributions = options.contributions;
+                console.warn('[CONTRIB_SYNC] Migrating legacy contributions to unified settings.');
             }
         }
 
@@ -399,10 +403,9 @@ function initGrist() {
         renderSettingsUI();
         refreshDashboard();
 
-        // Load Contributions from Grist options (LEGACY STANDALONE)
-        if (options && options.contributions && window.logic && window.logic.loadContributionsFromOptions) {
-            console.warn('[CONTRIB_SYNC] Found LEGACY standalone contributions option. This may conflict with unified settings.');
-            window.logic.loadContributionsFromOptions(options.contributions);
+        // Initialize Contributions logic with the data we just merged
+        if (window.logic && window.logic.loadContributionsFromOptions) {
+            window.logic.loadContributionsFromOptions(currentSettings.contributions);
         }
 
         // MIGRATION: Convert old format (array) to new format (object by year)
