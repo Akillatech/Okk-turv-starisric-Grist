@@ -230,7 +230,14 @@ window.showSaveReminder = function () {
 // --- Grist Integration ---
 
 function initGrist() {
-    grist.ready({ requiredAccess: 'full' }); // Full access needed for settings (options)
+    console.log('--- Init Grist ---');
+
+    // Grist.ready promise resolves with user info if available
+    grist.ready({ requiredAccess: 'full' });
+
+    // Try to get user info automatically from Grist to avoid requiring manual input
+    // The API might push it via onOptions or we can attempt to get it from doc info
+    // But most reliably, we wait for any Grist message that includes user
 
     grist.onRecords(function (records, mappings) {
         console.log('RECORDS RECEIVED FROM GRIST API'); // Bold marker
@@ -277,11 +284,31 @@ function initGrist() {
     });
 
     grist.onOptions(function (options) {
+        console.log('--- onOptions Received ---', options);
+
         // 0. Check Persistence Lock
         const now = Date.now();
         if (now - lastSaveTime < SAVE_LOCK_DURATION) {
             console.log('⏳ Ignoring onOptions due to recent local save (Persistence Lock)');
             return;
+        }
+
+        // Try to identify user from Grist if not already known
+        let docUser = null;
+        if (options && options.user) docUser = options.user.name || options.user.email;
+        else if (window.grist && grist.getUser) {
+            // Fallback attempt (async might be tricky here, but we can try)
+        }
+
+        if (docUser && !currentSettings.userName) {
+            console.log('👤 Detected Grist User:', docUser);
+            currentSettings.userName = docUser;
+            // Split name for greeting if empty
+            if (!currentSettings.firstName) {
+                const parts = docUser.split(' ');
+                currentSettings.firstName = parts[0];
+                currentSettings.lastName = parts.slice(1).join(' ');
+            }
         }
 
         // 1. Load Personal Settings from localStorage
@@ -398,7 +425,7 @@ function initGrist() {
         }
 
         refreshDashboard(); // Settings might change stats (holidays etc)
-        applyTheme(currentSettings.theme, currentSettings.accent);
+        applyTheme(currentSettings.theme, currentSettings.accentColor);
     });
 }
 
