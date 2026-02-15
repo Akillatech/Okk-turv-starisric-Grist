@@ -290,36 +290,38 @@ function initGrist() {
             }
         }
 
-        // 3. Merge: Defaults -> Global -> Personal 
-        // Logic: 
-        // - Load defaults
-        // - Apply Global (holidays lines)
-        // - Determine User:
-        //   - If localStorage has user, use that. 
-        //   - If global.userProfiles has entry for that user, OVERRIDE local theme/accent with cloud version.
-
-        currentSettings = {
+        // 3. Merge Strategy: Defaults -> Local Persistence -> Cloud Overrides
+        const merged = {
             ...defaultGlobalSettings,
             ...defaultPersonalSettings,
-            ...global,
-            ...personal // This loads userName from local
+            ...personal // Load from localStorage (userName, accent, etc.)
         };
 
-        // CHECK CLOUD PROFILE FOR THIS USER
-        if (currentSettings.userName && currentSettings.userProfiles && currentSettings.userProfiles[currentSettings.userName]) {
-            const cloudProfile = currentSettings.userProfiles[currentSettings.userName];
-            console.log('🔄 Found Cloud Profile for', currentSettings.userName, cloudProfile);
-
-            // Priority: Cloud profile overrides ONLY if it has valid values
-            if (cloudProfile.theme) currentSettings.theme = cloudProfile.theme;
-            if (cloudProfile.accentColor) currentSettings.accentColor = cloudProfile.accentColor;
-            if (cloudProfile.grade) currentSettings.grade = cloudProfile.grade;
+        // Apply Global Grist settings if they exist
+        if (global) {
+            if (global.holidays) merged.holidays = global.holidays;
+            if (global.shortDays) merged.shortDays = global.shortDays;
+            if (global.years) merged.years = global.years;
+            if (global.grade) merged.grade = global.grade;
+            if (global.userProfiles) merged.userProfiles = global.userProfiles;
         }
 
-        // Safety: Ensure accent is never empty
-        if (!currentSettings.accentColor) currentSettings.accentColor = 'lime';
+        // Apply Cloud Profile overrides ONLY if we have a username
+        if (merged.userName && merged.userProfiles && merged.userProfiles[merged.userName]) {
+            const cloudProfile = merged.userProfiles[merged.userName];
+            console.log('🔄 Applying Cloud Profile for', merged.userName, cloudProfile);
+            if (cloudProfile.theme) merged.theme = cloudProfile.theme;
+            if (cloudProfile.accentColor) merged.accentColor = cloudProfile.accentColor;
+            if (cloudProfile.grade) merged.grade = cloudProfile.grade;
+        }
 
-        console.log('✅ Settings Loaded:', currentSettings);
+        // Safety check for accent color
+        if (!merged.accentColor) merged.accentColor = 'lime';
+
+        // Update global state
+        currentSettings = merged;
+
+        console.log('✅ Settings Finalized:', currentSettings);
 
         // IMMEDIATE ACCENT/THEME APPLY
         // This fixes the "default lime flash" and ensures runtime state matches storage
