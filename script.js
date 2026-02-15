@@ -152,12 +152,14 @@ function autoSaveSettings() {
     lastSaveTime = Date.now(); // Update lock timestamp
     lastSavedSettingsHash = JSON.stringify(globalSettingsToSave); // Store hash to check in onOptions
 
+    console.log('[CONTRIB_SYNC] Staging global settings to Grist. Contributions count:', globalSettingsToSave.contributions ? globalSettingsToSave.contributions.length : 0);
+
     grist.setOption('settings', globalSettingsToSave)
         .then(() => {
-            console.log('✅ Global settings staged in Grist');
+            console.log('✅ [CONTRIB_SYNC] Global settings staged in Grist');
         })
         .catch(err => {
-            console.error('❌ Failed to save settings to Grist:', err);
+            console.error('❌ [CONTRIB_SYNC] Failed to save settings to Grist:', err);
         });
 }
 window.autoSaveSettings = autoSaveSettings; // Expose to global scope for kpi.js
@@ -364,7 +366,10 @@ function initGrist() {
             if (global.userProfiles) merged.userProfiles = global.userProfiles;
             if (global.kpiData) merged.kpiData = global.kpiData;
             if (global.kpiTransitions) merged.kpiTransitions = global.kpiTransitions;
-            if (global.contributions) merged.contributions = global.contributions;
+            if (global.contributions) {
+                merged.contributions = global.contributions;
+                console.log('[CONTRIB_SYNC] Found contributions in unified settings:', global.contributions.length);
+            }
         }
 
         // Apply Cloud Profile overrides ONLY if we have a username
@@ -394,8 +399,9 @@ function initGrist() {
         renderSettingsUI();
         refreshDashboard();
 
-        // Load Contributions from Grist options
+        // Load Contributions from Grist options (LEGACY STANDALONE)
         if (options && options.contributions && window.logic && window.logic.loadContributionsFromOptions) {
+            console.warn('[CONTRIB_SYNC] Found LEGACY standalone contributions option. This may conflict with unified settings.');
             window.logic.loadContributionsFromOptions(options.contributions);
         }
 

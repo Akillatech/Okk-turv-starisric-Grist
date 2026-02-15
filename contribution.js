@@ -27,7 +27,7 @@ if (window.logic) {
 
     // Called by script.js when options are loaded
     window.logic.loadContributionsFromOptions = function (data) {
-        console.log("Loading Contributions from Options...", data);
+        console.log("[CONTRIB_SYNC] loadContributionsFromOptions triggered. Items:", data ? data.length : 0);
         if (Array.isArray(data)) {
             window.logic.contributions = data;
             // Sync to global settings if not already there
@@ -49,6 +49,7 @@ if (window.logic) {
         if (typeof renderLastContribution === 'function') renderLastContribution();
 
         try {
+            console.log('[CONTRIB_SYNC] Triggering autoSaveSettings for contribution save. Local array size:', window.logic.contributions.length);
             if (window.showSaveReminder) window.showSaveReminder(); // Trigger standard notification immediately
 
             // Call unified save helper
