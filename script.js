@@ -181,10 +181,13 @@ window.showSaveReminder = function () {
     }, 5000);
 }
 
+
 // --- User Auto-Detection ---
 async function tryAutoDetectUser() {
     try {
-        const token = await grist.docApi.getAccessToken();
+        console.log('Starting Auto-Correction...');
+        const token = await grist.docApi.getAccessToken({ readOnly: true }); // Explicitly request readOnly to safer defaults
+        console.log('Token received:', token ? 'YES' : 'NO');
         if (token) {
             let foundName = null;
 
@@ -252,6 +255,7 @@ async function tryAutoDetectUser() {
         console.warn('Auto-detect user failed:', e);
     }
 }
+
 
 // --- Grist Integration ---
 
