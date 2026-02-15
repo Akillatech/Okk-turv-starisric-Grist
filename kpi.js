@@ -185,8 +185,6 @@ function renderKpiView() {
 
     // Render Cards
     renderLastContribution();
-    // Render Cards
-    renderLastContribution();
     if (typeof renderTransitionsCard === 'function') renderTransitionsCard();
 
     // Updated Grade Card logic
@@ -1009,6 +1007,12 @@ function renderContributionCard() {
 function renderTransitionsCard() {
     var c = document.getElementById('kpiTransitionsBody');
     if (!c) return;
+
+    // Sync from global settings
+    if (window.currentSettings && window.currentSettings.kpiTransitions && window.currentSettings.kpiTransitions.length > 0) {
+        KPI_TRANSITIONS_DEMO = window.currentSettings.kpiTransitions;
+    }
+
     c.innerHTML = KPI_TRANSITIONS_DEMO.map(function (t) {
         return '<div class="kpi-transition-block"><div class="kpi-transition-header"><div>' +
             '<div class="kpi-transition-type">' + t.type + '</div>' +
