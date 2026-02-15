@@ -424,9 +424,17 @@
                     <!-- User Tab Content -->
                     <div id="tab-user" class="settings-tab-content">
                         <div class="form-group">
-                            <label><span class="icon icon-user"></span> Имя пользователя</label>
-                            <input type="text" id="userName" class="form-input" placeholder="Ваше имя"
-                                onchange="window.logic.saveUserName()">
+                            <label><span class="icon icon-user"></span> Ваше Имя</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="firstName" class="form-input" placeholder="Имя"
+                                    onchange="window.logic.saveUserName()">
+                                <input type="text" id="lastName" class="form-input" placeholder="Фамилия"
+                                    onchange="window.logic.saveUserName()">
+                            </div>
+                            <div class="setting-hint"
+                                style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                                Настройки темы привязываются к полному имени
+                            </div>
                         </div>
                     </div>
 

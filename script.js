@@ -100,7 +100,9 @@ function autoSaveSettings() {
     const personalSettings = {
         theme: currentSettings.theme,
         accentColor: currentSettings.accentColor,
-        userName: currentSettings.userName,
+        userName: currentSettings.userName, // Kept for back-compat
+        firstName: currentSettings.firstName,
+        lastName: currentSettings.lastName,
         dashboardCheckStatus: currentSettings.dashboardCheckStatus
     };
 
@@ -682,13 +684,22 @@ window.logic = {
     },
 
     saveUserName: function () {
-        const input = document.getElementById('userName');
-        const newName = input.value.trim();
+        const firstInput = document.getElementById('firstName');
+        const lastInput = document.getElementById('lastName');
+
+        const first = firstInput ? firstInput.value.trim() : '';
+        const last = lastInput ? lastInput.value.trim() : '';
+
+        const fullName = `${first} ${last}`.trim();
+
+        // Update updated fields
+        currentSettings.firstName = first;
+        currentSettings.lastName = last;
 
         // Check for existing cloud profile before saving
-        if (newName && currentSettings.userProfiles && currentSettings.userProfiles[newName]) {
-            const profile = currentSettings.userProfiles[newName];
-            console.log('🔄 Switching user to', newName, 'Found profile:', profile);
+        if (fullName && currentSettings.userProfiles && currentSettings.userProfiles[fullName]) {
+            const profile = currentSettings.userProfiles[fullName];
+            console.log('🔄 Switching user to', fullName, 'Found profile:', profile);
 
             if (profile.theme) currentSettings.theme = profile.theme;
             if (profile.accentColor) currentSettings.accentColor = profile.accentColor;
@@ -696,12 +707,12 @@ window.logic = {
             // Apply loaded theme immediately
             applyTheme(currentSettings.theme, currentSettings.accentColor);
 
-            // Update inputs
+            // Update inputs (theme select might need update if open)
             const themeSelect = document.getElementById('themeSelect');
             if (themeSelect) themeSelect.value = currentSettings.theme;
         }
 
-        currentSettings.userName = newName;
+        currentSettings.userName = fullName; // key for logic
         autoSaveSettings();
         updateGreeting();
     },
@@ -1119,7 +1130,7 @@ function updateGreeting() {
     const sheetName = document.getElementById('sheetName');
     if (!el) return;
 
-    const name = currentSettings.userName || '';
+    const name = currentSettings.firstName || currentSettings.userName || '';
     if (!name) {
         el.style.display = 'none';
         if (sheetName) sheetName.style.display = '';
@@ -1392,10 +1403,11 @@ function getPeriodDateRange(period) {
 
 function renderSettingsUI() {
     // Load username into input
-    const userNameInput = document.getElementById('userName');
-    if (userNameInput && currentSettings.userName) {
-        userNameInput.value = currentSettings.userName;
-    }
+    const firstNameInput = document.getElementById('firstName');
+    const lastNameInput = document.getElementById('lastName');
+
+    if (firstNameInput) firstNameInput.value = currentSettings.firstName || (currentSettings.userName ? currentSettings.userName.split(' ')[0] : '') || '';
+    if (lastNameInput) lastNameInput.value = currentSettings.lastName || (currentSettings.userName ? currentSettings.userName.split(' ').slice(1).join(' ') : '') || '';
 
     // Set Theme Select
     const themeSelect = document.getElementById('themeSelect');
