@@ -235,7 +235,8 @@ if (window.logic) {
                 c.code = code;
                 c.description = desc;
                 c.result = res;
-                window.logic.addHistoryEntry(c, 'Вклад отредактирован', 'You');
+                const author = (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User';
+                window.logic.addHistoryEntry(c, 'Вклад отредактирован', author);
 
                 window.logic.renderContributions(); // Refresh list immediately with new data
 
@@ -257,7 +258,7 @@ if (window.logic) {
                     {
                         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         text: 'Вклад создан',
-                        author: 'You'
+                        author: (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User'
                     }
                 ]
             };
@@ -326,7 +327,8 @@ if (window.logic) {
 
         c.status = newStatus;
         const statusMap = { 'pending': 'НА ПРОВЕРКЕ', 'approved': 'ОДОБРЕНО', 'rejected': 'ОТКЛОНЕНО' };
-        window.logic.addHistoryEntry(c, `Статус изменен с ${statusMap[oldStatus]} на ${statusMap[newStatus]}`, 'You');
+        const author = (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User';
+        window.logic.addHistoryEntry(c, `Статус изменен с ${statusMap[oldStatus]} на ${statusMap[newStatus]}`, author);
 
         // Update Custom Dropdown UI
         const statusText = document.getElementById('currentStatusText');
@@ -413,7 +415,7 @@ if (window.logic) {
 
         const c = window.logic.contributions.find(x => x.id == window.logic.currentContributionId);
         if (c) {
-            const author = 'You';
+            const author = (typeof currentSettings !== 'undefined' && currentSettings.userName) ? currentSettings.userName : 'User';
             c.comments.push({
                 author: author,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
