@@ -119,18 +119,17 @@
 .kpi-data-edit-btn {
     position: absolute;
     top: 13%;
-    /* Adjusted to sit nicely inside triangle above month */
     left: 50%;
     transform: translateX(-50%);
     width: 32px;
     height: 32px;
     border: none;
-    border-radius: 50%;
+    border-radius: 8px;
     background: var(--bg-color);
-    box-shadow: 4px 4px 8px var(--shadow-dark),
-        -4px -4px 8px var(--shadow-light);
+    box-shadow: 2px 2px 5px var(--shadow-dark),
+        -2px -2px 5px var(--shadow-light);
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--accent-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -141,8 +140,8 @@
 .kpi-data-edit-btn:hover {
     color: var(--accent-text);
     transform: translate(-50%, -2px);
-    box-shadow: 6px 6px 12px var(--shadow-dark),
-        -6px -6px 12px var(--shadow-light);
+    box-shadow: 4px 4px 10px var(--shadow-dark),
+        -4px -4px 10px var(--shadow-light);
 }
 
 .triangle-svg {
@@ -189,7 +188,7 @@
 }
 
 .kpi-open-all-btn {
-    background: none;
+    background: var(--bg-color);
     border: none;
     color: var(--accent-text);
     font-size: 11px;
@@ -197,13 +196,27 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: background 0.2s;
+    padding: 6px 14px;
+    border-radius: 10px;
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+        -3px -3px 6px var(--shadow-light);
+    transition: all 0.2s ease;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .kpi-open-all-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
+    box-shadow: 2px 2px 4px var(--shadow-dark),
+        -2px -2px 4px var(--shadow-light);
+    transform: translateY(-1px);
+    color: var(--accent-text);
+}
+
+.kpi-open-all-btn:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+    transform: translateY(0);
 }
 
 .kpi-cards-area {
@@ -317,7 +330,7 @@
     box-shadow: 2px 2px 5px var(--shadow-dark),
         -2px -2px 5px var(--shadow-light);
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--accent-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -367,8 +380,7 @@
     background: var(--block-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.15),
-        -6px -6px 12px rgba(255, 255, 255, 0.8);
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4);
     max-width: 380px;
     width: 90%;
 }
@@ -496,10 +508,10 @@
     border: none;
     border-radius: 8px;
     background: var(--bg-color);
-    box-shadow: 3px 3px 6px var(--shadow-dark),
-        -3px -3px 6px var(--shadow-light);
+    box-shadow: 2px 2px 5px var(--shadow-dark),
+        -2px -2px 5px var(--shadow-light);
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--accent-text);
     display: flex;
     align-items: center;
     justify-content: center;

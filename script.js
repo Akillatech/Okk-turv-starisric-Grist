@@ -249,7 +249,7 @@ window.showSaveReminder = function () {
         `;
         reminder.innerHTML = `
             <span>Не забудь сохранить настройки</span>
-            <span style="font-size: 20px;">⬆️</span>
+            <span class="icon icon-arrow icon-small" style="transform: rotate(90deg); color: white;"></span>
         `;
         document.body.appendChild(reminder);
 
@@ -808,8 +808,7 @@ window.logic = {
         updateGreeting();
     },
 
-    saveTheme: function () {
-        const theme = document.getElementById('themeSelect').value;
+    saveThemeCore: function (theme) {
         currentSettings.theme = theme;
         applyTheme(theme, currentSettings.accentColor);
         autoSaveSettings();
@@ -823,40 +822,24 @@ window.logic = {
         renderSettingsUI(); // Immediate feedback for button highlight
     },
 
-    addHoliday: function () {
-        const input = document.getElementById('newHolidayInput');
+    addSetting: function (type) {
+        const inputId = type === 'holidays' ? 'holidayInput' : 'shortDayInput';
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
         const val = input.value.trim();
         if (val) {
             const yearSelect = document.getElementById('calendarYear');
             const year = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
 
-            if (!currentSettings.holidays) currentSettings.holidays = {};
-            if (!currentSettings.holidays[year]) currentSettings.holidays[year] = [];
+            if (!currentSettings[type]) currentSettings[type] = {};
+            if (!currentSettings[type][year]) currentSettings[type][year] = [];
 
-            if (!currentSettings.holidays[year].includes(val)) {
-                currentSettings.holidays[year].push(val);
+            if (!currentSettings[type][year].includes(val)) {
+                currentSettings[type][year].push(val);
                 input.value = '';
                 renderSettingsUI();
-                autoSaveSettings(); // Auto-save
-            }
-        }
-    },
-
-    addShortDay: function () {
-        const input = document.getElementById('newShortDayInput');
-        const val = input.value.trim();
-        if (val) {
-            const yearSelect = document.getElementById('calendarYear');
-            const year = yearSelect ? yearSelect.value : new Date().getFullYear().toString();
-
-            if (!currentSettings.shortDays) currentSettings.shortDays = {};
-            if (!currentSettings.shortDays[year]) currentSettings.shortDays[year] = [];
-
-            if (!currentSettings.shortDays[year].includes(val)) {
-                currentSettings.shortDays[year].push(val);
-                input.value = '';
-                renderSettingsUI();
-                autoSaveSettings(); // Auto-save
+                autoSaveSettings();
             }
         }
     },
@@ -1504,11 +1487,13 @@ function renderSettingsUI() {
     if (firstNameInput) firstNameInput.value = currentSettings.firstName || (currentSettings.userName ? currentSettings.userName.split(' ')[0] : '') || '';
     if (lastNameInput) lastNameInput.value = currentSettings.lastName || (currentSettings.userName ? currentSettings.userName.split(' ').slice(1).join(' ') : '') || '';
 
-    // Set Theme Select
-    const themeSelect = document.getElementById('themeSelect');
-    if (themeSelect) {
-        themeSelect.value = currentSettings.theme || 'light';
-    }
+    // Theme Selection Cards
+    const theme = currentSettings.theme || 'light';
+    document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    const activeCard = document.getElementById(`theme-card-${theme}`);
+    if (activeCard) activeCard.classList.add('active');
 
     // Get currently selected year
     const yearSelect = document.getElementById('calendarYear');
@@ -1516,25 +1501,29 @@ function renderSettingsUI() {
 
     // Render holidays for selected year
     const holidayContainer = document.getElementById('holidaysList');
-    holidayContainer.innerHTML = '';
-    const yearHolidays = (currentSettings.holidays && currentSettings.holidays[selectedYear]) || [];
-    yearHolidays.forEach((h, index) => {
-        const chip = document.createElement('div');
-        chip.className = 'date-chip';
-        chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('holidays', ${index})">×</button>`;
-        holidayContainer.appendChild(chip);
-    });
+    if (holidayContainer) {
+        holidayContainer.innerHTML = '';
+        const yearHolidays = (currentSettings.holidays && currentSettings.holidays[selectedYear]) || [];
+        yearHolidays.forEach((h, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'date-chip';
+            chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('holidays', ${index})">×</button>`;
+            holidayContainer.appendChild(chip);
+        });
+    }
 
     // Render short days for selected year
     const shortContainer = document.getElementById('shortDaysList');
-    shortContainer.innerHTML = '';
-    const yearShortDays = (currentSettings.shortDays && currentSettings.shortDays[selectedYear]) || [];
-    yearShortDays.forEach((h, index) => {
-        const chip = document.createElement('div');
-        chip.className = 'date-chip';
-        chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('shortDays', ${index})">×</button>`;
-        shortContainer.appendChild(chip);
-    });
+    if (shortContainer) {
+        shortContainer.innerHTML = '';
+        const yearShortDays = (currentSettings.shortDays && currentSettings.shortDays[selectedYear]) || [];
+        yearShortDays.forEach((h, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'date-chip';
+            chip.innerHTML = `${h} <button class="remove-date" onclick="removeSetting('shortDays', ${index})">×</button>`;
+            shortContainer.appendChild(chip);
+        });
+    }
 
     // Render year list in select
     if (yearSelect) {
@@ -1556,18 +1545,12 @@ function renderSettingsUI() {
 
     // Highlight Active Accent Color
     const accentValue = currentSettings.accentColor || 'lime';
-    document.querySelectorAll('.accent-btn').forEach(btn => {
-        // extract color from onclick call or style if possible, 
-        // but easier to check the onclick argument
+    document.querySelectorAll('.accent-btn-circle').forEach(btn => {
         const onClick = btn.getAttribute('onclick') || '';
         if (onClick.includes(`'${accentValue}'`) || onClick.includes(`"${accentValue}"`)) {
             btn.classList.add('active');
-            btn.style.boxShadow = '0 0 0 3px var(--accent-color), 0 0 10px rgba(0,0,0,0.2)';
-            btn.style.borderColor = '#fff';
         } else {
             btn.classList.remove('active');
-            btn.style.boxShadow = 'none';
-            btn.style.borderColor = '#ddd';
         }
     });
 }

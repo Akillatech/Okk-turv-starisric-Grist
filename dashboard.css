@@ -280,6 +280,8 @@
 
 .wave-path {
     animation: waveSlide 3s ease-in-out infinite;
+    fill: url(#liquidGradient);
+    /* Apply accent color gradient */
 }
 
 .wave-path-2 {
@@ -316,6 +318,11 @@
 
 .splash-5 {
     animation: splash5 1.7s ease-out infinite 0.4s;
+}
+
+.splash {
+    fill: var(--accent-color);
+    /* Apply accent color to splashes */
 }
 
 @keyframes splash1 {
@@ -589,6 +596,25 @@
     line-height: 1.2;
 }
 
+.workload-hours-block {
+    margin: 15px auto 0;
+    background: var(--bg-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    box-shadow: var(--neu-pressed-small);
+}
+
+.workload-hours-block .icon {
+    font-size: 14px;
+}
+
 .tile-label {
     font-size: 9px;
     font-weight: 700;
@@ -681,10 +707,18 @@
 .weekly-table tr {
     background: #fff;
     /* Explicit white for card effect */
-    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    box-shadow: 6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
     overflow: hidden;
     margin-bottom: 10px;
     /* Ensure spacing between rows */
+}
+
+/* Remove glow in light mode as requested */
+[data-theme="light"] .weekly-table tr {
+    box-shadow: none !important;
+    border: 1px solid #eee;
+    /* Add light border to keep definition */
 }
 
 .weekly-table thead tr {

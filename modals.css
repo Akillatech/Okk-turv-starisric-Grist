@@ -23,17 +23,17 @@
 
 .modal {
     background: var(--bg-color);
-    border-radius: 24px;
+    border-radius: 20px;
     width: 90%;
     max-width: 600px;
     display: flex;
     flex-direction: column;
     max-height: 90vh;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     padding: 0;
-    border: 5px solid white;
-    animation: modalSlideUp 0.3s ease;
+    border: 1px solid var(--border-color);
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalSlideUp {
@@ -50,8 +50,8 @@
 
 /* Modal Header */
 .modal-header {
-    padding: 24px 32px 10px 32px;
-    background: white;
+    padding: 20px 24px 8px 24px;
+    background: var(--bg-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -72,28 +72,26 @@
 .header-icon-container {
     width: 40px;
     height: 40px;
-    background: white;
-    border-radius: 12px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
 }
 
 .close-modal,
 .modal-close {
-    background: white;
+    background: transparent;
     border: none;
     font-size: 18px;
     cursor: pointer;
-    color: #718096;
+    color: var(--accent-text);
     width: 40px;
     height: 40px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
     transition: all 0.2s;
 }
 
@@ -104,53 +102,52 @@
 }
 
 .modal-body {
-    padding: 26px;
+    padding: 20px 24px;
     overflow-y: auto;
-    background: white;
+    background: var(--bg-color);
     flex: 1;
 }
 
 /* Settings Tabs */
 .settings-tabs-container {
-    padding: 4px;
-    background: white;
-    margin-bottom: 24px;
+    padding: 0;
+    margin-bottom: 20px;
 }
 
 .settings-tabs {
     display: flex;
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
-    padding: 4px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 3px;
+    box-shadow: var(--neu-inset-small);
 }
 
 .tab-btn,
 .settings-tab {
     flex: 1;
-    padding: 12px;
+    padding: 8px 12px;
     border: none;
     background: transparent;
     font-weight: 700;
     color: var(--text-secondary);
-    border-radius: 12px;
+    border-radius: 9px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    transition: all 0.2s;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .tab-btn.active,
 .settings-tab.active {
     background: var(--bg-color);
     color: var(--accent-text);
-    box-shadow: var(--neu-raised-small);
+    box-shadow: var(--neu-raised-extra-small);
 }
 
 /* Section Blocks */
@@ -170,17 +167,17 @@
 
 /* Forms & Inputs */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #2D3748;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
 }
 
 .form-input {
@@ -356,6 +353,10 @@
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2px;
 }
 
 .date-chip {
@@ -514,31 +515,133 @@
     cursor: pointer;
 }
 
-/* Date Pills / Items */
-.settings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 4px;
-}
+/* Date Pills / Items - Handled by consolidated .settings-list above */
 
 .settings-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: #f7fafc;
-    border-radius: 8px;
-    border: 1px solid #edf2f7;
+    padding: 10px 14px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--neu-raised-extra-small);
 }
 
-.btn-remove {
-    background: none;
-    border: none;
-    color: #e53e3e;
+.btn-remove:hover {
+    color: #c53030;
+    transform: scale(1.1);
+}
+
+/* =============================================
+   COMPACT CALENDAR CONTROLS
+   ============================================= */
+.calendar-top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    background: var(--bg-color);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 16px;
+}
+
+.year-control {
+    flex: 1;
+}
+
+.small-label {
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px !important;
+}
+
+.import-export-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 12px;
     cursor: pointer;
-    font-size: 18px;
-    padding: 0 4px;
+    transition: all 0.2s;
+    box-shadow: var(--neu-raised-extra-small);
+}
+
+.btn-icon-label .icon {
+    width: 24px;
+    height: 24px;
+    box-shadow: none;
+    background: transparent;
+}
+
+.btn-icon-label span:not(.icon) {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.btn-icon-label:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+}
+
+/* Grid Layout for Sections */
+.settings-grid-two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.settings-section label {
+    font-size: 13px !important;
+    margin-bottom: 12px !important;
+}
+
+.compact-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.form-input.narrow {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.btn-plus {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(var(--accent-rgb, 196, 217, 22), 0.3);
+    transition: all 0.2s;
+}
+
+.btn-plus:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(var(--accent-rgb, 196, 217, 22), 0.4);
+}
+
+/* Scrollable lists density */
+.settings-list.compact-list {
+    max-height: 180px;
 }

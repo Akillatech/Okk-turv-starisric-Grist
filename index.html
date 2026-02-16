@@ -64,7 +64,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        <label><span class="icon icon-calendar icon-small"></span>
                             Квартал:</label>
                         <select id="kpiQuarterSelect" onchange="kpiQuarterChanged()">
                             <option value="1">1 Квартал</option>
@@ -227,8 +227,8 @@
                                             <circle cx="100" cy="100" r="90" />
                                         </clipPath>
                                         <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#E3FB1E" />
-                                            <stop offset="100%" style="stop-color:#9ab012" />
+                                            <stop offset="0%" style="stop-color:var(--accent-color)" />
+                                            <stop offset="100%" style="stop-color:var(--accent-color)" />
                                         </linearGradient>
                                     </defs>
                                     <g clip-path="url(#circleClip)">
@@ -258,7 +258,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="hours-text" id="workloadText">0 ч из 0 ч</div>
+                        <div class="workload-hours-block">
+                            <span class="icon icon-time"></span>
+                            <span id="workloadText">0 ч из 0 ч</span>
+                        </div>
                     </div>
 
                     <!-- Today Stats -->
@@ -267,7 +270,7 @@
                             <h3><span class="icon icon-calendar"></span> Сегодня</h3>
                             <button class="return-today-btn hidden" id="returnTodayBtn"
                                 onclick="window.logic.returnToToday()">
-                                <span class="icon icon-arrow">←</span> Вернуться
+                                <span class="icon icon-arrow icon-small"></span> Вернуться
                             </button>
                         </div>
                         <div class="today-date-picker">
@@ -433,49 +436,58 @@
 
                     <!-- Calendar Tab Content -->
                     <div id="tab-calendar" class="settings-tab-content active">
-                        <!-- Year Selector Row -->
+                        <!-- Compact Top Row -->
                         <div class="form-group">
-                            <label><span class="icon icon-calendar"></span> Год:</label>
-                            <div class="year-row">
-                                <select id="calendarYear" class="form-input year-select"
-                                    onchange="renderSettingsUI()"></select>
-                                <button class="btn-white" onclick="window.logic.addYear()">+ Год</button>
-                                <button class="btn-red" onclick="window.logic.removeYear()">- Удалить</button>
+                            <div class="calendar-top-controls">
+                                <div class="year-control">
+                                    <label class="small-label">Выберите год</label>
+                                    <div class="flex-row gap-8">
+                                        <select id="calendarYear" class="form-input"
+                                            onchange="window.logic.switchYear()">
+                                            <!-- Will be populated by JS -->
+                                        </select>
+                                        <button class="action-btn" onclick="window.logic.addYear()"
+                                            title="Добавить год">+</button>
+                                        <button class="action-btn delete-btn" onclick="window.logic.removeYear()"
+                                            title="Удалить этот год">×</button>
+                                    </div>
+                                </div>
+                                <div class="import-export-actions">
+                                    <button class="btn-icon-label" onclick="window.logic.exportSettings()"
+                                        title="Экспортировать JSON">
+                                        <span class="icon icon-box icon-small"></span>
+                                        <span>Экспорт</span>
+                                    </button>
+                                    <button class="btn-icon-label" onclick="window.logic.importSettings()"
+                                        title="Импортировать JSON">
+                                        <span class="icon icon-box icon-small"></span>
+                                        <span>Импорт</span>
+                                    </button>
+                                    <input type="file" id="importFile" class="hidden"
+                                        onchange="window.logic.processImport(this)">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Holidays Section -->
-                        <div class="section-block">
-                            <h4><span class="icon icon-star"></span> Праздничные дни (выходные):</h4>
-                            <div id="holidaysList" class="tags-list"></div>
-                            <div class="add-date-row">
-                                <input type="text" id="newHolidayInput" class="form-input dark-input"
-                                    placeholder="ДД.ММ">
-                                <button class="btn-lime" onclick="window.logic.addHoliday()">+ Добавить</button>
+                        <div class="settings-grid-two-cols">
+                            <!-- Holidays Section -->
+                            <div class="settings-section">
+                                <label><span class="icon icon-star icon-small"></span> Праздники</label>
+                                <div class="compact-add-row">
+                                    <input type="text" id="holidayInput" class="form-input narrow" placeholder="дд.мм">
+                                    <button class="btn-plus" onclick="window.logic.addSetting('holidays')">+</button>
+                                </div>
+                                <div id="holidaysList" class="settings-list compact-list"></div>
                             </div>
-                        </div>
 
-                        <!-- Short Days Section -->
-                        <div class="section-block">
-                            <h4><span class="icon icon-clock"></span> Сокращенные дни (7 часов):</h4>
-                            <div id="shortDaysList" class="tags-list"></div>
-                            <div class="add-date-row">
-                                <input type="text" id="newShortDayInput" class="form-input dark-input"
-                                    placeholder="ДД.ММ">
-                                <button class="btn-lime" onclick="window.logic.addShortDay()">+ Добавить</button>
-                            </div>
-                        </div>
-
-                        <!-- Import/Export Section -->
-                        <div class="section-block">
-                            <h4><span class="icon icon-box"></span> Импорт / Экспорт настроек:</h4>
-                            <div class="action-buttons-row">
-                                <button class="btn-lime-block" onclick="window.logic.exportSettings()">↓ Экспорт
-                                    JSON</button>
-                                <button class="btn-lime-block" onclick="window.logic.importSettings()">↑ Импорт
-                                    JSON</button>
-                                <input type="file" id="importFile" class="hidden"
-                                    onchange="window.logic.processImport(this)">
+                            <!-- Short Days Section -->
+                            <div class="settings-section">
+                                <label><span class="icon icon-clock icon-small"></span> Сокращенные</label>
+                                <div class="compact-add-row">
+                                    <input type="text" id="shortDayInput" class="form-input narrow" placeholder="дд.мм">
+                                    <button class="btn-plus" onclick="window.logic.addSetting('shortDays')">+</button>
+                                </div>
+                                <div id="shortDaysList" class="settings-list compact-list"></div>
                             </div>
                         </div>
                     </div>
@@ -484,21 +496,59 @@
                     <div id="tab-theme" class="settings-tab-content">
                         <div class="form-group">
                             <label><span class="icon icon-star"></span> Режим интерфейса</label>
-                            <select id="themeSelect" class="form-input" onchange="window.logic.saveTheme()">
-                                <option value="light">Светлая (Light)</option>
-                                <option value="dark">Темная (Dark)</option>
-                            </select>
+                            <div class="theme-selection-container">
+                                <!-- Light Theme Card -->
+                                <div class="theme-card" id="theme-card-light"
+                                    onclick="window.logic.saveThemeCore('light')">
+                                    <div class="theme-preview light-preview">
+                                        <div class="preview-header"></div>
+                                        <div class="preview-body">
+                                            <div class="preview-sidebar"></div>
+                                            <div class="preview-content">
+                                                <div class="preview-line"></div>
+                                                <div class="preview-line short"></div>
+                                                <div class="preview-card"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="theme-info">
+                                        <span class="theme-name">Светлая</span>
+                                        <div class="theme-check"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Dark Theme Card -->
+                                <div class="theme-card" id="theme-card-dark"
+                                    onclick="window.logic.saveThemeCore('dark')">
+                                    <div class="theme-preview dark-preview">
+                                        <div class="preview-header"></div>
+                                        <div class="preview-body">
+                                            <div class="preview-sidebar"></div>
+                                            <div class="preview-content">
+                                                <div class="preview-line"></div>
+                                                <div class="preview-line short"></div>
+                                                <div class="preview-card"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="theme-info">
+                                        <span class="theme-name">Темная</span>
+                                        <div class="theme-check"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label><span class="icon icon-star"></span> Акцентный цвет</label>
-                            <div class="accent-selector flex-row flex-wrap">
-                                <button class="accent-btn pointer" onclick="window.logic.saveAccent('lime')"></button>
-                                <button class="accent-btn pointer accent-blue"
-                                    onclick="window.logic.saveAccent('blue')"></button>
-                                <button class="accent-btn pointer accent-purple"
-                                    onclick="window.logic.saveAccent('purple')"></button>
-                                <button class="accent-btn pointer accent-orange"
-                                    onclick="window.logic.saveAccent('orange')"></button>
+                            <div class="accent-selector-large">
+                                <button class="accent-btn-circle accent-lime" onclick="window.logic.saveAccent('lime')"
+                                    title="Лайм"></button>
+                                <button class="accent-btn-circle accent-blue" onclick="window.logic.saveAccent('blue')"
+                                    title="Синий"></button>
+                                <button class="accent-btn-circle accent-purple"
+                                    onclick="window.logic.saveAccent('purple')" title="Фиолетовый"></button>
+                                <button class="accent-btn-circle accent-orange"
+                                    onclick="window.logic.saveAccent('orange')" title="Оранжевый"></button>
                             </div>
                         </div>
                     </div>

@@ -17,7 +17,11 @@ if (window.logic) {
         if (!toast) return;
 
         toast.querySelector('.message').textContent = message;
-        toast.querySelector('.icon').textContent = isError ? '⚠️' : '💾';
+        const iconEl = toast.querySelector('.icon');
+        iconEl.className = 'icon icon-small ' + (isError ? 'icon-fire' : 'icon-check');
+        iconEl.style.background = 'none';
+        iconEl.style.boxShadow = 'none';
+        iconEl.style.color = 'currentColor';
 
         toast.className = 'notification-toast show';
         if (isError) toast.classList.add('error');
@@ -126,9 +130,7 @@ if (window.logic) {
                 lastCommentHtml = `
                     <div class="card-last-comment">
                         <div class="last-comment-meta">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="opacity:0.7;">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
+                            <span class="icon icon-user icon-small" style="width:12px; height:12px; margin-right:4px;"></span>
                             <span class="last-comment-author">${last.author}</span>
                             <span style="font-size:10px; opacity:0.5; margin-left:auto;">${last.date.split(' ')[0]}</span>
                         </div>

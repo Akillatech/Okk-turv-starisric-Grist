@@ -77,7 +77,8 @@
     overflow: hidden;
     display: flex;
     align-items: stretch;
-    min-height: 140px;
+    height: 300px;
+    /* Increased to prevent footer clipping */
     position: relative;
     padding: 0;
 }
@@ -101,10 +102,18 @@
 
 .card-main {
     flex: 1;
-    padding: 20px 24px;
+    padding: 20px 24px 16px 24px;
+    /* Added bottom padding */
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
 }
 
 .card-code {
@@ -114,24 +123,39 @@
     text-transform: uppercase;
 }
 
+.card-date {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
 .card-description {
     font-size: 14px;
     color: var(--text-primary);
     line-height: 1.5;
-    max-height: 85px;
+    max-height: 4.5em;
+    /* 3 lines * 1.5 */
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     opacity: 0.9;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* New: Last Comment on Card */
 .card-last-comment {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: auto;
+    /* Push towards bottom but stay above footer */
+    padding: 10px 12px;
+    background: var(--badge-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 8px;
+    /* Slightly more space above footer */
 }
 
 .last-comment-meta {
@@ -151,6 +175,16 @@
     font-size: 12px;
     color: var(--text-secondary);
     line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: pre-wrap;
+    /* Limit height */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    max-height: 4.2em;
+    /* 3 lines * 1.4 line-height */
 }
 
 /* Card Footer & Badges */
@@ -158,8 +192,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: auto;
     padding-top: 12px;
+    border-top: 1px solid var(--border-color);
 }
 
 .card-period-badge {
@@ -431,6 +465,15 @@
     border: none;
 }
 
+.comment-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
 .comment-item.mine {
     background: #f0f7ff;
     /* Slight blue tint for own comments */
@@ -515,21 +558,28 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #007bff;
-    /* Blue button */
+    background: var(--accent-color);
     color: white;
+    /* Default to white icon on solid bg */
     font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     margin-right: 4px;
-    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+    border: none;
+    box-shadow: 4px 4px 8px var(--shadow-dark),
+        -2px -2px 6px var(--shadow-light);
+    transition: all 0.2s ease;
 }
 
 .btn-send-comment:hover {
-    background: #0056b3;
+    filter: brightness(1.05);
     transform: scale(1.05);
+}
+
+.btn-send-comment:active {
+    transform: scale(0.95);
 }
 
 /* Header Badges Container */
