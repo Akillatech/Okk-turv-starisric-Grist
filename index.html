@@ -6,8 +6,13 @@
     <title>Grist Statistics Widget</title>
     <!-- Grist Plugin API -->
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-    <link rel="stylesheet" href="style.css?v=11">
-    <link rel="stylesheet" href="theme.css?v=11">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modals.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="calendar.css">
+    <link rel="stylesheet" href="kpi.css">
+    <link rel="stylesheet" href="contributions.css">
+    <link rel="stylesheet" href="theme.css">
 </head>
 
 <body data-theme="light">
@@ -15,16 +20,16 @@
         <!-- New Main Header -->
         <div class="main-header">
             <div class="header-filters">
-                <div id="mainSelectors" style="display: flex; align-items: center; gap: 16px;">
+                <div id="mainSelectors" class="flex-row">
                     <div class="filter-group">
-                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        <label><span class="icon icon-calendar icon-small"></span>
                             Год:</label>
                         <select id="yearSelect" onchange="window.logic.applyCustomPeriod()">
                             <option value="all">Весь период</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        <label><span class="icon icon-calendar icon-small"></span>
                             Месяц:</label>
                         <select id="monthSelect" onchange="window.logic.applyCustomPeriod()">
                             <option value="all">Все месяцы</option>
@@ -42,18 +47,17 @@
                             <option value="12">Декабрь</option>
                         </select>
                     </div>
-                    <div class="period-selector" style="margin-top: 0; padding-top: 0; border-top: none;">
-                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                    <div class="period-selector no-border-top">
+                        <label><span class="icon icon-calendar icon-small"></span>
                             Диапазон:</label>
-                        <span id="dateRange"
-                            style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">-</span>
+                        <span id="dateRange" class="secondary-tiny">-</span>
                     </div>
                 </div>
 
                 <!-- KPI Selectors (Hidden by default) -->
-                <div id="kpiSelectors" style="display: none; align-items: center; gap: 16px;">
+                <div id="kpiSelectors" class="flex-row hidden">
                     <div class="filter-group">
-                        <label><span class="icon icon-calendar" style="width:20px;height:20px;margin-right:4px;"></span>
+                        <label><span class="icon icon-calendar icon-small"></span>
                             KPI Год:</label>
                         <select id="kpiYearSelect" onchange="kpiYearChanged()">
                             <!-- Populated dynamically -->
@@ -71,7 +75,7 @@
                     </div>
                 </div>
                 <!-- Contributions Controls (Hidden by default) -->
-                <div id="contributionsControls" style="display: none; align-items: center; gap: 16px; flex: 1;">
+                <div id="contributionsControls" class="flex-row flex-1 hidden">
                     <button class="nav-btn-back-header" onclick="window.logic.showKpi()">НАЗАД</button>
 
                     <div class="header-stats-bar">
@@ -82,7 +86,7 @@
                                 id="contribRejectedHeader">0</strong></span>
                     </div>
 
-                    <div style="flex:1"></div>
+                    <div class="flex-1"></div>
                     <button class="btn-add-contribution-header"
                         onclick="window.logic.openContributionCreateModal()">ДОБАВИТЬ ВКЛАД</button>
                 </div>
@@ -101,7 +105,7 @@
         </div>
 
         <!-- Hidden info for compatibility -->
-        <div style="display:none;">
+        <div class="hidden">
             <span id="totalRows">-</span>
             <span id="filteredRows">-</span>
             <span id="totalColumns">-</span>
@@ -113,13 +117,13 @@
             <p>Загрузка статистики...</p>
         </div>
 
-        <div id="content" style="display: none;">
+        <div id="content" class="hidden">
             <!-- Two Column Layout -->
             <div class="main-content">
                 <!-- Left Column - Tables -->
                 <div class="left-column">
                     <!-- Weekly Statistics -->
-                    <div id="weeklyStatsSection" class="data-block" style="display: none; overflow-x: auto;">
+                    <div id="weeklyStatsSection" class="data-block hidden scroll-x">
                         <h3><span class="icon icon-calendar"></span> Статистика по неделям</h3>
                         <table class="weekly-table">
                             <thead>
@@ -138,46 +142,40 @@
                         </table>
                     </div>
 
-                    <div id="projectSection" class="projects-section" style="display: none; overflow-x: auto;">
+                    <div id="projectSection" class="projects-section hidden scroll-x">
                         <h2>
                             <span class="icon icon-doc"></span>
-                            <span>Проект</span>
+                            Проект
                         </h2>
                         <table class="projects-table">
                             <thead>
                                 <tr>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'name')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'name')" class="pointer">
                                         Название <span id="sort-Проект-name">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'pureHours')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'pureHours')" class="pointer">
                                         Часы проверки <span id="sort-Проект-pureHours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'tasks')" style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'tasks')" class="pointer">
                                         Проверено <span id="sort-Проект-tasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMainTasks')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMainTasks')" class="pointer">
                                         Метрики проверки <span id="sort-Проект-avgMainTasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'markupHours')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupHours')" class="pointer">
                                         Часы разметки <span id="sort-Проект-markupHours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'markupTasks')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'markupTasks')" class="pointer">
                                         Размечено <span id="sort-Проект-markupTasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMarkupTasks')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'avgMarkupTasks')" class="pointer">
                                         Метрики разметки <span id="sort-Проект-avgMarkupTasks">↕️</span>
                                     </th>
                                     <th onclick="window.logic.sortWorkType('Проект', 'additionalHours')"
-                                        style="cursor: pointer;">
+                                        class="pointer">
                                         Иные часы работы <span id="sort-Проект-additionalHours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Проект', 'totalHours')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Проект', 'totalHours')" class="pointer">
                                         Всего часов <span id="sort-Проект-totalHours">↕️</span>
                                     </th>
                                 </tr>
@@ -186,7 +184,7 @@
                         </table>
                     </div>
 
-                    <div id="overtimeSection" class="projects-section" style="display: none; overflow-x: auto;">
+                    <div id="overtimeSection" class="projects-section hidden scroll-x">
                         <h2>
                             <span class="icon icon-fire"></span>
                             <span>Переработка</span>
@@ -194,24 +192,19 @@
                         <table class="projects-table">
                             <thead>
                                 <tr>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'name')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'name')" class="pointer">
                                         Название <span id="sort-Переработка-name">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'tasks')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'tasks')" class="pointer">
                                         Всего задач <span id="sort-Переработка-tasks">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'hours')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'hours')" class="pointer">
                                         Часы работы <span id="sort-Переработка-hours">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'entries')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'entries')" class="pointer">
                                         Записей <span id="sort-Переработка-entries">↕️</span>
                                     </th>
-                                    <th onclick="window.logic.sortWorkType('Переработка', 'avgHours')"
-                                        style="cursor: pointer;">
+                                    <th onclick="window.logic.sortWorkType('Переработка', 'avgHours')" class="pointer">
                                         Ср. часов/задача <span id="sort-Переработка-avgHours">↕️</span>
                                     </th>
                                 </tr>
@@ -240,6 +233,9 @@
                                     </defs>
                                     <g clip-path="url(#circleClip)">
                                         <g id="liquidGroup" transform="translate(0,190)">
+                                            <!-- Track Circle (Added) -->
+                                            <circle cx="100" cy="100" r="90" fill="none" stroke="#e0e0e0"
+                                                stroke-width="2" opacity="0.5" />
                                             <!-- Волна 1 (основная) - увеличенная амплитуда -->
                                             <path id="wave1" class="wave-path"
                                                 d="M-40,15 Q-10,-8 20,15 Q50,38 80,15 Q110,-8 140,15 Q170,38 200,15 Q230,-8 260,15 L260,200 L-40,200 Z" />
@@ -269,8 +265,8 @@
                     <div class="today-sidebar">
                         <div class="today-header">
                             <h3><span class="icon icon-calendar"></span> Сегодня</h3>
-                            <button class="return-today-btn" id="returnTodayBtn" onclick="window.logic.returnToToday()"
-                                style="display: none;">
+                            <button class="return-today-btn hidden" id="returnTodayBtn"
+                                onclick="window.logic.returnToToday()">
                                 <span class="icon icon-arrow">←</span> Вернуться
                             </button>
                         </div>
@@ -329,7 +325,7 @@
         </div><!-- End content -->
 
         <!-- Calendar View -->
-        <div id="calendarView" class="calendar-view" style="display: none;">
+        <div id="calendarView" class="calendar-view hidden">
             <div class="calendar-controls">
                 <button class="calendar-nav-btn" onclick="window.logic.prevMonth()">◀</button>
                 <div class="calendar-title-selects">
@@ -364,8 +360,8 @@
                 <div class="calendar-header-cell">Ср</div>
                 <div class="calendar-header-cell">Чт</div>
                 <div class="calendar-header-cell">Пт</div>
-                <div class="calendar-header-cell" style="color: #e57373;">Сб</div>
-                <div class="calendar-header-cell" style="color: #e57373;">Вс</div>
+                <div class="calendar-header-cell weekend-header">Сб</div>
+                <div class="calendar-header-cell weekend-header">Вс</div>
                 <!-- Days will be populated via JS -->
             </div>
 
@@ -386,11 +382,11 @@
         </div>
 
         <!-- KPI View (loaded dynamically from kpi.html) -->
-        <div id="kpiView" style="display: none;"></div>
+        <div id="kpiView" class="hidden"></div>
 
         <!-- Settings Modal (Restored & Refined) -->
         <div id="settingsModal" class="modal-overlay">
-            <div class="modal neu-raised" style="max-width: 600px;">
+            <div class="modal neu-raised modal-narrow">
                 <div class="modal-header">
                     <h3>
                         <div class="header-icon-container">
@@ -423,14 +419,13 @@
                     <div id="tab-user" class="settings-tab-content">
                         <div class="form-group">
                             <label><span class="icon icon-user"></span> Ваше Имя</label>
-                            <div style="display: flex; gap: 10px;">
+                            <div class="flex-row">
                                 <input type="text" id="firstName" class="form-input" placeholder="Имя"
                                     onchange="window.logic.saveUserName()">
                                 <input type="text" id="lastName" class="form-input" placeholder="Фамилия"
                                     onchange="window.logic.saveUserName()">
                             </div>
-                            <div class="setting-hint"
-                                style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                            <div class="setting-hint secondary-tiny mt-5">
                                 Настройки темы привязываются к полному имени
                             </div>
                         </div>
@@ -479,7 +474,7 @@
                                     JSON</button>
                                 <button class="btn-lime-block" onclick="window.logic.importSettings()">↑ Импорт
                                     JSON</button>
-                                <input type="file" id="importFile" style="display:none"
+                                <input type="file" id="importFile" class="hidden"
                                     onchange="window.logic.processImport(this)">
                             </div>
                         </div>
@@ -496,15 +491,14 @@
                         </div>
                         <div class="form-group">
                             <label><span class="icon icon-star"></span> Акцентный цвет</label>
-                            <div class="accent-selector" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button class="accent-btn" onclick="window.logic.saveAccent('lime')"
-                                    style="background: #E3FB1E; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer;"></button>
-                                <button class="accent-btn" onclick="window.logic.saveAccent('blue')"
-                                    style="background: #0984e3; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer;"></button>
-                                <button class="accent-btn" onclick="window.logic.saveAccent('purple')"
-                                    style="background: #6c5ce7; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer;"></button>
-                                <button class="accent-btn" onclick="window.logic.saveAccent('orange')"
-                                    style="background: #e17055; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer;"></button>
+                            <div class="accent-selector flex-row flex-wrap">
+                                <button class="accent-btn pointer" onclick="window.logic.saveAccent('lime')"></button>
+                                <button class="accent-btn pointer accent-blue"
+                                    onclick="window.logic.saveAccent('blue')"></button>
+                                <button class="accent-btn pointer accent-purple"
+                                    onclick="window.logic.saveAccent('purple')"></button>
+                                <button class="accent-btn pointer accent-orange"
+                                    onclick="window.logic.saveAccent('orange')"></button>
                             </div>
                         </div>
                     </div>
@@ -520,7 +514,7 @@
 
     <!-- Day Modal -->
     <div id="dayModal" class="modal-overlay">
-        <div class="modal neumorphic-modal" style="max-width: 1100px; max-height: 80vh; overflow-y: auto;">
+        <div class="modal neumorphic-modal modal-xl max-h-80 scroll-y">
             <div class="modal-header">
                 <h3 id="dayModalTitle">Задачи за дату</h3>
                 <button class="icon-btn close-modal"
@@ -571,7 +565,7 @@
 
     <!-- Project Modal -->
     <div id="projectModal" class="modal-overlay">
-        <div class="modal neumorphic-modal" style="max-width: 1200px; max-height: 85vh; overflow-y: auto;">
+        <div class="modal neumorphic-modal modal-xxl max-h-85 scroll-y">
             <div class="modal-header">
                 <h3 id="projectModalTitle">Детали проекта</h3>
                 <button class="icon-btn close-modal"
@@ -579,22 +573,18 @@
             </div>
             <div class="modal-body">
                 <!-- Filters Row -->
-                <div class="modal-filters" style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-                    <div style="flex: 1;">
-                        <label
-                            style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 5px;">Год</label>
-                        <select id="projectYearSelect" class="neumorphic-select"
-                            onchange="window.logic.refreshProjectModal()"
-                            style="width: 100%; padding: 10px; border-radius: 12px; border: none; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); font-weight: 600;">
+                <div class="modal-filters flex-row mb-20">
+                    <div class="flex-1">
+                        <label class="label-tiny-bold uppercase mb-5">Год</label>
+                        <select id="projectYearSelect" class="neumorphic-select input-full neu-inset-field"
+                            onchange="window.logic.refreshProjectModal()">
                             <!-- Populated by JS -->
                         </select>
                     </div>
-                    <div style="flex: 1;">
-                        <label
-                            style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 5px;">Месяц</label>
-                        <select id="projectMonthSelect" class="neumorphic-select"
-                            onchange="window.logic.refreshProjectModal()"
-                            style="width: 100%; padding: 10px; border-radius: 12px; border: none; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); font-weight: 600;">
+                    <div class="flex-1">
+                        <label class="label-tiny-bold uppercase mb-5">Месяц</label>
+                        <select id="projectMonthSelect" class="neumorphic-select input-full neu-inset-field"
+                            onchange="window.logic.refreshProjectModal()">
                             <option value="0">Все месяцы</option>
                             <option value="1">Январь</option>
                             <option value="2">Февраль</option>
@@ -613,15 +603,15 @@
                 </div>
 
                 <!-- Loading State -->
-                <div id="projectLoading" style="display: none; text-align: center; padding: 40px;">
-                    <div class="spinner" style="margin: 0 auto;"></div>
-                    <p style="margin-top: 15px; color: var(--text-secondary);">Загрузка данных...</p>
+                <div id="projectLoading" class="hidden text-center p-40">
+                    <div class="spinner m-0-auto"></div>
+                    <p class="secondary-text mt-15">Загрузка данных...</p>
                 </div>
 
                 <!-- Content -->
-                <div id="projectContent" style="display: block;">
+                <div id="projectContent">
                     <!-- Summary Stats -->
-                    <div class="day-stats-row" style="margin-bottom: 25px;">
+                    <div class="day-stats-row mb-25">
                         <div class="stat-card-small">
                             <div class="stat-value" id="projectTotalHours">0</div>
                             <div class="stat-label">Всего часов</div>
@@ -664,7 +654,7 @@
     </div>
 
     <!-- Contributions View -->
-    <div id="contributionsView" style="display: none;">
+    <div id="contributionsView" class="hidden">
         <!-- Loaded dynamically from contribution.html -->
     </div>
 

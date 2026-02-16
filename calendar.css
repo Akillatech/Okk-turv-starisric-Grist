@@ -1,0 +1,306 @@
+/* ==================== CALENDAR STYLES ==================== */
+
+.calendar-view {
+    padding: 20px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 12px 20px;
+    background: var(--bg-color);
+    border-radius: 20px;
+    box-shadow: var(--neu-raised-small);
+}
+
+.calendar-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.calendar-nav-btn {
+    background: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow:
+        4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+}
+
+.calendar-nav-btn:hover {
+    color: var(--accent-text);
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+}
+
+.calendar-title-selects {
+    display: flex;
+    gap: 15px;
+}
+
+.calendar-select {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    outline: none;
+    cursor: pointer;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: 50px repeat(7, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.calendar-header-cell {
+    padding: 12px 5px;
+    text-align: center;
+    font-weight: 800;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.week-number-header {
+    color: var(--accent-text);
+    opacity: 0.8;
+}
+
+.weekend-header {
+    color: #e57373;
+}
+
+.day-stats-compact {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.day-stats-compact .stat-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4px 8px;
+    border-radius: 10px;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.day-stats-compact .stat-pill.hours {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.day-stats-compact .stat-pill.tasks {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.day-stats-compact .stat-pill.productivity {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.week-number-header {
+    color: var(--accent-text);
+}
+
+.day-cell {
+    min-height: 100px;
+    background: var(--bg-color);
+    border-radius: 16px;
+    padding: 10px;
+    position: relative;
+    cursor: default;
+    transition: all 0.2s ease;
+    box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+}
+
+.day-cell:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        8px 8px 16px var(--shadow-dark),
+        -8px -8px 16px var(--shadow-light);
+}
+
+.day-cell.empty {
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
+.week-number-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 14px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow:
+        inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
+}
+
+.day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.day-info {
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.day-cell.today {
+    border: 2px solid var(--accent-color);
+}
+
+.day-cell.weekend .day-number {
+    color: #e57373;
+}
+
+.day-cell.holiday {
+    background: #fff5f5;
+}
+
+.day-cell.holiday .day-number {
+    color: #d32f2f;
+}
+
+.day-cell.short-day {
+    background: #fdfde7;
+}
+
+.holiday-name {
+    font-size: 10px;
+    color: #d32f2f;
+    line-height: 1.2;
+    margin-top: 4px;
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 16px;
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot.holiday {
+    background: #fff5f5;
+    border: 1px solid #d32f2f;
+}
+
+.legend-dot.short {
+    background: #fdfde7;
+    border: 1px solid #fbc02d;
+}
+
+.legend-dot.today {
+    border: 2.5px solid var(--accent-color);
+    background: transparent;
+}
+
+/* Day stats row in Modal */
+.day-stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card-small {
+    flex: 1;
+    background: var(--bg-color);
+    padding: 15px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow:
+        5px 5px 10px var(--shadow-dark),
+        -5px -5px 10px var(--shadow-light);
+}
+
+.stat-card-small .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-text);
+    margin-bottom: 4px;
+}
+
+.stat-card-small .stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.table-container {
+    background: var(--bg-color);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    overflow-x: auto;
+}
+
+.projects-table .project-name {
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-primary);
+}

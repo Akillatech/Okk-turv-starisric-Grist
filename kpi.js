@@ -235,9 +235,8 @@ function renderGradeCard() {
             imgEl.style.maxWidth = '220px';
             imgEl.style.height = 'auto';
             imgEl.style.margin = '8px auto';
-            imgEl.style.display = 'flex';
-            imgEl.style.justifyContent = 'center';
-            imgEl.style.alignItems = 'center';
+            imgEl.classList.remove('hidden');
+            imgEl.style.display = 'flex'; // This is okay for svg centering if not blocked by .hidden
             console.log('✅ SVG Character rendered for grade:', grade);
         } catch (e) {
             console.error('❌ Error rendering SVG character:', e);

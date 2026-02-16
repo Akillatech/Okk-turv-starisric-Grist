@@ -669,13 +669,16 @@
 /* =============================================
    STAT CARDS (today stats)
    ============================================= */
-[data-theme="dark"] .today-stat-card {
+/* =============================================
+   STAT CARDS (today stats)
+   ============================================= */
+[data-theme="dark"] .today-tile {
     background: var(--card-bg);
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4),
         -3px -3px 8px rgba(255, 255, 255, 0.02);
 }
 
-[data-theme="dark"] .today-stat-card:hover {
+[data-theme="dark"] .today-tile:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 

@@ -101,8 +101,6 @@ function parseGristDate(val) {
 }
 
 // Helper to auto-save settings to Grist
-// Helper to auto-save settings to Grist
-// Helper to auto-save settings to Grist
 function autoSaveSettings() {
     console.log('Auto-saving settings...', currentSettings);
 
@@ -162,7 +160,63 @@ function autoSaveSettings() {
             console.error('❌ [CONTRIB_SYNC] Failed to save settings to Grist:', err);
         });
 }
-window.autoSaveSettings = autoSaveSettings; // Expose to global scope for kpi.js
+window.autoSaveSettings = autoSaveSettings;
+
+/**
+ * Merges defaults, local persistence, and cloud overrides.
+ * Handles legacy data format migrations.
+ */
+function migrateAndMergeSettings(options) {
+    // 1. Load Personal Settings from localStorage
+    let personal = {};
+    try {
+        const local = localStorage.getItem('okk_personal_settings');
+        if (local) personal = JSON.parse(local);
+    } catch (e) {
+        console.error('Failed to parse local personal settings', e);
+    }
+
+    // 2. Load Global Settings from Grist options
+    let global = options.settings || {};
+
+    // 3. Merge Strategy: Defaults -> Local Persistence -> Cloud Overrides
+    const merged = {
+        ...defaultGlobalSettings,
+        ...defaultPersonalSettings,
+        ...personal
+    };
+
+    // Apply Global Grist settings if they exist
+    if (global) {
+        if (global.holidays) merged.holidays = global.holidays;
+        if (global.shortDays) merged.shortDays = global.shortDays;
+        if (global.years) merged.years = global.years;
+        if (global.grade) merged.grade = global.grade;
+        if (global.userProfiles) merged.userProfiles = global.userProfiles;
+        if (global.kpiData) merged.kpiData = global.kpiData;
+        if (global.kpiTransitions) merged.kpiTransitions = global.kpiTransitions;
+
+        // MIGRATION: Unified contributions
+        if (global.contributions) {
+            merged.contributions = global.contributions;
+        } else if (options.contributions && Array.isArray(options.contributions)) {
+            merged.contributions = options.contributions;
+            console.warn('[CONTRIB_SYNC] Migrating legacy contributions to unified settings.');
+        }
+    }
+
+    // Apply Cloud Profile overrides ONLY if we have a username
+    if (merged.userName && merged.userProfiles && merged.userProfiles[merged.userName]) {
+        const cloudProfile = merged.userProfiles[merged.userName];
+        if (cloudProfile.theme) merged.theme = cloudProfile.theme;
+        if (cloudProfile.accentColor) merged.accentColor = cloudProfile.accentColor;
+    }
+
+    // Safety check for accent color
+    if (!merged.accentColor) merged.accentColor = 'lime';
+
+    return merged;
+}
 
 // Show save reminder notification
 let saveReminderTimeout;
@@ -222,21 +276,27 @@ window.showSaveReminder = function () {
                     opacity: 0;
                 }
             }
+            .hidden {
+                display: none !important;
+            }
+            .fading {
+                animation: slideOutToTop 0.4s ease-out forwards;
+            }
         `;
         document.head.appendChild(style);
     }
 
-    reminder.style.display = 'flex';
+    reminder.classList.remove('hidden');
 
-    // Hide after 5 seconds
-    saveReminderTimeout = setTimeout(() => {
-        if (reminder) {
-            reminder.style.animation = 'slideOutToTop 0.4s ease-out';
-            setTimeout(() => {
-                reminder.style.display = 'none';
-            }, 400);
-        }
-    }, 5000);
+    setTimeout(() => {
+        reminder.classList.add('fading');
+        setTimeout(() => {
+            if (reminder) {
+                reminder.classList.add('hidden');
+                reminder.classList.remove('fading');
+            }
+        }, 500);
+    }, SAVE_LOCK_DURATION);
 }
 
 
@@ -283,13 +343,17 @@ function initGrist() {
         initTodayDatePickers();
 
         // Hide loading and show content
-        document.getElementById('loading').style.display = 'none';
+        if (document.getElementById('loading')) {
+            document.getElementById('loading').classList.add('hidden');
+        }
 
-        // Only switch to home if we are not already in a specific view (like calendar)
-        // But for initial load, default to home
-        if (document.getElementById('content').style.display === 'none' &&
-            document.getElementById('calendarView').style.display === 'none') {
-            window.logic.showHome();
+        const content = document.getElementById('content');
+        const calendarView = document.getElementById('calendarView');
+
+        if (content && calendarView &&
+            content.classList.contains('hidden') &&
+            calendarView.classList.contains('hidden')) {
+            showView('content');
         }
 
         // Initial Render
@@ -331,59 +395,8 @@ function initGrist() {
             }
         }
 
-        // 1. Load Personal Settings from localStorage
-        let personal = {};
-        try {
-            const local = localStorage.getItem('okk_personal_settings');
-            if (local) personal = JSON.parse(local);
-        } catch (e) {
-            console.error('Failed to parse local personal settings', e);
-        }
-
-        // 2. Load Global Settings from Grist options
-        let global = {};
-        if (options && options.settings) {
-            global = options.settings;
-            // Load userProfiles
-            if (global.userProfiles) {
-                currentSettings.userProfiles = global.userProfiles;
-            }
-        }
-
-        // 3. Merge Strategy: Defaults -> Local Persistence -> Cloud Overrides
-        const merged = {
-            ...defaultGlobalSettings,
-            ...defaultPersonalSettings,
-            ...personal // Load from localStorage (userName, accent, etc.)
-        };
-
-        // Apply Global Grist settings if they exist
-        if (global) {
-            if (global.holidays) merged.holidays = global.holidays;
-            if (global.shortDays) merged.shortDays = global.shortDays;
-            if (global.years) merged.years = global.years;
-            if (global.grade) merged.grade = global.grade;
-            if (global.userProfiles) merged.userProfiles = global.userProfiles;
-            if (global.kpiData) merged.kpiData = global.kpiData;
-            if (global.kpiTransitions) merged.kpiTransitions = global.kpiTransitions;
-            if (global.contributions) {
-                merged.contributions = global.contributions;
-                console.log('[CONTRIB_SYNC] Found contributions in unified settings:', global.contributions.length);
-            } else if (options && options.contributions && Array.isArray(options.contributions)) {
-                // MIGRATION: Pull from legacy if unified is empty
-                merged.contributions = options.contributions;
-                console.warn('[CONTRIB_SYNC] Migrating legacy contributions to unified settings.');
-            }
-        }
-
-        // Apply Cloud Profile overrides ONLY if we have a username
-        if (merged.userName && merged.userProfiles && merged.userProfiles[merged.userName]) {
-            const cloudProfile = merged.userProfiles[merged.userName];
-            console.log('🔄 Applying Cloud Profile for', merged.userName, cloudProfile);
-            if (cloudProfile.theme) merged.theme = cloudProfile.theme;
-            if (cloudProfile.accentColor) merged.accentColor = cloudProfile.accentColor;
-            // grade is global, do not override from profile
-        }
+        // 1-3. Merge & Migrate
+        const merged = migrateAndMergeSettings(options);
 
         // Safety check for accent color
         if (!merged.accentColor) merged.accentColor = 'lime';
@@ -555,41 +568,53 @@ window.logic = {
     },
 
     showHome: function () {
-        document.getElementById('contributionsView').style.display = 'none';
+        const cv = document.getElementById('contributionsView');
+        if (cv) cv.classList.add('hidden');
 
         // Header controls
-        document.getElementById('mainSelectors').style.display = 'flex';
+        const mainSel = document.getElementById('mainSelectors');
+        if (mainSel) mainSel.classList.remove('hidden');
+
         const kpiSel = document.getElementById('kpiSelectors');
-        if (kpiSel) kpiSel.style.display = 'none';
+        if (kpiSel) kpiSel.classList.add('hidden');
+
         const contribCtrl = document.getElementById('contributionsControls');
-        if (contribCtrl) contribCtrl.style.display = 'none';
+        if (contribCtrl) contribCtrl.classList.add('hidden');
 
         showView('content');
     },
 
     showCalendar: function () {
-        document.getElementById('contributionsView').style.display = 'none';
+        const cv = document.getElementById('contributionsView');
+        if (cv) cv.classList.add('hidden');
 
         // Header controls
-        document.getElementById('mainSelectors').style.display = 'flex';
+        const mainSel = document.getElementById('mainSelectors');
+        if (mainSel) mainSel.classList.remove('hidden');
+
         const kpiSel = document.getElementById('kpiSelectors');
-        if (kpiSel) kpiSel.style.display = 'none';
+        if (kpiSel) kpiSel.classList.add('hidden');
+
         const contribCtrl = document.getElementById('contributionsControls');
-        if (contribCtrl) contribCtrl.style.display = 'none';
+        if (contribCtrl) contribCtrl.classList.add('hidden');
 
         showView('calendarView');
         this.updateCalendarView(); // Trigger render
     },
 
     showKpi: function () {
-        document.getElementById('contributionsView').style.display = 'none';
+        const cv = document.getElementById('contributionsView');
+        if (cv) cv.classList.add('hidden');
 
         // Header controls
-        document.getElementById('mainSelectors').style.display = 'none';
+        const mainSel = document.getElementById('mainSelectors');
+        if (mainSel) mainSel.classList.add('hidden');
+
         const kpiSel = document.getElementById('kpiSelectors');
-        if (kpiSel) kpiSel.style.display = 'flex';
+        if (kpiSel) kpiSel.classList.remove('hidden');
+
         const contribCtrl = document.getElementById('contributionsControls');
-        if (contribCtrl) contribCtrl.style.display = 'none';
+        if (contribCtrl) contribCtrl.classList.add('hidden');
 
         showView('kpiView');
         const container = document.getElementById('kpiView');
@@ -639,11 +664,11 @@ window.logic = {
     showContributions: function () {
         ['content', 'calendarView', 'kpiView'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
+            if (el) el.classList.add('hidden');
         });
         const cv = document.getElementById('contributionsView');
         if (cv) {
-            cv.style.display = 'block';
+            cv.classList.remove('hidden');
 
             // Load contribution.html dynamically if not loaded
             if (!cv.dataset.loaded) {
@@ -668,11 +693,14 @@ window.logic = {
         }
 
         // Header controls
-        document.getElementById('mainSelectors').style.display = 'none';
+        const mainSel = document.getElementById('mainSelectors');
+        if (mainSel) mainSel.classList.add('hidden');
+
         const kpiSel = document.getElementById('kpiSelectors');
-        if (kpiSel) kpiSel.style.display = 'none';
+        if (kpiSel) kpiSel.classList.add('hidden');
+
         const contribCtrl = document.getElementById('contributionsControls');
-        if (contribCtrl) contribCtrl.style.display = 'flex';
+        if (contribCtrl) contribCtrl.classList.remove('hidden');
     },
 
     prevMonth: function () {
@@ -1040,7 +1068,8 @@ window.logic = {
         // Reset date pickers to today
         initTodayDatePickers(); // Will trigger change
         // Hide the return button
-        document.getElementById('returnTodayBtn').style.display = 'none';
+        const btn = document.getElementById('returnTodayBtn');
+        if (btn) btn.classList.add('hidden');
     },
 
     loadTodayRange: function () {
@@ -1052,10 +1081,12 @@ window.logic = {
         const toDate = document.getElementById('todayDateTo').value;
         const btn = document.getElementById('returnTodayBtn');
 
-        if (fromDate === today && toDate === today) {
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'inline-flex';
+        if (btn) {
+            if (fromDate === today && toDate === today) {
+                btn.classList.add('hidden');
+            } else {
+                btn.classList.remove('hidden');
+            }
         }
     }
 };
@@ -1067,30 +1098,27 @@ initGrist();
 
 // Setup initial UI states
 function showView(viewId) {
-    document.getElementById('content').style.display = viewId === 'content' ? 'block' : 'none';
-    document.getElementById('calendarView').style.display = viewId === 'calendarView' ? 'block' : 'none';
-    document.getElementById('kpiView').style.display = viewId === 'kpiView' ? 'block' : 'none';
+    // Hide all main views
+    ['content', 'calendarView', 'kpiView'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
 
-    document.getElementById('homeBtn').classList.toggle('active', viewId === 'content');
-    document.getElementById('calendarBtn').classList.toggle('active', viewId === 'calendarView');
-    document.getElementById('kpiBtn').classList.toggle('active', viewId === 'kpiView');
+    // Show target view
+    const target = document.getElementById(viewId);
+    if (target) target.classList.remove('hidden');
 
-    // Toggle Header Selectors
-    const mainSel = document.getElementById('mainSelectors');
-    const kpiSel = document.getElementById('kpiSelectors');
+    // Update button states
+    const homeBtn = document.getElementById('homeBtn');
+    if (homeBtn) homeBtn.classList.toggle('active', viewId === 'content');
 
-    if (mainSel && kpiSel) {
-        if (viewId === 'content') {
-            mainSel.style.display = 'flex';
-            kpiSel.style.display = 'none';
-        } else if (viewId === 'kpiView') {
-            mainSel.style.display = 'none';
-            kpiSel.style.display = 'flex';
-        } else if (viewId === 'calendarView') {
-            mainSel.style.display = 'none';
-            kpiSel.style.display = 'none'; // Hide all in calendar
-        }
-    }
+    const calendarBtn = document.getElementById('calendarBtn');
+    if (calendarBtn) calendarBtn.classList.toggle('active', viewId === 'calendarView');
+
+    const kpiBtn = document.getElementById('kpiBtn');
+    if (kpiBtn) kpiBtn.classList.toggle('active', viewId === 'kpiView');
+
+    // Header Selectors logic is now handled in showHome/showCalendar/showKpi/showContributions
 }
 
 
@@ -1186,7 +1214,8 @@ function refreshDashboard() {
 
     // 3. Render Dashboard Center (Weekly/Projects)
     // Only if on content view
-    if (document.getElementById('content').style.display !== 'none') {
+    const content = document.getElementById('content');
+    if (content && !content.classList.contains('hidden')) {
         renderMainDashboard();
     }
 }
@@ -1198,8 +1227,8 @@ function updateGreeting() {
 
     const name = currentSettings.firstName || currentSettings.userName || '';
     if (!name) {
-        el.style.display = 'none';
-        if (sheetName) sheetName.style.display = '';
+        el.classList.add('hidden');
+        if (sheetName) sheetName.classList.remove('hidden');
         return;
     }
 
@@ -1211,8 +1240,8 @@ function updateGreeting() {
     else greeting = 'Доброй ночи';
 
     el.textContent = `${greeting}, ${name}`;
-    el.style.display = '';
-    if (sheetName) sheetName.style.display = 'none';
+    el.classList.remove('hidden');
+    if (sheetName) sheetName.classList.add('hidden');
 }
 
 function updateDateRangeLabel() {
@@ -1430,7 +1459,7 @@ function initTodayDatePickers() {
 
     if (fromInput) fromInput.value = iso;
     if (toInput) toInput.value = iso;
-    if (btn) btn.style.display = 'none'; // Hide button when on today's date
+    if (btn) btn.classList.add('hidden'); // Hide button when on today's date
 
     // Don't call refreshDashboard here - it's called right after in init
 }
@@ -1817,19 +1846,25 @@ function renderMainDashboard() {
     // 1. Weekly Stats
     // Only show if period is Month-specific (GAS behavior usually)
     const weeklySection = document.getElementById('weeklyStatsSection');
-    if (currentPeriod.startsWith('month:')) {
-        weeklySection.style.display = 'block';
-        renderWeeklyStats();
-    } else {
-        weeklySection.style.display = 'none';
+    if (weeklySection) {
+        if (currentPeriod.startsWith('month:')) {
+            weeklySection.classList.remove('hidden');
+            renderWeeklyStats();
+        } else {
+            weeklySection.classList.add('hidden');
+        }
     }
 
     // 2. Projects
-    document.getElementById('projectSection').style.display = 'block';
-    renderProjectsTable();
+    const projectSection = document.getElementById('projectSection');
+    if (projectSection) {
+        projectSection.classList.remove('hidden');
+        renderProjectsTable();
+    }
 
     // 3. Overtime — hidden from main screen
-    // document.getElementById('overtimeSection').style.display = 'block';
+    // const overtimeSection = document.getElementById('overtimeSection');
+    // if (overtimeSection) overtimeSection.classList.remove('hidden');
     // renderOvertimeTable();
 }
 
@@ -2120,8 +2155,10 @@ function openProjectModal(projectName) {
 
 function renderProjectDetails(projectName, year, month) {
     // Show Loading
-    document.getElementById('projectLoading').style.display = 'flex';
-    document.getElementById('projectContent').style.display = 'none';
+    const loading = document.getElementById('projectLoading');
+    const content = document.getElementById('projectContent');
+    if (loading) loading.classList.remove('hidden');
+    if (content) content.classList.add('hidden');
 
     // Calculate stats
     setTimeout(() => { // Small delay to allow UI to render Loading
@@ -2151,8 +2188,8 @@ function renderProjectDetails(projectName, year, month) {
             tbody.appendChild(tr);
         });
 
-        document.getElementById('projectLoading').style.display = 'none';
-        document.getElementById('projectContent').style.display = 'block';
+        if (loading) loading.classList.add('hidden');
+        if (content) content.classList.remove('hidden');
     }, 10);
 }
 
